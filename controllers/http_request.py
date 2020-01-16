@@ -5,8 +5,7 @@ import random
 def getPBSite():
 
     proxyUrl = "https://piratebay-proxylist.se/api/v1/proxies"
-    sites = requests.get(proxyUrl).json()["proxies"]
-    randomIndex = random.randint(0, len(sites))
-
+    sites = list(requests.get(proxyUrl).json()["proxies"].values())
+    randomIndex = random.randint(0, len(sites) - 1)
     return sites[randomIndex]
     

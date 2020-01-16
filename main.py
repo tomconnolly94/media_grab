@@ -1,6 +1,7 @@
 from controllers import http_request
 import json
 import enum
+from scrapers import index_page_scraper
 
 localDownloadLocation = "/home/pi/Downloads"
 
@@ -8,6 +9,17 @@ localDownloadLocation = "/home/pi/Downloads"
 class MEDIA_TYPE(enum.Enum):
 	TV = "tv"
 	FILM = "film"
+
+seasonTemplates = [
+	[ "s" ],
+	[ "season " ],
+	[ "season"],
+]
+
+episodeTemplates = [
+	[ "s", "e" ],
+	[ "s", " e"]
+]		
 
 def init():
 	
@@ -17,25 +29,47 @@ def init():
 	media = json.loads(mediaIndexfile.read())["media"]
 	queryUrls = []
 
-	for media_info in media:
+	for mediaInfo in media:
 
-		searchSuffix = ""
+		if mediaInfo["type"] == MEDIA_TYPE.TV.value:
+			
+			#TODO: create multiple variants of the search URL 
+			#1. "name s0x" 2. "name season 0x" 3. "name season0x" 4. "name s0xe0x" 5. "name s0x e0x" 
 
-		print(media_info["type"])
-		print(MEDIA_TYPE.TV.value)
+			seasonQueries = []
 
-		if media_info["type"] == MEDIA_TYPE.TV.value:
-			searchSuffix += f's{media_info["type_specific_data"]["latest_season"]} e{media_info["type_specific_data"]["latest_season"]}'
-		
-		print(searchSuffix)
+			for template in seasonTemplates:
 
-		#create search url
-		queryUrls.append(f"https://{pbDomain}/s/?q={media_info['name']}{searchSuffix}&page=0&orderby=99")
+				searchSection = ""
 
-		#TODO: create multiple variants of the search URL 
-		#1. "name s0x" 2. "name season 0x" 3. "name season0x" 4. "name s0xe0x" 5. "name s0x e0x" 
+				for fragmentIndex, fragment in enumerate(template):
+					value = list(mediaInfo["type_specific_data"].values())[fragmentIndex]
 
-	print(queryUrls)
+					searchSection += "{fragment}{value:>02}".format(fragment=fragment,value=int(value))
+
+				#create search url
+				seasonQueries.append(f"https://{pbDomain}/s/?q={mediaInfo['name']} {searchSection}&page=0&orderby=99")
+
+			episodeQueries = []
+
+			for template in episodeTemplates:
+
+				searchSection = ""
+
+				for fragmentIndex, fragment in enumerate(template):
+					value = list(mediaInfo["type_specific_data"].values())[fragmentIndex]
+
+					searchSection += "{fragment}{value:>02}".format(fragment=fragment,value=int(value))
+
+				#create search url
+				episodeQueries.append(f"https://{pbDomain}/s/?q={mediaInfo['name']} {searchSection}&page=0&orderby=99")
+
+			queryUrls.append({
+				"name": mediaInfo['name'],
+				"season_queries": seasonQueries,
+				"episode_queries": episodeQueries
+			})
+
 	return queryUrls
 
 
@@ -43,8 +77,8 @@ def main():
 	#init all reusable variables
 	queryUrls = init()
 
-
-	#make season query
+	#make season queries, scrape torrent page links from page and store them in a list
+	torrent_page_links = [ index_page_scraper.scrape(seasonQueryURL) for seasonQueryURL in queryUrl.season_queries for queryUrl in queryUrls ]
 
 
 	#if season query fails, make individual episode queries
