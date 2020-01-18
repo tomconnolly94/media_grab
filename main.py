@@ -1,9 +1,18 @@
+#!/venv/bin/python
+
+#pip dependencies
 from controllers import http_request
 import json
 import enum
+import itertools
+import pprint
+
+#internal dependencies
 from scrapers import index_page_scraper
+from controllers import bit_torrent
 
 localDownloadLocation = "/home/pi/Downloads"
+pp = pprint.PrettyPrinter(indent=4)
 
 # Using enum class create enumerations
 class MEDIA_TYPE(enum.Enum):
@@ -67,10 +76,18 @@ def init():
 			queryUrls.append({
 				"name": mediaInfo['name'],
 				"season_queries": seasonQueries,
-				"episode_queries": episodeQueries
+				"episode_queries": episodeQueries,
+				"season_torrent_magnets": [],
+				"episode_torrent_magnets": []
 			})
 
 	return queryUrls
+
+def groupQueryUrls(queryUrls, queryType):
+	urlList = []
+	for queryUrl in queryUrls:
+		urlList.extend(queryUrl[queryType])
+	return urlList
 
 
 def main():
@@ -78,18 +95,33 @@ def main():
 	queryUrls = init()
 
 	#make season queries, scrape torrent page links from page and store them in a list
-	torrent_page_links = [ index_page_scraper.scrape(seasonQueryURL) for seasonQueryURL in queryUrl.season_queries for queryUrl in queryUrls ]
+	for queryUrl in queryUrls:
+		
+		for seasonQueryUrl in queryUrl["season_queries"]:
+			torrentMagnets = index_page_scraper.scrape(seasonQueryUrl)
+			if len(torrentMagnets) > 0: # if any torrent magnets are found add them to the master list and dont look for any more
+				queryUrl["season_torrent_magnets"].extend(torrentMagnets)
+				break
 
+		makeEpisodeQuery = False
 
-	#if season query fails, make individual episode queries
+		if makeEpisodeQuery:
+			# if no season torrent magnets can be found, look for episode torrent magnets
+			for episodeQueryUrl in queryUrl["episode_queries"]:
+				torrentMagnets = index_page_scraper.scrape(episodeQueryUrl)
+				if len(torrentMagnets) > 0: # if any torrent magnets are found add them to the master list and dont look for any more
+					queryUrl["episode_torrent_magnets"].extend(torrentMagnets)
+					break
 
-
+	pp.pprint(queryUrls)
 	#start torrent, download to localDownloadLocation
-
+	for queryUrl in queryUrls:
+		bit_torrent.initTorrent(queryUrl["season_torrent_magnets"][0])
+		break
 	
 	#when torrent is finished cp it to mounted network media_drive
 
-	pass
+	return
 
 
 
