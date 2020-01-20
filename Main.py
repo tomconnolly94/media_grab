@@ -61,7 +61,6 @@ def main():
 
 
 		if seasonTorrentPageUrls:
-			
 			for torrentPageUrl in seasonTorrentPageUrls:
 
 				torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
@@ -77,7 +76,6 @@ def main():
 						break
 
 		elif episodeTorrentPageUrls:
-			
 			for torrentPageUrl in episodeTorrentPageUrls:
 
 				torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
