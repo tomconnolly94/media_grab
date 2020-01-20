@@ -1,83 +1,98 @@
 #!/venv/bin/python
 
-#pip dependencies
+# pip dependencies
 import json
 import enum
 import itertools
 import pprint
 
-#internal dependencies
+# internal dependencies
 from interfaces import HttpRequestInterface
 from scrapers import IndexPageScraper, TorrentPageScraper
 from controllers import BittorrentController
 from controllers import DataOrganisationController
-
-localDownloadLocation = "/home/pi/Downloads"
-
-# Using enum class create enumerations
-class MEDIA_TYPE(enum.Enum):
-	TV = "tv"
-	FILM = "film"
 
 
 def loadMediaFile():
 	mediaIndexfile = open("data/MediaIndex.json", "r")
 	return json.loads(mediaIndexfile.read())["media"]
 
+
 def init():
 	
-	#find site to search for torrents
+	# find site to search for torrents
 	pbDomain = HttpRequestInterface.getPBSite()["domain"]
 	media = loadMediaFile()
 	queryUrls = []
 
 	for mediaInfo in media:
-		if mediaInfo["type"] == MEDIA_TYPE.TV.value:
-			queryUrls.append(DataOrganisationController.generateTVQueryUrls(mediaInfo, pbDomain))
+		queryUrls.append(DataOrganisationController.generateTVQueryUrls(mediaInfo, pbDomain))
 
 	return queryUrls, pbDomain
 
 
-def getTorrentMagnets(query, queryKey):
+def getTorrentPageUrls(torrentIndexPages):
 		
-	for queryUrl in query[queryKey]:
-		torrentMagnets = IndexPageScraper.scrape(queryUrl)
-		if len(torrentMagnets) > 0: # if any torrent magnets are found add them to the master list and dont look for any more
-			return torrentMagnets
+	for torrentIndexPages in torrentIndexPages:
+		#TODO: apply some sort of regex to the name of the torrent page 
+		# url to ensure only strictly relevant page URls are returned.
+		torrentPageUrls = IndexPageScraper.scrape(torrentIndexPages)
+		if len(torrentPageUrls) > 0:
+			return torrentPageUrls
 			
 	return None
 
 
 def main():
-	#init all reusable variables
+	# init all reusable variables
 	queryUrls, pbDomain = init()
 
-	#make season queries, scrape torrent page links from page and store them in a list
+	# scrape torrent pages for torrent magnets
 	for queryUrl in queryUrls:
 
-		#get magnets for seasons queries
-		torrentMagnets = getTorrentMagnets(queryUrl, "season_queries")
-		if torrentMagnets:
-			queryUrl["season_torrent_magnets"].extend(torrentMagnets)
+		# get magnets for seasons queries
+		seasonTorrentPageUrls = getTorrentPageUrls(queryUrl["seasonIndexPageUrls"])
 
 		makeEpisodeQuery = False
 
 		if makeEpisodeQuery:
 			# get magnets for episodes queries
-			torrentMagnets = getTorrentMagnets(queryUrl, "episode_queries")
-			if torrentMagnets:
-				queryUrl["episode_torrent_magnets"].extend(torrentMagnets)
+			episodeTorrentPageUrls = getTorrentPageUrls(queryUrl["episodeIndexPageUrls"])
 
-	#start torrent
-	for queryUrl in queryUrls:
 
-		url = f'https://{pbDomain}{queryUrl["season_torrent_magnets"][0]}'
+		if seasonTorrentPageUrls:
+			
+			for torrentPageUrl in seasonTorrentPageUrls:
 
-		torrentMagnet = TorrentPageScraper.scrape(url)
-		BittorrentController.initTorrentDownload(torrentMagnet)
-		break
-	
-	#when torrent is finished cp it to mounted network media drive (/mnt/share/media_drive)
+				torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
+				torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)
+				
+				if torrentMagnet:
+					if BittorrentController.initTorrentDownload(torrentMagnet):
+						# TODO: send email notification
+
+						# TODO: update data/MediaIndex.json to reflect what has been downloaded 
+
+						# use break to move to the next media item
+						break
+
+		elif episodeTorrentPageUrls:
+			
+			for torrentPageUrl in episodeTorrentPageUrls:
+
+				torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
+				torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)
+				
+				if torrentMagnet:
+					if BittorrentController.initTorrentDownload(torrentMagnet):
+						# TODO: send email notification
+
+						# TODO: update data/MediaIndex.json to reflect what has been downloaded 
+
+						# use break to move to the next media item
+						break
+					
+	# when torrent is finished cp it to mounted network media drive (/mnt/share/media_drive)
 
 	return
 

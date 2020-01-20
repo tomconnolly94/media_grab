@@ -2,7 +2,6 @@
     "media": [
         {
             "name": "vikings",
-            "type": "tv",
             "type_specific_data":{
                 "latest_season": "5",
                 "latest_episode": "10"
@@ -10,7 +9,6 @@
         },
         {
             "name": "silicon valley",
-            "type": "tv",
             "type_specific_data":{
                 "latest_season": "4",
                 "latest_episode": "10"

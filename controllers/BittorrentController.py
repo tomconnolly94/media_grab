@@ -4,8 +4,9 @@ from qbittorrent import Client
 qb = Client("http://127.0.0.1:8081/")
 
 def initTorrentDownload(torrentMagnet):
-    result = qb.login("tom", "India2015")
-    print(result)
-    print(torrentMagnet)
-    result = qb.download_from_link(torrentMagnet)
-    print(result)
+    qb.login("tom", "India2015")
+    torrentInitResult = qb.download_from_link(torrentMagnet)
+
+    if torrentInitResult == "Ok.":
+        return True
+    return False

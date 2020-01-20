@@ -1,6 +1,6 @@
 #!/venv/bin/python
 
-#pip dependencies
+# pip dependencies
 import requests
 from bs4 import BeautifulSoup
 
