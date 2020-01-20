@@ -1,7 +1,7 @@
 import unittest
 from controllers import BittorrentController
 
-class BittorrentTest(unittest.TestCase):
+class TestBittorrent(unittest.TestCase):
 
     def test_UnmockedTorrentDownload(self):
 
