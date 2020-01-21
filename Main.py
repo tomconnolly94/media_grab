@@ -56,7 +56,10 @@ def getTorrentPageUrls(torrentIndexPages):
 	return None
 
 def onSuccessfulTorrentAdd(torrentMagnet):
+	# TODO: send email notification
 
+	# TODO: update data/MediaIndex.json to reflect what has been downloaded 
+	pass
 
 
 def main():
@@ -89,9 +92,7 @@ def main():
 				# if adding torrent is successful, update various things
 				if BittorrentController.initTorrentDownload(torrentMagnet):
 					print(f"ADDED TORRENT: {torrentMagnet}")
-					# TODO: send email notification
-
-					# TODO: update data/MediaIndex.json to reflect what has been downloaded 
+					onSuccessfulTorrentAdd(torrentMagnet)
 
 					# use break to move to the next media item
 					break
@@ -104,9 +105,7 @@ def main():
 				
 				if torrentMagnet:
 					if BittorrentController.initTorrentDownload(torrentMagnet):
-						# TODO: send email notification
-
-						# TODO: update data/MediaIndex.json to reflect what has been downloaded 
+						onSuccessfulTorrentAdd(torrentMagnet)
 
 						# use break to move to the next media item
 						break
