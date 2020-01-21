@@ -5,6 +5,7 @@ import json
 import enum
 import itertools
 import pprint
+import re
 
 # internal dependencies
 from interfaces import HttpRequestInterface
@@ -12,31 +13,28 @@ from scrapers import IndexPageScraper, TorrentPageScraper
 from controllers import BittorrentController
 from controllers import DataOrganisationController
 
-
-def loadMediaFile():
-	mediaIndexfile = open("data/MediaIndex.json", "r")
-	return json.loads(mediaIndexfile.read())["media"]
-
+makeEpisodeQuery = False
 
 def init():
-	
 	# find site to search for torrents
 	pbDomain = HttpRequestInterface.getPBSite()["domain"]
-	media = loadMediaFile()
-	queryUrls = []
+	queryRecords = DataOrganisationController.generateTVQueryUrls(pbDomain)
 
-	for mediaInfo in media:
-		queryUrls.append(DataOrganisationController.generateTVQueryUrls(mediaInfo, pbDomain))
+	return queryRecords, pbDomain
 
-	return queryUrls, pbDomain
+
+def filterTorrentPageUrls(torrentPageUrls, mediaData):
+	seasonRegex1 = f'Vikings.*Season[\s.Ss]*0*5'
+	seasonRegex = re.compile(rf'{seasonRegex1}')
+	return list(filter(seasonRegex.search, torrentPageUrls))
 
 
 def getTorrentPageUrls(torrentIndexPages):
 		
-	for torrentIndexPages in torrentIndexPages:
+	for torrentIndexPage in torrentIndexPages:
 		#TODO: apply some sort of regex to the name of the torrent page 
 		# url to ensure only strictly relevant page URls are returned.
-		torrentPageUrls = IndexPageScraper.scrape(torrentIndexPages)
+		torrentPageUrls = IndexPageScraper.scrape(torrentIndexPage)
 		if len(torrentPageUrls) > 0:
 			return torrentPageUrls
 			
@@ -44,36 +42,38 @@ def getTorrentPageUrls(torrentIndexPages):
 
 
 def main():
-	# init all reusable variables
-	queryUrls, pbDomain = init()
+	queryRecords, pbDomain = init()
 
-	# scrape torrent pages for torrent magnets
-	for queryUrl in queryUrls:
+	for queryRecord in queryRecords:
 
-		# get magnets for seasons queries
-		seasonTorrentPageUrls = getTorrentPageUrls(queryUrl["seasonIndexPageUrls"])
-
-		makeEpisodeQuery = False
+		# get page urls for seasons queries
+		seasonTorrentPageUrls = getTorrentPageUrls(queryRecord["seasonIndexPageUrls"])
+		filterTorrentPageUrls(torrentPageUrls, queryRecord["typeSpecificData"])
 
 		if makeEpisodeQuery:
-			# get magnets for episodes queries
-			episodeTorrentPageUrls = getTorrentPageUrls(queryUrl["episodeIndexPageUrls"])
+			# get page urls for episodes queries
+			episodeTorrentPageUrls = getTorrentPageUrls(queryRecord["episodeIndexPageUrls"])
 
 
 		if seasonTorrentPageUrls:
 			for torrentPageUrl in seasonTorrentPageUrls:
 
+
 				torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
 				torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)
 				
-				if torrentMagnet:
-					if BittorrentController.initTorrentDownload(torrentMagnet):
-						# TODO: send email notification
+				# skip page if torrent magnet cannot be accessed
+				if not torrentMagnet:
+					continue
 
-						# TODO: update data/MediaIndex.json to reflect what has been downloaded 
+				# if adding torrent is successful, update various things
+				if BittorrentController.initTorrentDownload(torrentMagnet):
+					# TODO: send email notification
 
-						# use break to move to the next media item
-						break
+					# TODO: update data/MediaIndex.json to reflect what has been downloaded 
+
+					# use break to move to the next media item
+					break
 
 		elif episodeTorrentPageUrls:
 			for torrentPageUrl in episodeTorrentPageUrls:

@@ -1,5 +1,8 @@
 #!/venv/bin/python
 
+# pip dependencies
+import json
+
 seasonTemplates = [
 	[ "s" ],
 	[ "season " ],
@@ -11,7 +14,22 @@ episodeTemplates = [
 	[ "s", " e"]
 ]
 
-def generateTVQueryUrls(mediaInfo, pbDomain):
+
+def generateTVQueryUrls(pbDomain):
+	media = loadMediaFile()
+	queryUrls = []
+	for mediaInfo in media:
+		queryUrls.append(generatesingleMediaQueryUrls(mediaInfo, pbDomain))
+
+	return queryUrls
+
+
+def loadMediaFile():
+	mediaIndexfile = open("data/MediaIndex.json", "r")
+	return json.loads(mediaIndexfile.read())["media"]
+
+
+def generatesingleMediaQueryUrls(mediaInfo, pbDomain):
 
 	seasonQueries = []
 
@@ -44,5 +62,6 @@ def generateTVQueryUrls(mediaInfo, pbDomain):
 	return {
 		"name": mediaInfo['name'],
 		"seasonIndexPageUrls": seasonQueries,
-		"episodeIndexPageUrls": episodeQueries
+		"episodeIndexPageUrls": episodeQueries,
+		"typeSpecificData": mediaInfo["typeSpecificData"]
 	}
