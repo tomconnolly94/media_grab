@@ -1,18 +1,1 @@
-{
-    "media": [
-        {
-            "name": "vikings",
-            "typeSpecificData": {
-                "latestSeason": "5",
-                "latestEpisode": "20"
-            }
-        },
-        {
-            "name": "silicon valley",
-            "typeSpecificData": {
-                "latestSeason": "6",
-                "latestEpisode": "7"
-            }
-        }
-    ]
-}
+{"media": [{"name": "vikings", "typeSpecificData": {"latestSeason": "5", "latestEpisode": "20"}}, {"name": "silicon valley", "typeSpecificData": {"latestSeason": "6", "latestEpisode": "7"}}]}

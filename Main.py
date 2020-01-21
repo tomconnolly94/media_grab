@@ -9,7 +9,7 @@ import os
 from os.path import join, dirname
 
 # internal dependencies
-from interfaces import HttpRequestInterface
+from interfaces import HttpRequestInterface, MailInterface
 from scrapers import IndexPageScraper, TorrentPageScraper
 from controllers import BittorrentController, DataOrganisationController, TorrentFilterController
 
@@ -19,22 +19,25 @@ dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
 
-def init():
+def initDomain():
 	# find site to search for torrents
-	pbDomain = HttpRequestInterface.getPBSite()["domain"]
-	queryRecords = DataOrganisationController.generateTVQueryUrls(pbDomain)
+	return HttpRequestInterface.getPBSite()["domain"]
 
-	return queryRecords, pbDomain
+
+def initQueryRecords(pbDomain):
+	return DataOrganisationController.generateTVQueryUrls(pbDomain)
 
 
 def getTorrentPageUrls(torrentIndexPages):
 		
 	for torrentIndexPage in torrentIndexPages:
+		print("Index page torrent > " + torrentIndexPage)
 		torrentPageUrls = IndexPageScraper.scrape(torrentIndexPage)
 		if len(torrentPageUrls) > 0:
 			return torrentPageUrls
 			
 	return None
+
 
 def onSuccessfulTorrentAdd(queryRecord, updateableField, torrentMagnet):
 
@@ -50,61 +53,63 @@ def onSuccessfulTorrentAdd(queryRecord, updateableField, torrentMagnet):
 
 	with open(os.getenv("MEDIA_FILE"), "w") as mediaFileTarget:
 		json.dump(media, mediaFileTarget)
+
 	# TODO: send email notification
-	pass
+	addMessage = f'ADDED TORRENT: {queryRecord["name"]} season {queryRecord["typeSpecificData"][updateableField]} \n\n Magnet:{torrentMagnet}'
+	MailInterface.sendMail(addMessage)
+	
+	print(addMessage)
 
 
 def main():
-	queryRecords, pbDomain = init()
 
-	for queryRecord in queryRecords:
+	while True:
+		pbDomain = initDomain()
+		queryRecords = initQueryRecords(pbDomain)
 
-		seasonTorrentPageUrls = []
-		episodeTorrentPageUrls = []
+		for queryRecord in queryRecords:
 
-		# get page urls for seasons queries and filter them
-		seasonTorrentPageUrls = TorrentFilterController.filterTorrentPageUrls(getTorrentPageUrls(queryRecord["seasonIndexPageUrls"]), queryRecord)
+			seasonTorrentPageUrls = []
+			episodeTorrentPageUrls = []
 
-		if makeEpisodeQuery:
-			# get page urls for episodes queries
-			episodeTorrentPageUrls = getTorrentPageUrls(queryRecord["episodeIndexPageUrls"])
+			# get page urls for seasons queries and filter them
+			seasonTorrentPageUrls = TorrentFilterController.filterTorrentPageUrls(getTorrentPageUrls(queryRecord["seasonIndexPageUrls"]), queryRecord)
 
-
-		if seasonTorrentPageUrls:
-			for torrentPageUrl in seasonTorrentPageUrls:
+			if makeEpisodeQuery:
+				# get page urls for episodes queries
+				episodeTorrentPageUrls = getTorrentPageUrls(queryRecord["episodeIndexPageUrls"])
 
 
-				torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
-				torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)
-				
-				# skip page if torrent magnet cannot be accessed
-				if not torrentMagnet:
-					continue
+			if seasonTorrentPageUrls:
+				for torrentPageUrl in seasonTorrentPageUrls:
 
-				# if adding torrent is successful, update various things
-				if BittorrentController.initTorrentDownload(torrentMagnet):
-					print(f"ADDED TORRENT: {torrentMagnet}")
-					onSuccessfulTorrentAdd(queryRecord, "latestSeason", torrentMagnet)
 
-					# use break to move to the next media item
-					break
+					torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
+					torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)
+					
+					# skip page if torrent magnet cannot be accessed
+					if not torrentMagnet:
+						continue
 
-		elif episodeTorrentPageUrls:
-			for torrentPageUrl in episodeTorrentPageUrls:
-
-				torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
-				torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)
-				
-				if torrentMagnet:
+					# if adding torrent is successful, update various things
 					if BittorrentController.initTorrentDownload(torrentMagnet):
-						onSuccessfulTorrentAdd(queryRecord, "latestEpisode", torrentMagnet)
+						onSuccessfulTorrentAdd(queryRecord, "latestSeason", torrentMagnet)
 
 						# use break to move to the next media item
 						break
-					
-	# when torrent is finished cp it to mounted network media drive (/mnt/share/media_drive)
 
-	return
+			elif episodeTorrentPageUrls:
+				for torrentPageUrl in episodeTorrentPageUrls:
+
+					torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
+					torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)
+					
+					if torrentMagnet:
+						if BittorrentController.initTorrentDownload(torrentMagnet):
+							onSuccessfulTorrentAdd(queryRecord, "latestEpisode", torrentMagnet)
+
+							# use break to move to the next media item
+							break
 
 
 if __name__== "__main__":
