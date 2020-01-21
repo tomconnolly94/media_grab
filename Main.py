@@ -6,6 +6,9 @@ import enum
 import itertools
 import pprint
 import re
+from dotenv import load_dotenv
+import os
+from os.path import join, dirname
 
 # internal dependencies
 from interfaces import HttpRequestInterface
@@ -14,6 +17,10 @@ from controllers import BittorrentController
 from controllers import DataOrganisationController
 
 makeEpisodeQuery = False
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
 
 def init():
 	# find site to search for torrents
@@ -24,21 +31,32 @@ def init():
 
 
 def filterTorrentPageUrls(torrentPageUrls, mediaData):
-	seasonRegex1 = f'Vikings.*Season[\s.Ss]*0*5'
-	seasonRegex = re.compile(rf'{seasonRegex1}')
-	return list(filter(seasonRegex.search, torrentPageUrls))
+
+	if not torrentPageUrls:
+		return []
+
+	name = mediaData["name"]
+	nameFirstLetter = name[0].lower()
+	restOfName = name[1:]
+	relevantSeason = mediaData["typeSpecificData"]["latestSeason"]
+
+	seasonRegex = fr'[{nameFirstLetter.upper()}|{nameFirstLetter}]{restOfName}.*[Season\s.Ss0]*{relevantSeason}'
+	seasonRegex = re.compile(seasonRegex)
+	filteredTorrentPageUrls = list(filter(seasonRegex.search, torrentPageUrls))
+	return filteredTorrentPageUrls
 
 
 def getTorrentPageUrls(torrentIndexPages):
 		
 	for torrentIndexPage in torrentIndexPages:
-		#TODO: apply some sort of regex to the name of the torrent page 
-		# url to ensure only strictly relevant page URls are returned.
 		torrentPageUrls = IndexPageScraper.scrape(torrentIndexPage)
 		if len(torrentPageUrls) > 0:
 			return torrentPageUrls
 			
 	return None
+
+def onSuccessfulTorrentAdd(torrentMagnet):
+
 
 
 def main():
@@ -46,9 +64,11 @@ def main():
 
 	for queryRecord in queryRecords:
 
-		# get page urls for seasons queries
-		seasonTorrentPageUrls = getTorrentPageUrls(queryRecord["seasonIndexPageUrls"])
-		filterTorrentPageUrls(torrentPageUrls, queryRecord["typeSpecificData"])
+		seasonTorrentPageUrls = []
+		episodeTorrentPageUrls = []
+
+		# get page urls for seasons queries and filter them
+		seasonTorrentPageUrls = filterTorrentPageUrls(getTorrentPageUrls(queryRecord["seasonIndexPageUrls"]), queryRecord)
 
 		if makeEpisodeQuery:
 			# get page urls for episodes queries
@@ -68,6 +88,7 @@ def main():
 
 				# if adding torrent is successful, update various things
 				if BittorrentController.initTorrentDownload(torrentMagnet):
+					print(f"ADDED TORRENT: {torrentMagnet}")
 					# TODO: send email notification
 
 					# TODO: update data/MediaIndex.json to reflect what has been downloaded 

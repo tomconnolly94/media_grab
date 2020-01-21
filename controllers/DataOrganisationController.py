@@ -32,13 +32,16 @@ def loadMediaFile():
 def generatesingleMediaQueryUrls(mediaInfo, pbDomain):
 
 	seasonQueries = []
+	# increment last episode/season numbers
+	mediaInfo["typeSpecificData"]["latestSeason"] = str(int(mediaInfo["typeSpecificData"]["latestSeason"]) + 1)
+	mediaInfo["typeSpecificData"]["latestEpisode"] = str(int(mediaInfo["typeSpecificData"]["latestEpisode"]) + 1)
 
 	for template in seasonTemplates:
 
 		searchSection = ""
 
 		for fragmentIndex, fragment in enumerate(template):
-			value = list(mediaInfo["type_specific_data"].values())[fragmentIndex]
+			value = list(mediaInfo["typeSpecificData"].values())[fragmentIndex]
 
 			searchSection += "{fragment}{value:>02}".format(fragment=fragment,value=int(value))
 
@@ -52,7 +55,7 @@ def generatesingleMediaQueryUrls(mediaInfo, pbDomain):
 		searchSection = ""
 
 		for fragmentIndex, fragment in enumerate(template):
-			value = list(mediaInfo["type_specific_data"].values())[fragmentIndex]
+			value = list(mediaInfo["typeSpecificData"].values())[fragmentIndex]
 
 			searchSection += "{fragment}{value:>02}".format(fragment=fragment,value=int(value))
 
