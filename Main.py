@@ -39,9 +39,8 @@ def getTorrentPageUrls(torrentIndexPages):
 	return None
 
 
-def onSuccessfulTorrentAdd(queryRecord, updateableField, torrentMagnet):
-
-	# TODO: update data/MediaIndex.json to reflect what has been downloaded 
+def writeMediaFile(queryRecord, updateableField):
+	
 	with open(os.getenv("MEDIA_FILE"), 'r') as mediaFileSrc:
 		media = json.load(mediaFileSrc)["media"]
 
@@ -53,6 +52,12 @@ def onSuccessfulTorrentAdd(queryRecord, updateableField, torrentMagnet):
 
 	with open(os.getenv("MEDIA_FILE"), "w") as mediaFileTarget:
 		json.dump(media, mediaFileTarget)
+
+	return
+
+def onSuccessfulTorrentAdd(queryRecord, updateableField, torrentMagnet):
+
+	writeMediaFile(queryRecord, updateableField)
 
 	# TODO: send email notification
 	addMessage = f'ADDED TORRENT: {queryRecord["name"]} season {queryRecord["typeSpecificData"][updateableField]} \n\n Magnet:{torrentMagnet}'
@@ -79,10 +84,9 @@ def main():
 				# get page urls for episodes queries
 				episodeTorrentPageUrls = getTorrentPageUrls(queryRecord["episodeIndexPageUrls"])
 
-
 			if seasonTorrentPageUrls:
+				# TODO: lines 89-103 are very similar to 106-119 find a way to remove duplication
 				for torrentPageUrl in seasonTorrentPageUrls:
-
 
 					torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
 					torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)
@@ -104,12 +108,15 @@ def main():
 					torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
 					torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)
 					
-					if torrentMagnet:
-						if BittorrentController.initTorrentDownload(torrentMagnet):
-							onSuccessfulTorrentAdd(queryRecord, "latestEpisode", torrentMagnet)
+					# skip page if torrent magnet cannot be accessed
+					if not torrentMagnet:
+						continue
 
-							# use break to move to the next media item
-							break
+					if BittorrentController.initTorrentDownload(torrentMagnet):
+						onSuccessfulTorrentAdd(queryRecord, "latestEpisode", torrentMagnet)
+
+						# use break to move to the next media item
+						break
 
 
 if __name__== "__main__":
