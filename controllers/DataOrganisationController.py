@@ -2,6 +2,7 @@
 
 # pip dependencies
 import json
+import os
 
 seasonTemplates = [
 	[ "s" ],
@@ -25,8 +26,8 @@ def generateTVQueryUrls(pbDomain):
 
 
 def loadMediaFile():
-	mediaIndexfile = open("data/MediaIndex.json", "r")
-	return json.loads(mediaIndexfile.read())["media"]
+	with open(os.getenv("MEDIA_FILE"), "r") as mediaIndexfile:
+		return json.loads(mediaIndexfile.read())["media"]
 
 
 def generatesingleMediaQueryUrls(mediaInfo, pbDomain):
