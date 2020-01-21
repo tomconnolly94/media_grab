@@ -55,10 +55,11 @@ def getTorrentPageUrls(torrentIndexPages):
 			
 	return None
 
-def onSuccessfulTorrentAdd(torrentMagnet):
-	# TODO: send email notification
+def onSuccessfulTorrentAdd(queryRecord, torrentMagnet):
 
 	# TODO: update data/MediaIndex.json to reflect what has been downloaded 
+	
+	# TODO: send email notification
 	pass
 
 
