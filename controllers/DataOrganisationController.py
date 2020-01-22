@@ -3,6 +3,8 @@
 # pip dependencies
 import json
 import os
+import logging
+
 
 seasonTemplates = [
 	[ "s" ],
@@ -20,7 +22,7 @@ def generateTVQueryUrls(pbDomain):
 	media = loadMediaFile()
 	queryUrls = []
 	for mediaInfo in media:
-		queryUrls.append(generatesingleMediaQueryUrls(mediaInfo, pbDomain))
+		queryUrls.append(generateSingleMediaQueryUrls(mediaInfo, pbDomain))
 
 	return queryUrls
 
@@ -30,7 +32,7 @@ def loadMediaFile():
 		return json.loads(mediaIndexfile.read())["media"]
 
 
-def generatesingleMediaQueryUrls(mediaInfo, pbDomain):
+def generateSingleMediaQueryUrls(mediaInfo, pbDomain):
 
 	seasonQueries = []
 	# increment last episode/season numbers
@@ -58,10 +60,12 @@ def generatesingleMediaQueryUrls(mediaInfo, pbDomain):
 		for fragmentIndex, fragment in enumerate(template):
 			value = list(mediaInfo["typeSpecificData"].values())[fragmentIndex]
 
-			searchSection += "{fragment}{value:>02}".format(fragment=fragment,value=int(value))
+			searchSection += f"{fragment} {int(value)}"
 
 		# create search url
 		episodeQueries.append(f"https://{pbDomain}/s/?q={mediaInfo['name']} {searchSection}&page=0&orderby=99")
+
+	logging.info(episodeQueries)
 
 	return {
 		"name": mediaInfo['name'],

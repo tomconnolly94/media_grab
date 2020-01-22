@@ -1,6 +1,13 @@
 {
     "media": [
         {
+            "name": "taskmaster",
+            "typeSpecificData": {
+                "latestSeason": "6",
+                "latestEpisode": "1"
+            }
+        },
+        {
             "name": "vikings",
             "typeSpecificData": {
                 "latestSeason": "5",
@@ -17,7 +24,7 @@
         {
             "name": "rick and morty",
             "typeSpecificData": {
-                "latestSeason": "4",
+                "latestSeason": "1",
                 "latestEpisode": "5"
             }
         }

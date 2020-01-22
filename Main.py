@@ -7,16 +7,28 @@ import itertools
 from dotenv import load_dotenv
 import os
 from os.path import join, dirname
+import logging
 
 # internal dependencies
 from interfaces import HttpRequestInterface, MailInterface
 from scrapers import IndexPageScraper, TorrentPageScraper
 from controllers import BittorrentController, DataOrganisationController, TorrentFilterController
 
-makeEpisodeQuery = False
-
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
+
+logFormat = '%(asctime)s - %(levelname)s - %(message)s'
+logDateFormat = '%d-%b-%y %H:%M:%S'
+
+if os.getenv("ENVIRONMENT") == "production":
+	logging.basicConfig(filename="logs/media_grab.log", filemode='w', format=logFormat, datefmt=logDateFormat, level=logging.INFO)
+else:
+	logging.basicConfig(format=logFormat, datefmt=logDateFormat, level=logging.INFO)
+
+logging.info('media_grab app started.')
+
+makeEpisodeQueries = True
+makeSeasonQueries = False
 
 
 def initDomain():
@@ -31,7 +43,7 @@ def initQueryRecords(pbDomain):
 def getTorrentPageUrls(torrentIndexPages):
 		
 	for torrentIndexPage in torrentIndexPages:
-		print("Index page torrent > " + torrentIndexPage)
+		logging.info("Index page torrent > " + torrentIndexPage)
 		torrentPageUrls = IndexPageScraper.scrape(torrentIndexPage)
 		if len(torrentPageUrls) > 0:
 			return torrentPageUrls
@@ -60,10 +72,10 @@ def onSuccessfulTorrentAdd(queryRecord, updateableField, torrentMagnet):
 	writeMediaFile(queryRecord, updateableField)
 
 	# TODO: send email notification
-	addMessage = f'ADDED TORRENT: {queryRecord["name"]} season {queryRecord["typeSpecificData"][updateableField]} \n\n Magnet:{torrentMagnet}'
+	addMessage = f'ADDED TORRENT: {queryRecord["name"]} {updateableField} {queryRecord["typeSpecificData"][updateableField]} \n\n Magnet:{torrentMagnet}'
 	MailInterface.sendMail(addMessage)
 	
-	print(addMessage)
+	logging.info(addMessage)
 
 
 def main():
@@ -77,12 +89,15 @@ def main():
 			seasonTorrentPageUrls = []
 			episodeTorrentPageUrls = []
 
-			# get page urls for seasons queries and filter them
-			seasonTorrentPageUrls = TorrentFilterController.filterTorrentPageUrls(getTorrentPageUrls(queryRecord["seasonIndexPageUrls"]), queryRecord)
+			if makeSeasonQueries:
+				# get page urls for seasons queries and filter them
+				logging.info(f'seasonIndexPageUrls: {getTorrentPageUrls(queryRecord["seasonIndexPageUrls"])}')
+				seasonTorrentPageUrls = TorrentFilterController.filterSeasonTorrentPageUrls(getTorrentPageUrls(queryRecord["seasonIndexPageUrls"]), queryRecord)
 
-			if makeEpisodeQuery:
+			if makeEpisodeQueries:
 				# get page urls for episodes queries
-				episodeTorrentPageUrls = getTorrentPageUrls(queryRecord["episodeIndexPageUrls"])
+				logging.info(f'episodeIndexPageUrls: {getTorrentPageUrls(queryRecord["episodeIndexPageUrls"])}')
+				episodeTorrentPageUrls = TorrentFilterController.filterEpisodeTorrentPageUrls(getTorrentPageUrls(queryRecord["episodeIndexPageUrls"]), queryRecord)
 
 			if seasonTorrentPageUrls:
 				# TODO: lines 89-103 are very similar to 106-119 find a way to remove duplication
