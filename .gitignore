@@ -2,3 +2,4 @@ venv
 *.pyc
 .env
 logs/*
+data/MediaIndex.json

@@ -81,58 +81,57 @@ def onSuccessfulTorrentAdd(queryRecord, updateableField, torrentMagnet):
 def main():
 
 	try:
-		while True:
-			pbDomain = initDomain()
-			queryRecords = initQueryRecords(pbDomain)
+		pbDomain = initDomain()
+		queryRecords = initQueryRecords(pbDomain)
 
-			for queryRecord in queryRecords:
+		for queryRecord in queryRecords:
 
-				seasonTorrentPageUrls = []
-				episodeTorrentPageUrls = []
+			seasonTorrentPageUrls = []
+			episodeTorrentPageUrls = []
 
-				if makeSeasonQueries:
-					# get page urls for seasons queries and filter them
-					logging.info(f'seasonIndexPageUrls: {getTorrentPageUrls(queryRecord["seasonIndexPageUrls"])}')
-					seasonTorrentPageUrls = TorrentFilterController.filterSeasonTorrentPageUrls(getTorrentPageUrls(queryRecord["seasonIndexPageUrls"]), queryRecord)
+			if makeSeasonQueries:
+				# get page urls for seasons queries and filter them
+				logging.info(f'seasonIndexPageUrls: {getTorrentPageUrls(queryRecord["seasonIndexPageUrls"])}')
+				seasonTorrentPageUrls = TorrentFilterController.filterSeasonTorrentPageUrls(getTorrentPageUrls(queryRecord["seasonIndexPageUrls"]), queryRecord)
 
-				if makeEpisodeQueries:
-					# get page urls for episodes queries
-					logging.info(f'episodeIndexPageUrls: {getTorrentPageUrls(queryRecord["episodeIndexPageUrls"])}')
-					episodeTorrentPageUrls = TorrentFilterController.filterEpisodeTorrentPageUrls(getTorrentPageUrls(queryRecord["episodeIndexPageUrls"]), queryRecord)
+			if makeEpisodeQueries:
+				# get page urls for episodes queries
+				logging.info(f'episodeIndexPageUrls: {getTorrentPageUrls(queryRecord["episodeIndexPageUrls"])}')
+				episodeTorrentPageUrls = TorrentFilterController.filterEpisodeTorrentPageUrls(getTorrentPageUrls(queryRecord["episodeIndexPageUrls"]), queryRecord)
 
-				if seasonTorrentPageUrls:
-					# TODO: lines 89-103 are very similar to 106-119 find a way to remove duplication
-					for torrentPageUrl in seasonTorrentPageUrls:
+			if seasonTorrentPageUrls:
+				# TODO: lines 89-103 are very similar to 106-119 find a way to remove duplication
+				for torrentPageUrl in seasonTorrentPageUrls:
 
-						torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
-						torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)
-						
-						# skip page if torrent magnet cannot be accessed
-						if not torrentMagnet:
-							continue
+					torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
+					torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)
+					
+					# skip page if torrent magnet cannot be accessed
+					if not torrentMagnet:
+						continue
 
-						# if adding torrent is successful, update various things
-						if BittorrentController.initTorrentDownload(torrentMagnet):
-							onSuccessfulTorrentAdd(queryRecord, "latestSeason", torrentMagnet)
+					# if adding torrent is successful, update various things
+					if BittorrentController.initTorrentDownload(torrentMagnet):
+						onSuccessfulTorrentAdd(queryRecord, "latestSeason", torrentMagnet)
 
-							# use break to move to the next media item
-							break
+						# use break to move to the next media item
+						break
 
-				elif episodeTorrentPageUrls:
-					for torrentPageUrl in episodeTorrentPageUrls:
+			elif episodeTorrentPageUrls:
+				for torrentPageUrl in episodeTorrentPageUrls:
 
-						torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
-						torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)
-						
-						# skip page if torrent magnet cannot be accessed
-						if not torrentMagnet:
-							continue
+					torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
+					torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)
+					
+					# skip page if torrent magnet cannot be accessed
+					if not torrentMagnet:
+						continue
 
-						if BittorrentController.initTorrentDownload(torrentMagnet):
-							onSuccessfulTorrentAdd(queryRecord, "latestEpisode", torrentMagnet)
+					if BittorrentController.initTorrentDownload(torrentMagnet):
+						onSuccessfulTorrentAdd(queryRecord, "latestEpisode", torrentMagnet)
 
-							# use break to move to the next media item
-							break
+						# use break to move to the next media item
+						break
 	
 	except Exception as e:
 		logging.error("Exception occurred", exc_info=True)
