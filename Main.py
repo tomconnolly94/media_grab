@@ -22,7 +22,7 @@ logFormat = '%(asctime)s - %(levelname)s - %(message)s'
 logDateFormat = '%d-%b-%y %H:%M:%S'
 
 if os.getenv("ENVIRONMENT") == "production":
-	logFilename = f"logs/media_grab_{time.strftime('%d_%m_%Y_%T')}_.log"
+	logFilename = f"logs/media_grab_{time.strftime('%d-%m-%Y_%H-%M')}_.log"
 	logging.basicConfig(filename=logFilename, filemode='w', format=logFormat, datefmt=logDateFormat, level=logging.INFO)
 else:
 	logging.basicConfig(format=logFormat, datefmt=logDateFormat, level=logging.INFO)
