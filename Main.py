@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import os
 from os.path import join, dirname
 import logging
+import time
 
 # internal dependencies
 from interfaces import HttpRequestInterface, MailInterface
@@ -21,7 +22,8 @@ logFormat = '%(asctime)s - %(levelname)s - %(message)s'
 logDateFormat = '%d-%b-%y %H:%M:%S'
 
 if os.getenv("ENVIRONMENT") == "production":
-	logging.basicConfig(filename="logs/media_grab.log", filemode='w', format=logFormat, datefmt=logDateFormat, level=logging.INFO)
+	logFilename = f"logs/media_grab_{time.strftime('%d_%m_%Y_%T')}_.log"
+	logging.basicConfig(filename=logFilename, filemode='w', format=logFormat, datefmt=logDateFormat, level=logging.INFO)
 else:
 	logging.basicConfig(format=logFormat, datefmt=logDateFormat, level=logging.INFO)
 
