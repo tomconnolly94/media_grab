@@ -10,7 +10,9 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "pythonPath": "/home/tom/projects/media_grab/venv/bin/python"
+            "pythonPath": "/home/tom/projects/media_grab/venv/bin/python",
+            "env": {"PYTHONPATH": "${workspaceRoot}"},
+            "envFile": "${workspaceRoot}/.env",
         }
     ]
 }

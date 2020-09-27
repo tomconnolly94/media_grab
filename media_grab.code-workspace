@@ -5,6 +5,7 @@
 		}
 	],
 	"settings": {
-		"python.pythonPath": "venv/bin/python3.8"
+		"python.pythonPath": "venv/bin/python3",
+		"pythonTestExplorer.testFramework": "unittest"
 	}
 }
