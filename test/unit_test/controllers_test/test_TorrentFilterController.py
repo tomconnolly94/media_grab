@@ -15,11 +15,8 @@ class TestTorrentFilterController(unittest.TestCase):
             }
         }
 
-        expectedSeason = str(int(mediaData["typeSpecificData"]["latestSeason"]) + 1)
-        mediaName = mediaData["name"]
         torrentData = []
         
-
         with open('test/unit_test/unit_test_resources/fakeTorrentData.json', 'r') as file:
             jsonData = json.load(file) 
             torrentData = jsonData["torrents"]
@@ -48,5 +45,3 @@ if __name__ == '__main__':
 
 
 # N.B. test cant be debugged from the vs code side bar, to debug test, add breakpoint and hit f5, this should be fixed soon
-
-#Rick.{0,3}and.{0,3}morty.{0,3}(?:season|s).{0,3}\\d*(?:3|three)(?!.*episode).*$'
