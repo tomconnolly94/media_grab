@@ -170,7 +170,7 @@
         },
         {
             "itemText": "Rick and Morty",
-            "passesFilter": true
+            "passesFilter": false
         }
     ]
 }

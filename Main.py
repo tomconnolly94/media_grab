@@ -29,26 +29,22 @@ else:
 
 logging.info('media_grab app started.')
 
-makeEpisodeQueries = True
-makeSeasonQueries = False
+makeEpisodeQueries = False
+makeSeasonQueries = True
 
 
-def initDomain():
+def getPDDomain():
 	# find site to search for torrents
-	return HttpRequestInterface.getPBSite()["domain"]
+	return HttpRequestInterface.getPBSite()
 
 
-def initQueryRecords(pbDomain):
-	return DataOrganisationController.generateTVQueryUrls(pbDomain)
-
-
-def getTorrentPageUrls(torrentIndexPages):
+def getTorrentInfo(queryUrlList):
 		
-	for torrentIndexPage in torrentIndexPages:
-		logging.info("Index page torrent > " + torrentIndexPage)
-		torrentPageUrls = IndexPageScraper.scrape(torrentIndexPage)
-		if len(torrentPageUrls) > 0:
-			return torrentPageUrls
+	for queryUrl in queryUrlList:
+		logging.info("Index page torrent > " + queryUrl)
+		torrents = IndexPageScraper.scrape(queryUrl)
+		if torrents:
+			return torrents
 			
 	return None
 
@@ -80,30 +76,40 @@ def onSuccessfulTorrentAdd(queryRecord, updateableField, torrentMagnet):
 	logging.info(addMessage)
 
 
+def loadMediaFile():
+	with open(os.getenv("MEDIA_FILE"), "r") as mediaIndexfile:
+		return json.loads(mediaIndexfile.read())["media"]
+
+
 def main():
 
 	try:
-		pbDomain = initDomain()
-		queryRecords = initQueryRecords(pbDomain)
+		pbDomain = getPDDomain()
+		queryUrlLists = DataOrganisationController.generateSeasonQueryUrlLists(pbDomain)
 
-		for queryRecord in queryRecords:
+		#TODO: somehow pass the correct member of mediaInfo into the filterSeasonTorrents function on line 102
+		mediaInfo = loadMediaFile()
 
-			seasonTorrentPageUrls = []
+		for queryUrlList in queryUrlLists:
+
+			seasonTorrentsInfo = []
 			episodeTorrentPageUrls = []
 
 			if makeSeasonQueries:
 				# get page urls for seasons queries and filter them
-				logging.info(f'seasonIndexPageUrls: {getTorrentPageUrls(queryRecord["seasonIndexPageUrls"])}')
-				seasonTorrentPageUrls = TorrentFilterController.filterSeasonTorrentPageUrls(getTorrentPageUrls(queryRecord["seasonIndexPageUrls"]), queryRecord)
+				torrents = getTorrentInfo(queryUrlList)
+				logging.info(f'seasonIndexPageUrls: {torrents}')
+				seasonTorrentsInfo = TorrentFilterController.filterSeasonTorrents(torrents, queryRecord)
 
-			if makeEpisodeQueries:
-				# get page urls for episodes queries
-				logging.info(f'episodeIndexPageUrls: {getTorrentPageUrls(queryRecord["episodeIndexPageUrls"])}')
-				episodeTorrentPageUrls = TorrentFilterController.filterEpisodeTorrentPageUrls(getTorrentPageUrls(queryRecord["episodeIndexPageUrls"]), queryRecord)
+			# Deprecated due to new use case requirement
+			# if makeEpisodeQueries:
+			# 	# get page urls for episodes queries
+			# 	logging.info(f'episodeIndexPageUrls: {getTorrentPageUrls(queryRecord["episodeIndexPageUrls"])}')
+			# 	episodeTorrentPageUrls = TorrentFilterController.filterEpisodeTorrentPageUrls(getTorrentPageUrls(queryRecord["episodeIndexPageUrls"]), queryRecord)
 
-			if seasonTorrentPageUrls:
+			if seasonTorrentsInfo:
 				# TODO: lines 89-103 are very similar to 106-119 find a way to remove duplication
-				for torrentPageUrl in seasonTorrentPageUrls:
+				for torrentPageUrl in seasonTorrentsInfo:
 
 					torrentPageUrl = f'https://{pbDomain}{torrentPageUrl}'
 					torrentMagnet = TorrentPageScraper.scrape(torrentPageUrl)

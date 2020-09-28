@@ -9,11 +9,9 @@ class TestIndexPageScraper(unittest.TestCase):
 
     @mock.patch('scrapers.IndexPageScraper.requests.get')
     def test_scrape(self, requestsGetMock):
-
-        torrentData = []
     
         with open('test/unit_test/unit_test_resources/MockIndexPage.html', 'r') as file:
-            requestsGetMock.return_value = namedtuple('literal', 'text')(text= file.read().replace('\n', ''))
+            requestsGetMock.return_value = namedtuple('literal', 'ok text')(ok=True,text=file.read().replace('\n', ''))
 
         torrentItemInfo = IndexPageScraper.scrape("fakeUrl")        
         

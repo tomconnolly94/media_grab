@@ -7,69 +7,35 @@ import logging
 
 
 seasonTemplates = [
-	[ "s" ],
-	[ "season " ],
-	[ "season"],
-]
-
-episodeTemplates = [
-	[ "s", "e" ],
-	[ "s", " e"]
+	"s",
+	"season",
+	"season ",
 ]
 
 
-def generateTVQueryUrls(pbDomain):
+def generateSeasonQueryUrlLists(pbDomain):
 	media = loadMediaFile()
 	queryUrls = []
 	for mediaInfo in media:
-		queryUrls.append(generateSingleMediaQueryUrls(mediaInfo, pbDomain))
+		queryUrls.append(generateSeasonIndexQueryUrls(mediaInfo["name"], int(mediaInfo["typeSpecificData"]["latestSeason"]) + 1, pbDomain))
 
 	return queryUrls
 
 
-def loadMediaFile():
-	with open(os.getenv("MEDIA_FILE"), "r") as mediaIndexfile:
-		return json.loads(mediaIndexfile.read())["media"]
-
-
-def generateSingleMediaQueryUrls(mediaInfo, pbDomain):
+def generateSeasonIndexQueryUrls(mediaName, relevantSeason, pbDomain):
 
 	seasonQueries = []
-	# increment last episode/season numbers
-	mediaInfo["typeSpecificData"]["latestSeason"] = str(int(mediaInfo["typeSpecificData"]["latestSeason"]) + 1)
-	mediaInfo["typeSpecificData"]["latestEpisode"] = str(int(mediaInfo["typeSpecificData"]["latestEpisode"]) + 1)
 
 	for template in seasonTemplates:
 
 		searchSection = ""
 
-		for fragmentIndex, fragment in enumerate(template):
-			value = list(mediaInfo["typeSpecificData"].values())[fragmentIndex]
-
-			searchSection += "{fragment}{value:>02}".format(fragment=fragment,value=int(value))
-
-		# create search url
-		seasonQueries.append(f"https://{pbDomain}/s/?q={mediaInfo['name']} {searchSection}&page=0&orderby=99")
-
-	episodeQueries = []
-
-	for template in episodeTemplates:
-
-		searchSection = ""
-
-		for fragmentIndex, fragment in enumerate(template):
-			value = list(mediaInfo["typeSpecificData"].values())[fragmentIndex]
-
-			searchSection += f"{fragment} {int(value)}"
+		for nameFragment in mediaName.split():
+			searchSection += nameFragment + "+"
+		
+		searchSection += "{template}{relevantSeason:>02}".format(template=template.replace(" ", "+"),relevantSeason=relevantSeason)
 
 		# create search url
-		episodeQueries.append(f"https://{pbDomain}/s/?q={mediaInfo['name']} {searchSection}&page=0&orderby=99")
+		seasonQueries.append(f"https://{pbDomain}/search.php?q={searchSection}&cat=0&page=0&orderby=99")
 
-	logging.info(episodeQueries)
-
-	return {
-		"name": mediaInfo['name'],
-		"seasonIndexPageUrls": seasonQueries,
-		"episodeIndexPageUrls": episodeQueries,
-		"typeSpecificData": mediaInfo["typeSpecificData"]
-	}
+	return seasonQueries
