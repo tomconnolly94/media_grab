@@ -18,12 +18,13 @@ class TestDataOrganisationController(unittest.TestCase):
         name = mediaInfo["name"]
         relevantSeason = int(mediaInfo["typeSpecificData"]["latestSeason"]) + 1
 
-        expectedQueryUrls = [
-            "https://fakeDomain.net/search.php?q=rick+and+morty+s02&cat=0&page=0&orderby=99",
-            "https://fakeDomain.net/search.php?q=rick+and+morty+season02&cat=0&page=0&orderby=99",
-            "https://fakeDomain.net/search.php?q=rick+and+morty+season+02&cat=0&page=0&orderby=99",
-        ]
-
+        expectedQueryUrls = {
+            mediaInfo["name"]: [
+                "https://fakeDomain.net/search.php?q=rick+and+morty+s02&cat=0&page=0&orderby=99",
+                "https://fakeDomain.net/search.php?q=rick+and+morty+season02&cat=0&page=0&orderby=99",
+                "https://fakeDomain.net/search.php?q=rick+and+morty+season+02&cat=0&page=0&orderby=99",
+            ]
+        }
 
         seasonIndexQueryURLs = DataOrganisationController.generateSeasonIndexQueryUrls(name, relevantSeason, fakePbDomain)
 

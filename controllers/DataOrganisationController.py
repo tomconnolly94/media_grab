@@ -13,11 +13,10 @@ seasonTemplates = [
 ]
 
 
-def generateSeasonQueryUrlLists(pbDomain):
-	media = loadMediaFile()
-	queryUrls = []
+def generateSeasonQueryUrlLists(pbDomain, media):
+	queryUrls = {}
 	for mediaInfo in media:
-		queryUrls.append(generateSeasonIndexQueryUrls(mediaInfo["name"], int(mediaInfo["typeSpecificData"]["latestSeason"]) + 1, pbDomain))
+		queryUrls[mediaInfo["name"]] = generateSeasonIndexQueryUrls(mediaInfo["name"], int(mediaInfo["typeSpecificData"]["latestSeason"]), pbDomain)
 
 	return queryUrls
 
