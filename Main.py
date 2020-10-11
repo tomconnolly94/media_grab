@@ -11,8 +11,7 @@ import logging
 import time
 
 # internal dependencies
-from interfaces import HttpRequestInterface, MailInterface
-from scrapers import IndexPageScraper, TorrentPageScraper
+from interfaces import HttpRequestInterface, MailInterface, TPBInterface
 from controllers import BittorrentController, DataOrganisationController, TorrentFilterController
 
 dotenv_path = join(dirname(__file__), '.env')
