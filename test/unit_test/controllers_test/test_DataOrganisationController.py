@@ -3,7 +3,7 @@ from controllers import DataOrganisationController
 
 class TestDataOrganisationController(unittest.TestCase):
 
-    def test_generateSingleMediaQueryUrls(self):
+    def test_generateSeasonQueryGroup(self):
 
         mediaInfo = {
             "name": "rick and morty",
@@ -12,23 +12,19 @@ class TestDataOrganisationController(unittest.TestCase):
             }
         }
 
-
-
-        fakePbDomain = "fakeDomain.net"
         name = mediaInfo["name"]
         relevantSeason = int(mediaInfo["typeSpecificData"]["latestSeason"]) + 1
 
-        expectedQueryUrls = {
-            mediaInfo["name"]: [
-                "https://fakeDomain.net/search.php?q=rick+and+morty+s02&cat=0&page=0&orderby=99",
-                "https://fakeDomain.net/search.php?q=rick+and+morty+season02&cat=0&page=0&orderby=99",
-                "https://fakeDomain.net/search.php?q=rick+and+morty+season+02&cat=0&page=0&orderby=99",
-            ]
-        }
+        expectedQueries = [
+            "rick and morty s02",
+            "rick and morty s 02",
+            "rick and morty season02",
+            "rick and morty season 02"
+        ]
 
-        seasonIndexQueryURLs = DataOrganisationController.generateSeasonIndexQueryUrls(name, relevantSeason, fakePbDomain)
+        seasonQueryGroup = DataOrganisationController.generateSeasonQueryGroup(name, relevantSeason)
 
-        self.assertEqual(expectedQueryUrls, seasonIndexQueryURLs)
+        self.assertEqual(expectedQueries, seasonQueryGroup)
 
 if __name__ == '__main__':
     unittest.main()

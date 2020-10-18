@@ -1,3 +1,6 @@
+#!/venv/bin/python
+
+# external dependencies
 from qbittorrent import Client
 import os
 

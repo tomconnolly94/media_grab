@@ -8,33 +8,25 @@ import logging
 
 seasonTemplates = [
 	"s",
+	"s ",
 	"season",
-	"season ",
+	"season "
 ]
 
 
-def generateSeasonQueryUrlLists(pbDomain, media):
+def generateSeasonQueries(mediaInfoRecords):
 	queryUrls = {}
-	for mediaInfo in media:
-		queryUrls[mediaInfo["name"]] = generateSeasonIndexQueryUrls(mediaInfo["name"], int(mediaInfo["typeSpecificData"]["latestSeason"]), pbDomain)
-
+	for record in mediaInfoRecords:
+		queryUrls[record["name"]] = generateSeasonQueryGroup(record["name"], int(record["typeSpecificData"]["latestSeason"]))
 	return queryUrls
 
 
-def generateSeasonIndexQueryUrls(mediaName, relevantSeason, pbDomain):
+def generateSeasonQueryGroup(mediaName, relevantSeason):
 
 	seasonQueries = []
 
 	for template in seasonTemplates:
-
-		searchSection = ""
-
-		for nameFragment in mediaName.split():
-			searchSection += nameFragment + "+"
-		
-		searchSection += "{template}{relevantSeason:>02}".format(template=template.replace(" ", "+"),relevantSeason=relevantSeason)
-
 		# create search url
-		seasonQueries.append(f"https://{pbDomain}/search.php?q={searchSection}&cat=0&page=0&orderby=99")
+		seasonQueries.append(f"{mediaName} {template}{relevantSeason:>02}")
 
 	return seasonQueries

@@ -16,28 +16,25 @@ class TestTorrentFilterController(unittest.TestCase):
         }
 
         torrentData = []
+        torrentTitles = []
         
         with open('test/unit_test/unit_test_resources/fakeTorrentData.json', 'r') as file:
             jsonData = json.load(file) 
             torrentData = jsonData["torrents"]
-            
-            for torrent in torrentData:
-                torrent["itemPageLink"] = "fakePageLink"
-                torrent["itemMagnetLink"] = "fakeMagnetLink"
+            torrentTitles = [torrent["itemText"] for torrent in torrentData]
 
 
-        filteredTorrents = TorrentFilterController.filterSeasonTorrents(torrentData, mediaData)
+        filteredTorrents = TorrentFilterController.filterSeasonTorrents(torrentTitles, mediaData)
 
         numOfTorrentsThatPassFilter = 27
 
         # assert the right number of torrents were kept from the data input
         self.assertEqual(numOfTorrentsThatPassFilter, len(filteredTorrents))
 
-        # assert that the right number of torrents in the input have the "passesFilter" field set to true
-        self.assertEqual(numOfTorrentsThatPassFilter, len([torrent for torrent in torrentData if torrent["passesFilter"]]))
+        expectedFilteredTorrents = [ torrent["itemText"] for torrent in torrentData if torrent["passesFilter"] ]
 
-        for torrent in filteredTorrents:
-            self.assertTrue(torrent["passesFilter"])
+        # assert that the right number of torrents in the input have the "passesFilter" field set to true
+        self.assertEqual(expectedFilteredTorrents, filteredTorrents)
 
 
 if __name__ == '__main__':

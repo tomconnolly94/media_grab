@@ -6,9 +6,9 @@ import logging
 from num2words import num2words
 
 
-def filterSeasonTorrents(torrents, mediaData):
+def filterSeasonTorrents(torrentTitles, mediaData):
 
-	if not torrents:
+	if not torrentTitles:
 		return []
 
 	name = mediaData["name"]
@@ -24,7 +24,7 @@ def filterSeasonTorrents(torrents, mediaData):
 
 	logging.info(f"seasonRegex: {seasonRegex}")
 
-	filteredTorrents = [ torrent for torrent in torrents if re.search(seasonRegex, torrent["itemText"], re.IGNORECASE)]
+	filteredTorrents = [ torrentTitle for torrentTitle in torrentTitles if re.search(seasonRegex, torrentTitle, re.IGNORECASE)]
 
 	return filteredTorrents
 

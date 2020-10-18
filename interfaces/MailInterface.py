@@ -1,6 +1,6 @@
 #!/venv/bin/python
 
-# pip dependencies
+# external dependencies
 import smtplib
 import os
 import logging
