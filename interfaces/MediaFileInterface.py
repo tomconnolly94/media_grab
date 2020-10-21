@@ -16,8 +16,8 @@ def writeMediaFile(queryRecord, updateableField):
 
 	media = { "media": media }
 
-	with open(os.getenv("MEDIA_FILE"), "w") as mediaFileTarget:
-		json.dump(media, mediaFileTarget)
+	# with open(os.getenv("MEDIA_FILE"), "w") as mediaFileTarget:
+	# 	json.dump(media, mediaFileTarget)
 
 	return
     

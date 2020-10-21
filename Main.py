@@ -19,6 +19,11 @@ makeSeasonQueries = True
 #intitialise logging module
 LoggingController.initLogging()
 
+def findMediaInfoRecord(mediaInfoRecords, mediaInfoName):
+	for record in mediaInfoRecords:
+		if record["name"] == mediaInfoName:
+			return record
+
 
 def main():
 
@@ -29,28 +34,37 @@ def main():
 		mediaInfoRecords = MediaFileInterface.loadMediaFile() # information about the wanted media
 		mediaSearchQueries = DataOrganisationController.generateSeasonQueries(mediaInfoRecords)
 
-		for mediaInfoName, mediaSearchQueries in mediaSearchQueries.items():
+		for mediaInfoName, queries in mediaSearchQueries.items():
 
 			# make query for the mediaInfoRecord, if none are found, try the next query format
-			for query in mediaSearchQueries:
-				torrentInfo = TPBInterface.query(query)
+			for query in queries:
+				torrentQuery = TPBInterface.query('taskmaster')
 
-				if torrentInfo:
-					break
+				if not torrentQuery:
+					continue
+				
+				torrentInfo = []
+
+				for torrent in torrentQuery:
+					torrentInfo.append(torrent)
+				break
+
 
 			#filter torrentInfo by applying regex to torrent titles
-			filteredTorrentTitles = TorrentFilterController.filterSeasonTorrents([ torrent["title"] for torrent in torrentInfo ], mediaInfoRecords[mediaInfoName])
+			mediaInfoRecord = findMediaInfoRecord(mediaInfoRecords, mediaInfoName)
+			torrentTitles = [ torrent.title for torrent in torrentInfo ]
+			filteredTorrentTitles = TorrentFilterController.filterSeasonTorrents(torrentTitles, mediaInfoRecord)
 
 			#get list of filtered torrent objects
-			filteredTorrents = [ torrent for torrent in torrentInfo if torrentInfo["title"] in 
+			filteredTorrents = [ torrent for torrent in torrentInfo if torrent.title in 
 			filteredTorrentTitles ]
 
 			if filteredTorrents:
 				chosenTorrent = filteredTorrents[0]
 				logging.info(f'torrentInfo: {chosenTorrent}')
 
-				if BittorrentController.initTorrentDownload(torrentInfo["itemMagnetLink"]):
-					NewTorrentController.onSuccessfulTorrentAdd(chosenTorrent["magnet_link"], "latestSeason", torrentInfo["itemMagnetLink"])
+				if BittorrentController.initTorrentDownload(chosenTorrent.magnet_link):
+					NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, "latestSeason", chosenTorrent.magnet_link)
 
 	
 	except Exception:

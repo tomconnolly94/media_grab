@@ -13,6 +13,7 @@
             "pythonPath": "/home/tom/projects/media_grab/venv/bin/python",
             "env": {"PYTHONPATH": "${workspaceRoot}"},
             "envFile": "${workspaceRoot}/.env",
+            "justMyCode": false
         }
     ]
 }
