@@ -4,6 +4,7 @@
 from random import randint
 import requests
 import logging
+import os
 
 # internal dependencies
 from tpb import TPB, CATEGORIES, ORDERS
@@ -14,21 +15,14 @@ def init():
 
     sites = [proxyRecord["domain"] for proxyRecord in list(proxyResponse["proxies"])]
 
-    #randomIndex = randint(1, len(sites))
-    randomIndex = 0 # set random number for dev purposes
+    if os.getenv('ENVIRONMENT') == "production":
+        randomIndex = randint(1, len(sites))
+    else:
+        randomIndex = 0 # set random number for dev purposes
     
     #define global tpb object
     global thePirateBay
-    #thePirateBay = TPB(sites[randomIndex]) # create a TPB object with domain
-    thePirateBay = TPB("http://thepiratebay.org")
-
-    # torrents = thePirateBay.search('public domain', category=CATEGORIES.VIDEO.MOVIES)
-
-    # print(torrents)
-
-    # for torrent in torrents.items():
-    #     logging.info(torrent)
-    pass
+    thePirateBay = TPB(sites[randomIndex]) # create a TPB object with domain
     
 def query(queryTerm):
     # search for 'public domain' in 'movies' category
