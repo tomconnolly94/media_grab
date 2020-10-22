@@ -16,4 +16,3 @@ def onSuccessfulTorrentAdd(queryRecord, updateableField, torrentMagnet):
 	MailInterface.sendMail(addMessage)
 	
 	logging.info(addMessage)
-
