@@ -1,6 +1,8 @@
+# external dependencies
 import unittest
 import mock
 
+# internal dependencies
 from controllers import BittorrentController
 
 class TestBittorrentController(unittest.TestCase):

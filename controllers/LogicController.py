@@ -24,6 +24,9 @@ def getTorrentRecords(queries):
         if not torrentQuery:
             continue
         
+        # this is necessary to force the TPB to make the http requests here and save the value
+        # if this is not done then every time the torrentQuery object is used a new http 
+        # request is made
         for torrent in torrentQuery:
             torrentRecords.append(torrent)
         break
