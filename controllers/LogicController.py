@@ -51,7 +51,7 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
 
         if filteredTorrents:
             chosenTorrent = filteredTorrents[0]
-            logging.info(f'torrentInfo: {chosenTorrent}')
+            logging.info(f'torrentInfo: {chosenTorrent.magnet_link}')
             mediaInfoRecord["magnet_link"] = chosenTorrent.magnet_link
             mediaInfoRecordsWithTorrents.append(mediaInfoRecord)
 
