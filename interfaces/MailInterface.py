@@ -5,9 +5,13 @@ import smtplib
 import os
 import logging
 
+enterLogMessage = "MailInterface:sendMail called."
+finishLogMessage = "Sent notification for torrent add."
+fromEmailAddress = "tomconnollyapps@gmail.com"
+toEmailAddress = "tom.connolly2511@gmail.com"
 
 def sendMail(message):
-    logging.info("sendMail called")
+    logging.info(enterLogMessage)
     if os.getenv("ENVIRONMENT") == "production":
         with smtplib.SMTP('smtp.gmail.com', 587) as server:
             server.starttls()
@@ -21,8 +25,6 @@ def sendMail(message):
 
             message = f'Subject: {mailSubject}\n\n{message}'
             #Send the mail
-            server.sendmail("tomconnollyapps@gmail.com", "tom.connolly2511@gmail.com", message)
+            server.sendmail(fromEmailAddress, toEmailAddress, message)
 
-            logging.info("Sending notification for torrent")
-
-#sendMail("test message")
+            logging.info(finishLogMessage)

@@ -4,20 +4,33 @@
 import os
 import json
 
+writeFile = None
+
+
+def updateMedia(mediaInfoRecords, queryRecord, updateableField):
+
+	for mediaRecord in mediaInfoRecords:
+		if mediaRecord["name"] == queryRecord["name"]:
+			mediaRecord["typeSpecificData"][updateableField] = queryRecord["typeSpecificData"][updateableField]
+			return mediaInfoRecords
+	return None
+
 
 def writeMediaFile(queryRecord, updateableField):
 	
 	with open(os.getenv("MEDIA_FILE"), 'r') as mediaFileSrc:
 		media = json.load(mediaFileSrc)["media"]
 
-	for mediaRecord in media:
-		if mediaRecord["name"] == queryRecord["name"]:
-			mediaRecord["typeSpecificData"][updateableField] = queryRecord["typeSpecificData"][updateableField]
+	updatedMedia = updateMedia(media, queryRecord, updateableField)
 
-	media = { "media": media }
+	if not updatedMedia:
+		return
 
-	# with open(os.getenv("MEDIA_FILE"), "w") as mediaFileTarget:
-	# 	json.dump(media, mediaFileTarget)
+	media = { "media": updatedMedia }
+
+	if writeFile:
+		with open(os.getenv("MEDIA_FILE"), "w") as mediaFileTarget:
+			json.dump(media, mediaFileTarget)
 
 	return
     
