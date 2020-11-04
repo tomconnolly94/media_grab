@@ -44,21 +44,10 @@ class TestLogicController(unittest.TestCase):
         self.assertEqual(relevantMediaInfoRecord, actualMediaInfoRecord)
 
 
-    @mock.patch("interfaces.TPBInterface.query")
-    def test_getTorrentRecords(self, queryMock):
-        TPBQueryResponses = [None, ["torrent1", "torrent2", "torrent3"]]
-        queryMock.side_effect = TPBQueryResponses
-        queries = ["fakeQueryString1", "fakeQueryString2", "fakeQueryString3"]
-
-        torrentRecords = LogicController.getTorrentRecords(queries)
-
-        self.assertEqual(TPBQueryResponses[1], torrentRecords)
-
-
     @mock.patch("logging.info")
     @mock.patch("controllers.TorrentFilterController.filterSeasonTorrents")
     @mock.patch("controllers.LogicController.findMediaInfoRecord")
-    @mock.patch("controllers.LogicController.getTorrentRecords")
+    @mock.patch("interfaces.TPBInterface.getTorrentRecords")
     def test_getMediaInfoRecordsWithTorrents(self, getTorrentRecordsMock, findMediaInfoRecordMock, filterSeasonTorrentsMock, loggingInfoMock):
         
         fakeMediaSearchQueries = {
