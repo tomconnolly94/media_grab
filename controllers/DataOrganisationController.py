@@ -14,19 +14,22 @@ seasonTemplates = [
 ]
 
 
-def generateSeasonQueries(mediaInfoRecords):
+def generateTVSeasonQueries(mediaInfoRecords):
 	queryUrls = {}
 	for record in mediaInfoRecords:
-		queryUrls[record["name"]] = generateSeasonQueryGroup(record["name"], int(record["typeSpecificData"]["latestSeason"]))
+		queryUrls[record["name"]] = generateTVSeasonQueryGroup(record["name"], int(record["typeSpecificData"]["latestSeason"]))
 	return queryUrls
 
 
-def generateSeasonQueryGroup(mediaName, relevantSeason):
-
-	seasonQueries = []
+def generateTVSeasonQueryGroup(mediaName, relevantSeason):
+	queries = []
 
 	for template in seasonTemplates:
 		# create search url
-		seasonQueries.append(f"{mediaName} {template}{relevantSeason:>02}")
+		queries.append(f"{mediaName} {template}{relevantSeason:>02}")
 
-	return seasonQueries
+	return queries
+	
+
+def generateMovieQueries(mediaInfoRecords):	
+	return [mediaInfoRecords["name"]]

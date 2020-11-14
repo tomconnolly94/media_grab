@@ -22,7 +22,7 @@ class TestDataOrganisationController(unittest.TestCase):
             "rick and morty season 02"
         ]
 
-        seasonQueryGroup = DataOrganisationController.generateSeasonQueryGroup(name, relevantSeason)
+        seasonQueryGroup = DataOrganisationController.generateTVSeasonQueryGroup(name, relevantSeason)
 
         self.assertEqual(expectedQueries, seasonQueryGroup)
 

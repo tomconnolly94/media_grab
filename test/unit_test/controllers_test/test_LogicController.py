@@ -5,6 +5,7 @@ from unittest.mock import call
 
 # internal dependencies 
 from controllers import LogicController
+from data_types.ProgramMode import ProgramMode
 
 class TestLogicController(unittest.TestCase):
 
@@ -108,8 +109,8 @@ class TestLogicController(unittest.TestCase):
     @mock.patch("controllers.NewTorrentController.onSuccessfulTorrentAdd")
     @mock.patch("controllers.BittorrentController.initTorrentDownload")
     @mock.patch("controllers.LogicController.getMediaInfoRecordsWithTorrents")
-    @mock.patch("controllers.DataOrganisationController.generateSeasonQueries")
-    def test_runProgramLogic(self, generateSeasonQueriesMock, getMediaInfoRecordsWithTorrentsMock, initTorrentDownloadMock, onSuccessfulTorrentAddMock):
+    @mock.patch("controllers.DataOrganisationController.generateTVSeasonQueries")
+    def test_runProgramLogic(self, generateTVSeasonQueriesMock, getMediaInfoRecordsWithTorrentsMock, initTorrentDownloadMock, onSuccessfulTorrentAddMock):
         
         fakeMediaSearchQueries = {
             "fakeMediaInfoName1": ["fakeMediaInfoName1Query1", "fakeMediaInfoName1Query2", "fakeMediaInfoName1Query3"],
@@ -145,15 +146,15 @@ class TestLogicController(unittest.TestCase):
 
         
         # config mocks
-        generateSeasonQueriesMock.return_value = fakeMediaSearchQueries
+        generateTVSeasonQueriesMock.return_value = fakeMediaSearchQueries
         getMediaInfoRecordsWithTorrentsMock.return_value = fakeMediaInfoRecordsWithTorrents
         initTorrentDownloadMock.side_effect = [True, True, True, None]
 
-        LogicController.runProgramLogic(fakeMediaInfoRecords)
+        LogicController.runProgramLogic(fakeMediaInfoRecords, ProgramMode.TV)
 
         
         # mock asserts
-        generateSeasonQueriesMock.assert_called_with(fakeMediaInfoRecords)
+        generateTVSeasonQueriesMock.assert_called_with(fakeMediaInfoRecords)
         getMediaInfoRecordsWithTorrentsMock.assert_called_with(fakeMediaSearchQueries, fakeMediaInfoRecords)
         
         calls = [ call("fakeMagnetLink"), call("fakeMagnetLink"), call("fakeMagnetLink") ]
