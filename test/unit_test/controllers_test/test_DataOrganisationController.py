@@ -1,7 +1,7 @@
 import unittest
-from controllers import DataOrganisationController
+from controllers import QueryGenerationController
 
-class TestDataOrganisationController(unittest.TestCase):
+class TestQueryGenerationController(unittest.TestCase):
 
     def test_generateSeasonQueryGroup(self):
 
@@ -22,7 +22,7 @@ class TestDataOrganisationController(unittest.TestCase):
             "rick and morty season 02"
         ]
 
-        seasonQueryGroup = DataOrganisationController.generateTVSeasonQueryGroup(name, relevantSeason)
+        seasonQueryGroup = QueryGenerationController.generateTVSeasonQueryGroup(name, relevantSeason)
 
         self.assertEqual(expectedQueries, seasonQueryGroup)
 

@@ -109,7 +109,7 @@ class TestLogicController(unittest.TestCase):
     @mock.patch("controllers.NewTorrentController.onSuccessfulTorrentAdd")
     @mock.patch("controllers.BittorrentController.initTorrentDownload")
     @mock.patch("controllers.LogicController.getMediaInfoRecordsWithTorrents")
-    @mock.patch("controllers.DataOrganisationController.generateTVSeasonQueries")
+    @mock.patch("controllers.QueryGenerationController.generateTVSeasonQueries")
     def test_runProgramLogic(self, generateTVSeasonQueriesMock, getMediaInfoRecordsWithTorrentsMock, initTorrentDownloadMock, onSuccessfulTorrentAddMock):
         
         fakeMediaSearchQueries = {

@@ -5,7 +5,7 @@ import logging
 
 # internal dependencies
 from interfaces import TPBInterface
-from controllers import BittorrentController, DataOrganisationController, TorrentFilterController, NewTorrentController
+from controllers import BittorrentController, QueryGenerationController, TorrentFilterController, NewTorrentController
 from data_types.ProgramMode import ProgramMode 
 
 def findMediaInfoRecord(mediaInfoRecords, mediaInfoName):
@@ -42,9 +42,9 @@ def runProgramLogic(mediaInfoRecords, mode):
 
     # ascertain mode of program
     if mode == ProgramMode.TV:
-        mediaSearchQueries = DataOrganisationController.generateTVSeasonQueries(mediaInfoRecords)
+        mediaSearchQueries = QueryGenerationController.generateTVSeasonQueries(mediaInfoRecords)
     elif mode == ProgramMode.Movies:
-        mediaSearchQueries = DataOrganisationController.generateMovieQueries(mediaInfoRecords)
+        mediaSearchQueries = QueryGenerationController.generateMovieQueries(mediaInfoRecords)
     else:
         raise ValueError(f"mode: {mode} has no handler statement") 
 
