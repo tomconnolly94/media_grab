@@ -1,6 +1,12 @@
+#python build files
 venv
 *.pyc
 .env
 logs/*
+
+#data files
 data/MediaIndex.json
+data/DownloadsInProgress.json
+
+#dev dir
 dump_complete

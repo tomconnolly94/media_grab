@@ -4,12 +4,12 @@
 import logging
 
 #internal dependencies
-from interfaces import MediaFileInterface, MailInterface
+from interfaces import MediaIndexFileInterface, MailInterface
 
 
 def onSuccessfulTorrentAdd(queryRecord, updateableField, torrentMagnet):
 
-	MediaFileInterface.writeMediaFile(queryRecord, updateableField)
+	MediaIndexFileInterface.writeMediaFile(queryRecord, updateableField)
 
 	# TODO: send email notification
 	addMessage = f'ADDED TORRENT: {queryRecord["name"]} {updateableField} {queryRecord["typeSpecificData"][updateableField]} \n\n Magnet:{torrentMagnet}'

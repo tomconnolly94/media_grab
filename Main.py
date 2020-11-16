@@ -8,7 +8,7 @@ import logging
 import getopt
 
 # internal dependencies
-from interfaces import TPBInterface, MediaFileInterface
+from interfaces import TPBInterface, MediaIndexFileInterface
 from controllers import LoggingController, LogicController
 from data_types.ProgramMode import ProgramMode 
 
@@ -50,7 +50,7 @@ def main(argv):
 	# catch all exceptions so they are always reported
 	try:
 		TPBInterface.init()
-		mediaInfoRecords = MediaFileInterface.loadMediaFile() # information about the wanted media
+		mediaInfoRecords = MediaIndexFileInterface.loadMediaFile() # information about the wanted media
 		LogicController.runProgramLogic(mediaInfoRecords, mode)
 	
 	except Exception:

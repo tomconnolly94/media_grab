@@ -9,7 +9,7 @@ class TestNewTorrentController(unittest.TestCase):
 
     @mock.patch('logging.info')
     @mock.patch('interfaces.MailInterface.sendMail')
-    @mock.patch('interfaces.MediaFileInterface.writeMediaFile')
+    @mock.patch('interfaces.MediaIndexFileInterface.writeMediaFile')
     def test_onSuccessfulTorrentAdd(self, writeMediaFileMock, sendMailMock, infoMock):
 
         fakeQueryRecord = {

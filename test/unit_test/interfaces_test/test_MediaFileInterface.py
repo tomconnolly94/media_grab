@@ -3,9 +3,9 @@ import unittest
 import mock
 
 # internal dependencies
-from interfaces import MediaFileInterface
+from interfaces import MediaIndexFileInterface
 
-class TestMediaFileInterface(unittest.TestCase):
+class TestMediaIndexFileInterface(unittest.TestCase):
 
     def test_sendMailDev(self):
 
@@ -31,7 +31,7 @@ class TestMediaFileInterface(unittest.TestCase):
         queryRecord["typeSpecificData"][relevantField] = 2
 
         # called testable method
-        updatedMedia = MediaFileInterface.updateMedia(fakeMediaInfoRecords, queryRecord, relevantField)
+        updatedMedia = MediaIndexFileInterface.updateMedia(fakeMediaInfoRecords, queryRecord, relevantField)
 
         self.assertEqual(2, updatedMedia[0]["typeSpecificData"][relevantField])
 
@@ -40,7 +40,7 @@ class TestMediaFileInterface(unittest.TestCase):
         queryRecord = fakeMediaInfoRecords[relevantRecord]
         queryRecord["typeSpecificData"]["latestEpisode"] = 2
         # called testable method
-        updatedMedia = MediaFileInterface.updateMedia(fakeMediaInfoRecords, queryRecord, relevantField)
+        updatedMedia = MediaIndexFileInterface.updateMedia(fakeMediaInfoRecords, queryRecord, relevantField)
 
         self.assertEqual(2, updatedMedia[relevantRecord]["typeSpecificData"][relevantField])
 
@@ -49,7 +49,7 @@ class TestMediaFileInterface(unittest.TestCase):
             "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 }
         }
         # called testable method
-        updatedMedia = MediaFileInterface.updateMedia(fakeMediaInfoRecords, nonExistentRecord, "latestSeason")
+        updatedMedia = MediaIndexFileInterface.updateMedia(fakeMediaInfoRecords, nonExistentRecord, "latestSeason")
 
         self.assertEqual(None, updatedMedia)
 
