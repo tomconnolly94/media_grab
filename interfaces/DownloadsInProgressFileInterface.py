@@ -2,6 +2,7 @@
 
 #external dependencies
 import json
+import os
 
 def notifyDownloadStarted(mediaType, mediaName):
 
@@ -10,10 +11,10 @@ def notifyDownloadStarted(mediaType, mediaName):
     if not os.path.exists(file):
         createDownloadsInProgressFile(file)
 
-	with open(file, 'r') as dipFile:
-		media = json.loads(dipFile.read())
-
+    with open(file, 'rw') as dipFile:
+        media = json.loads(dipFile.read())
         media[mediaType].append(mediaName)
+
 
 
 def createDownloadsInProgressFile(fileLocation):
