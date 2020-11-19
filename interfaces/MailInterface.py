@@ -13,7 +13,7 @@ mailUsername = os.getenv("MAIL_USERNAME")
 mailPassword = os.getenv("MAIL_PASSWORD")
 
 
-def sendMail(message):
+def sendMail(heading, messageBody):
     logging.info(enterLogMessage)
 
     #only send mail when in production mode
@@ -26,21 +26,21 @@ def sendMail(message):
             server.login(mailUsername, mailPassword)
             #server.login('tomconnollyapps@gmail.com', 'Ring6Door9Sofa3')
 
-            mailSubject = "Media Grab: A new torrent has just been added."
-
-            message = f'Subject: {mailSubject}\n\n{message}'
+            mailContent = f'Subject: {heading}\n\n{messageBody}'
             #Send the email
-            server.sendmail(mailUsername, toEmailAddress, message)
+            server.sendmail(mailUsername, toEmailAddress, mailContent)
 
             logging.info(finishLogMessage)
     else:
         logging.info(f"Program is running in {environmentEnv} mode. No email has been sent.")
 
+def sendNewTorrentMail(torrentName, torrentExtraInfo, torrentMagnet):
+    messageBody = f'ADDED TORRENT: {torrentName} {torrentExtraInfo} \n\n Magnet:{torrentMagnet}'
+    
+	logging.info(addMessage)
+    sendMail("Media Grab: A new torrent has just been added.", messageBody)
 
 if __name__== "__main__":
     # test setup to send email using static mail account
     environmentEnv = "production"
-    # leave commented to use default mail account login details 
-    #mailUsername = "" # complete this field
-    #mailPassword = "" # complete this field
-    sendMail("test message generated from running the interfaces/MailInterface.py as __main__")
+    sendMail("Media Grab: Test Message", "test message generated from running the interfaces/MailInterface.py as __main__")
