@@ -34,13 +34,20 @@ def sendMail(heading, messageBody):
     else:
         logging.info(f"Program is running in {environmentEnv} mode. No email has been sent.")
 
+
 def sendNewTorrentMail(torrentName, torrentExtraInfo, torrentMagnet):
     messageBody = f'ADDED TORRENT: {torrentName} {torrentExtraInfo} \n\n Magnet:{torrentMagnet}'
-    
-	logging.info(addMessage)
+
+    logging.info(messageBody)
     sendMail("Media Grab: A new torrent has just been added.", messageBody)
 
-if __name__== "__main__":
+
+def sendTestMail():
     # test setup to send email using static mail account
+    global environmentEnv
     environmentEnv = "production"
     sendMail("Media Grab: Test Message", "test message generated from running the interfaces/MailInterface.py as __main__")
+
+
+if __name__== "__main__":
+    sendTestMessage()
