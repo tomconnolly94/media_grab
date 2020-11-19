@@ -50,4 +50,4 @@ def sendTestMail():
 
 
 if __name__== "__main__":
-    sendTestMessage()
+    sendTestMail()
