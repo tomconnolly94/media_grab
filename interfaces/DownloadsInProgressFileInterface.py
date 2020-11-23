@@ -1,12 +1,15 @@
 #!/venv/bin/python
 
-#external dependencies
+# external dependencies
 import json
 import os
 
+# internal dependencies
+from data_types.ProgramModeMap import PROGRAM_MODE_MAP
+
 file = os.getenv("DOWNLOADS_IN_PROGRESS_FILE")
 
-def notifyDownloadStarted(mediaType, mediaName):
+def notifyDownloadStarted(mediaName, mediaType):
 
     if not os.path.exists(file):
         createDownloadsInProgressFile(file)
@@ -31,7 +34,7 @@ def createDownloadsInProgressFile(fileLocation):
     file.write(initialFileContent)
 
 
-def notifyDownloadFinished(mediaType, mediaName):
+def notifyDownloadFinished(mediaName, mediaType):
     
     if not os.path.exists(file):
         return

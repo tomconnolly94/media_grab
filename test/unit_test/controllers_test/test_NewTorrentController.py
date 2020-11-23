@@ -4,13 +4,14 @@ import mock
 
 # internal dependencies
 from controllers import NewTorrentController
+from data_types.ProgramMode import PROGRAM_MODE
 
 class TestNewTorrentController(unittest.TestCase):
 
-    @mock.patch('logging.info')
-    @mock.patch('interfaces.MailInterface.sendMail')
+    @mock.patch('interfaces.DownloadsInProgressFileInterface.notifyDownloadStarted')
+    @mock.patch('interfaces.MailInterface.sendNewTorrentMail')
     @mock.patch('interfaces.MediaIndexFileInterface.writeMediaFile')
-    def test_onSuccessfulTorrentAdd(self, writeMediaFileMock, sendMailMock, infoMock):
+    def test_onSuccessfulTorrentAdd(self, writeMediaFileMock, sendNewTorrentMailMock, notifyDownloadStartedMock):
 
         fakeQueryRecord = {
             "name": "RecordName",
@@ -21,15 +22,14 @@ class TestNewTorrentController(unittest.TestCase):
         }
         fakeUpdateableField = "latestSeason"
         fakeTorrentMagnetLink = "fakeTorrentMagnet"
+        activeMode = PROGRAM_MODE.TV_SEASONS
 
-        NewTorrentController.onSuccessfulTorrentAdd(fakeQueryRecord, fakeUpdateableField, fakeTorrentMagnetLink)
-
-        expectedEmailText = "ADDED TORRENT: RecordName latestSeason 1 \n\n Magnet:fakeTorrentMagnet"
-
+        NewTorrentController.onSuccessfulTorrentAdd(fakeQueryRecord, fakeUpdateableField, fakeTorrentMagnetLink, activeMode)
+        
         # mock function asserts
         writeMediaFileMock.assert_called_once_with(fakeQueryRecord, fakeUpdateableField)
-        sendMailMock.assert_called_once_with(expectedEmailText)
-        infoMock.assert_called_once_with(expectedEmailText)       
+        sendNewTorrentMailMock.assert_called_once_with(fakeQueryRecord['name'], f"{fakeUpdateableField} {fakeQueryRecord['typeSpecificData']['latestSeason']}", fakeTorrentMagnetLink)
+        notifyDownloadStartedMock.assert_called_once_with(fakeQueryRecord["name"], activeMode)
 
 
 if __name__ == '__main__':

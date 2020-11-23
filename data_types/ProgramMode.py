@@ -1,6 +1,7 @@
 import enum
 
 #Mode enum declaration
-class ProgramMode(enum.Enum):
-   TV = 1
-   Movies = 2
+class PROGRAM_MODE(enum.Enum):
+   TV_EPISODES = 1
+   TV_SEASONS = 2
+   MOVIES = 3

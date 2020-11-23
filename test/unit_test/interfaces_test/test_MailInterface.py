@@ -17,13 +17,14 @@ class TestMailInterface(unittest.TestCase):
         osGetEnvMock.return_value = "notProduction"
         
         # config inputs
+        fakeHeading = "fake heading"
         fakeMessage = "fake message"
 
         # called testable method
-        MailInterface.sendMail(fakeMessage)
+        MailInterface.sendMail(fakeHeading, fakeMessage)
 
         # mock asserts
-        loggingInfoDevMock.assert_called_with("MailInterface:sendMail called.")
+        loggingInfoDevMock.assert_called_with("Program is running in dev mode. No email has been sent.")
 
 
     @mock.patch('smtplib.SMTP')
@@ -31,27 +32,42 @@ class TestMailInterface(unittest.TestCase):
     @mock.patch('logging.info')
     def test_sendMailProduction(self, loggingInfoProdMock, osGetEnvMock, smtpMock):
 
-        envValue = "production"
-
-        # config mocks
-        osGetEnvMock.return_value = envValue
-
         # config inputs
+        fakeToEmailAddress = "fakeToEmailAddress"
+        envValue = "production"
+        fakeMailUsername = "fakeMailUsername"
+        fakeMailPassword = "fakeMailPassword"
+
+        # override env values
+        MailInterface.toEmailAddress = fakeToEmailAddress
+        MailInterface.environmentEnv = envValue
+        MailInterface.mailUsername = fakeMailUsername
+        MailInterface.mailPassword = fakeMailPassword
+
+        fakeHeading = "fake heading"
         fakeMessage = "fake message"
 
         # called testable method
-        MailInterface.sendMail(fakeMessage)
+        MailInterface.sendMail(fakeHeading, fakeMessage)
 
         # mock asserts
-        calls = [ call("MailInterface:sendMail called."), call("Sent notification for torrent add.") ]
+        calls = [ call("MailInterface:sendMail called."), call('Sent notification for torrent add.') ]
         loggingInfoProdMock.assert_has_calls(calls)
-        calls = [ call("ENVIRONMENT"), call("MAIL_USERNAME"), call("MAIL_PASSWORD") ]
-        osGetEnvMock.assert_has_calls(calls)
-        calls = [ call().__enter__().starttls(), call().__enter__().ehlo(), call().__enter__().login(envValue, envValue), call().__enter__().sendmail(MailInterface.fromEmailAddress, MailInterface.toEmailAddress, ANY) ]
+
+        calls = [
+            call('smtp.gmail.com', 587),
+            call().__enter__(),
+            call().__enter__().starttls(),
+            call().__enter__().ehlo(),
+            call().__enter__().login(fakeMailUsername, fakeMailPassword),
+            call().__enter__().sendmail(fakeMailUsername, fakeToEmailAddress, f'Subject: {fakeHeading}\n\n{fakeMessage}'),
+            call().__exit__(None, None, None)
+        ]
         smtpMock.assert_has_calls(calls)
 
-        smtpMock.assert_called_once_with('smtp.gmail.com', 587)
-
+        self.assertIsNotNone(MailInterface.environmentEnv)
+        self.assertIsNotNone(MailInterface.mailUsername)
+        self.assertIsNotNone(MailInterface.mailPassword)
 
 if __name__ == '__main__':
     unittest.main()

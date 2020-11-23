@@ -5,7 +5,7 @@ from unittest.mock import call
 
 # internal dependencies 
 from controllers import LogicController
-from data_types.ProgramMode import ProgramMode
+from data_types.ProgramMode import PROGRAM_MODE
 
 class TestLogicController(unittest.TestCase):
 
@@ -137,6 +137,7 @@ class TestLogicController(unittest.TestCase):
         # config fake data
         fakeMediaSearchQueries = ["fakeMediaSearchQuery1", "fakeMediaSearchQuery2", "fakeMediaSearchQuery3"]
         fakeMediaInfoRecordsWithTorrents = []
+        activeMode = PROGRAM_MODE.TV_SEASONS
 
         # add fake magnet links
         for mediaInfoRecord in fakeMediaInfoRecords:
@@ -150,7 +151,7 @@ class TestLogicController(unittest.TestCase):
         getMediaInfoRecordsWithTorrentsMock.return_value = fakeMediaInfoRecordsWithTorrents
         initTorrentDownloadMock.side_effect = [True, True, True, None]
 
-        LogicController.runProgramLogic(fakeMediaInfoRecords, ProgramMode.TV)
+        LogicController.runProgramLogic(fakeMediaInfoRecords, activeMode)
 
         
         # mock asserts
@@ -160,7 +161,9 @@ class TestLogicController(unittest.TestCase):
         calls = [ call("fakeMagnetLink"), call("fakeMagnetLink"), call("fakeMagnetLink") ]
         initTorrentDownloadMock.assert_has_calls(calls)
 
-        calls = [ call(fakeMediaInfoRecordsWithTorrents[0], "latestSeason", "fakeMagnetLink"), call(fakeMediaInfoRecordsWithTorrents[1],"latestSeason", "fakeMagnetLink") ]
+        calls = [ 
+            call(fakeMediaInfoRecordsWithTorrents[0], "latestSeason", "fakeMagnetLink", activeMode), 
+            call(fakeMediaInfoRecordsWithTorrents[1],"latestSeason", "fakeMagnetLink", activeMode) ]
         onSuccessfulTorrentAddMock.assert_has_calls(calls)
 
 

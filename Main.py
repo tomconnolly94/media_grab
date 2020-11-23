@@ -10,7 +10,7 @@ import getopt
 # internal dependencies
 from interfaces import TPBInterface, MediaIndexFileInterface
 from controllers import LoggingController, LogicController
-from data_types.ProgramMode import ProgramMode 
+from data_types.ProgramModeMap import PROGRAM_MODE_MAP 
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -21,8 +21,9 @@ LoggingController.initLogging()
 
 def interpretArguments(argv):
 	mode = ''
+	permitted_modes = "|".join(PROGRAM_MODE_MAP.keys())
 	usage = f"""Usage:
-					{os.path.basename(__file__)} -m <mode>"""
+	python {os.path.basename(__file__)} -m <mode> [{permitted_modes}]"""
 
 	try:
 		opts, args = getopt.getopt(argv,"hm:",["mode="])
@@ -32,9 +33,14 @@ def interpretArguments(argv):
 	for opt, arg in opts:
 		if opt == '-h':
 			print(usage)
-			sys.exit()
+			sys.exit(3)
 		elif opt in ("-m", "--mode"):
-			mode = arg
+			#validate mode argument
+			if arg in PROGRAM_MODE_MAP.keys():
+				mode = PROGRAM_MODE_MAP[arg]
+			else:
+				print(usage)
+				sys.exit(4)
 			
 	print(f"Mode is {mode}")
 
@@ -43,9 +49,9 @@ def interpretArguments(argv):
 
 def main(argv):
 
-	logging.info("Media grab app started.")
-
 	mode = interpretArguments(argv)
+
+	logging.info("Media grab app started.")
 
 	# catch all exceptions so they are always reported
 	try:

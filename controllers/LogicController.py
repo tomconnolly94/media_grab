@@ -6,7 +6,11 @@ import logging
 # internal dependencies
 from interfaces import TPBInterface
 from controllers import BittorrentController, QueryGenerationController, TorrentFilterController, NewTorrentController
-from data_types.ProgramMode import ProgramMode 
+from data_types.ProgramMode import PROGRAM_MODE 
+
+modeMap = [
+    
+]
 
 def findMediaInfoRecord(mediaInfoRecords, mediaInfoName):
 	for record in mediaInfoRecords:
@@ -41,9 +45,11 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
 def runProgramLogic(mediaInfoRecords, mode):
 
     # ascertain mode of program
-    if mode == ProgramMode.TV:
+    if mode == PROGRAM_MODE.TV_SEASONS:
         mediaSearchQueries = QueryGenerationController.generateTVSeasonQueries(mediaInfoRecords)
-    elif mode == ProgramMode.Movies:
+    elif mode == PROGRAM_MODE.TV_EPISODES:
+        pass # mediaSearchQueries = QueryGenerationController.generateTVEpisodeQueries(mediaInfoRecords)
+    elif mode == PROGRAM_MODE.MOVIES:
         mediaSearchQueries = QueryGenerationController.generateMovieQueries(mediaInfoRecords)
     else:
         raise ValueError(f"mode: {mode} has no handler statement") 
@@ -56,4 +62,4 @@ def runProgramLogic(mediaInfoRecords, mode):
     for mediaInfoRecord in mediaInfoRecordsWithTorrents:
         magnet = mediaInfoRecord["magnet_link"]
         if BittorrentController.initTorrentDownload(magnet):
-            NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, "latestSeason", magnet)
+            NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, "latestSeason", magnet, mode)
