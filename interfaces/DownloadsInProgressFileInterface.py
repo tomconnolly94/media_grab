@@ -24,8 +24,7 @@ def notifyDownloadStarted(mediaName, mediaType):
 def createDownloadsInProgressFile(fileLocation):
     initialFileDict = {
         "tv_seasons": [],
-        "tv_episodes": [],
-        "movies": []
+        "tv_episodes": []
     }
     
     initialFileContent = json.dumps(initialFileDict, sort_keys=False)
@@ -58,3 +57,11 @@ def updateFile(operation):
         #write new contents of file
         dipFile.seek(0)
         dipFile.write(media)
+
+
+def getDownloadingItems(mode):
+    with open(file, 'r') as dipFile:
+        #load file contents to dict
+        fileContent = dipFile.read()
+        media = json.loads(fileContent)
+        return media[PROGRAM_MODE_MAP[mode]]

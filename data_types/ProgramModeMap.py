@@ -4,7 +4,7 @@
 from data_types.ProgramMode import PROGRAM_MODE 
 
 
-class PROGRAM_MODEMap(dict):
+class TwoWayMap(dict):
 
     def __init__(self, initDict):
         for key, val in initDict.items():
@@ -31,8 +31,13 @@ class PROGRAM_MODEMap(dict):
         return dict.__len__(self) // 2
 
 
-PROGRAM_MODE_MAP = PROGRAM_MODEMap({
+PROGRAM_MODE_MAP = TwoWayMap({
 	"tv-episodes": PROGRAM_MODE.TV_EPISODES,
-	"tv-seasons": PROGRAM_MODE.TV_SEASONS,
-	"movies": PROGRAM_MODE.MOVIES,
+	"tv-seasons":  PROGRAM_MODE.TV_SEASONS
+})
+
+
+PROGRAM_MODE_DIRECTORY_KEY_MAP = TwoWayMap({
+	PROGRAM_MODE.TV_EPISODES: "TV_TARGET_DIR",
+	PROGRAM_MODE.TV_SEASONS:  "TV_TARGET_DIR"
 })
