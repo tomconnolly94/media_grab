@@ -14,7 +14,7 @@ dumpCompleteDirPath = os.getenv("DUMP_COMPLETE_DIR")
 
 def extractShowName(fileName):
     
-    showNameMatch = re.match(r"(.*?)(?:season|s|episode|e).*\d*", fileName) # extract show name using regex capturing group
+    showNameMatch = re.match(r"(.+?)(?:[^a-zA-Z]*(?:season|s|episode|e)+.\d+.*)*?\s*$", fileName) # extract show name using regex capturing group
     showName = showNameMatch.groups()[0]
     showName = re.sub(r"[^\w\s]", "", showName) # replace all punctuation
     showName = showName.strip()

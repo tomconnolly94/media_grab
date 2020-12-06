@@ -11,8 +11,9 @@ class TestCompletedDownloadsController(unittest.TestCase):
 
 
     def test_extractShowName(self):
-        fakeShowName = "fakeShowName"
-        fakeShowNamesSuccessful = ["fakeShow ", 
+        expectedFakeShowName = "fakeShow"
+        fakeShowNamesSuccessful = [
+            "fakeShow ", 
             "fakeShow - S01",
             "fakeShow - S01E01",
             "fakeShow -   S01E01",
@@ -24,7 +25,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
 
         for fakeShowName in fakeShowNamesSuccessful:
             actualFakeShowName = CompletedDownloadsController.extractShowName(fakeShowName)
-            self.assertEqual(fakeShowName, actualFakeShowName)
+            self.assertEqual(expectedFakeShowName, actualFakeShowName)
 
 
     @mock.patch("controllers.CompletedDownloadsController.reportItemAlreadyExists")
