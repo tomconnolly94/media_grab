@@ -14,26 +14,43 @@ dumpCompleteDirPath = os.getenv("DUMP_COMPLETE_DIR")
 
 def extractShowName(fileName):
     
-    showNameMatch = re.match(r"(.+?)(?:[^a-zA-Z]*(?:season|s|episode|e)+.\d+.*)*?\s*$", fileName) # extract show name using regex capturing group
-    showName = showNameMatch.groups()[0]
-    showName = re.sub(r"[^\w\s]", "", showName) # replace all punctuation
-    showName = showName.strip()
-    showName = " ".join(showName.split()) # remove any double spaces
-    return showName
+    try:
+        showNameMatch = re.match(r"(.+?)(?:[^a-zA-Z]*(?:season|s|episode|e)+.\d+.*)*?\s*$", fileName, re.IGNORECASE) # extract show name using regex capturing group
+        showName = showNameMatch.groups()[0]
+        showName = re.sub(r"[^\w\s]", "", showName) # replace all punctuation
+        showName = showName.strip() # remove whitespace on left or right
+        showName = " ".join(showName.split()) # remove any double spaces
+        showName = showName.lower() # convert uppercase letters to lowercase
+        if showName:
+            return showName
+        else:
+            return None
+    except:
+        return None
 
 
 def extractSeasonNumber(fileName):
-    return re.match(r".*?(?:season|s)+?[ -_.,!\"'/$]*?(\d+)", fileName).groups[0]
+    try:
+        seasonNumber = re.match(r".*?(?:season|s)+?[ -_.,!\"'/$]*?(\d+)", fileName, re.IGNORECASE)
+        seasonNumber = int(seasonNumber.groups()[0])
+        if seasonNumber:
+            return seasonNumber
+        else:
+            return None
+    except:
+        return None
 
 
 def extractEpisodeNumber(fileName):
-    return re.match(r".*?(?:episode|e)+?[ -_.,!\"'/$]*?(\d+)", fileName).groups[0]
-
-
-def createDirectory(newDirectoryName):
-    os.mkdir(newDirectoryName)
-    # log action
-    logging.info(f"Created directory: {newDirectoryName}")
+    try:
+        episodeNumber = re.match(r".*?(?:episode|e)+?[ -_.,!\"'/$]?(\d+)", fileName, re.IGNORECASE)
+        episodeNumber = int(episodeNumber.groups()[0])
+        if episodeNumber:
+            return episodeNumber
+        else:
+            return None
+    except:
+        return None
 
 
 def reportItemAlreadyExists(newItemLocation, torrentName):
@@ -52,7 +69,7 @@ def auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir):
 
             # create tv show directory if it does not exist
             if not FolderInterface.directoryExists(tvShowDir):
-                createDirectory(tvShowDir)
+                FolderInterface.createDirectory(tvShowDir)
 
             seasonNumber = extractSeasonNumber(completedDownloadFile)
             episodeNumber = extractEpisodeNumber(completedDownloadFile)
@@ -60,7 +77,7 @@ def auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir):
 
             # create season directory if it does not exist
             if not FolderInterface.directoryExists(seasonDir):
-                createDirectory(seasonDir)
+                FolderInterface.createDirectory(seasonDir)
 
             prospectiveFile = os.path.join(seasonDir, f"{showName} - S0{seasonNumber}E0{episodeNumber}")
             
@@ -82,7 +99,7 @@ def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, tar
 
             # create tv show directory if it does not exist
             if not FolderInterface.directoryExists(tvShowDir):
-                createDirectory(tvShowDir)
+                FolderInterface.createDirectory(tvShowDir)
 
             seasonNumber = extractSeasonNumber(completedDownloadDirectory)
             seasonDir = os.path.join(tvShowDir, f"Season {seasonNumber}")

@@ -11,7 +11,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
 
 
     def test_extractShowName(self):
-        expectedFakeShowName = "fakeShow"
+        expectedFakeShowName = "fakeshow"
         fakeShowNamesSuccessful = [
             "fakeShow ", 
             "fakeShow - S01",
@@ -26,6 +26,55 @@ class TestCompletedDownloadsController(unittest.TestCase):
         for fakeShowName in fakeShowNamesSuccessful:
             actualFakeShowName = CompletedDownloadsController.extractShowName(fakeShowName)
             self.assertEqual(expectedFakeShowName, actualFakeShowName)
+        
+        # check empty string
+        self.assertEqual(None, CompletedDownloadsController.extractShowName(""))
+
+
+    def test_extractSeasonNumber(self):
+        expectedSeasonNumber = 1
+        fakeShowNamesSuccessful = [
+            "fakeShow - S01",
+            "fakeShow - S01E01",
+            "fakeShow -   S01E01",
+            "fakeShow.S01E01",
+            "fakeShow.S01.E01",
+            "FakeShow.S01.E01",
+            "fakeShow.S01"
+        ]
+
+        for fakeShowName in fakeShowNamesSuccessful:
+            actualFakeSeasonNumber = CompletedDownloadsController.extractSeasonNumber(fakeShowName)
+            self.assertEqual(expectedSeasonNumber, actualFakeSeasonNumber)
+
+        # check empty string
+        self.assertEqual(None, CompletedDownloadsController.extractSeasonNumber(""))
+
+
+    def test_extractEpisodeNumber(self):
+        expectedSeasonNumber = 2
+        fakeShowNamesSuccessful = [
+            "fakeShow - S01E02",
+            "fakeShow -   S01E02",
+            "fakeShow.S01E02",
+            "fakeShow.S01.E02",
+            "FakeShow.S01.E02",
+        ]
+        fakeShowNamesUnsuccessful = [
+            "fakeShow - S01",
+            "fakeShow.S01"
+        ]
+
+        for fakeShowName in fakeShowNamesSuccessful:
+            actualFakeSeasonNumber = CompletedDownloadsController.extractEpisodeNumber(fakeShowName)
+            self.assertEqual(expectedSeasonNumber, actualFakeSeasonNumber)
+
+        for fakeShowName in fakeShowNamesUnsuccessful:
+            actualFakeSeasonNumber = CompletedDownloadsController.extractEpisodeNumber(fakeShowName)
+            self.assertEqual(None, actualFakeSeasonNumber)
+
+        # check empty string
+        self.assertEqual(None, CompletedDownloadsController.extractSeasonNumber(""))
 
 
     @mock.patch("controllers.CompletedDownloadsController.reportItemAlreadyExists")
@@ -34,7 +83,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
     @mock.patch("controllers.CompletedDownloadsController.extractEpisodeNumber")
     @mock.patch("controllers.CompletedDownloadsController.extractSeasonNumber")
     @mock.patch("interfaces.FolderInterface.directoryExists")
-    @mock.patch("controllers.CompletedDownloadsController.createDirectory")
+    @mock.patch("interfaces.FolderInterface.createDirectory")
     @mock.patch('controllers.CompletedDownloadsController.extractShowName')
     def test_auditFiles(self, extractShowNameMock, createDirectoryMock, directoryExistsMock, extractSeasonNumberMock, extractEpisodeNumberMock, fileExistsMock, osRenameMock, reportItemAlreadyExistsMock):
 
@@ -154,7 +203,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
     @mock.patch("os.rename")
     @mock.patch("controllers.CompletedDownloadsController.extractSeasonNumber")
     @mock.patch("interfaces.FolderInterface.directoryExists")
-    @mock.patch("controllers.CompletedDownloadsController.createDirectory")
+    @mock.patch("interfaces.FolderInterface.createDirectory")
     @mock.patch('controllers.CompletedDownloadsController.extractShowName')
     def test_auditDirectories(self, extractShowNameMock, createDirectoryMock, directoryExistsMock, extractSeasonNumberMock, osRenameMock, reportItemAlreadyExistsMock):
 
