@@ -109,8 +109,10 @@ class TestLogicController(unittest.TestCase):
     @mock.patch("controllers.NewTorrentController.onSuccessfulTorrentAdd")
     @mock.patch("controllers.BittorrentController.initTorrentDownload")
     @mock.patch("controllers.LogicController.getMediaInfoRecordsWithTorrents")
+    @mock.patch("controllers.CompletedDownloadsController.auditDumpCompleteDir")
+    @mock.patch("interfaces.DownloadsInProgressFileInterface.getDownloadingItems")
     @mock.patch("controllers.QueryGenerationController.generateTVSeasonQueries")
-    def test_runProgramLogic(self, generateTVSeasonQueriesMock, getMediaInfoRecordsWithTorrentsMock, initTorrentDownloadMock, onSuccessfulTorrentAddMock):
+    def test_runProgramLogic(self, generateTVSeasonQueriesMock, getDownloadingItemsMock, auditDumpCompleteDirMock, getMediaInfoRecordsWithTorrentsMock, initTorrentDownloadMock, onSuccessfulTorrentAddMock):
         
         fakeMediaSearchQueries = {
             "fakeMediaInfoName1": ["fakeMediaInfoName1Query1", "fakeMediaInfoName1Query2", "fakeMediaInfoName1Query3"],
@@ -138,6 +140,7 @@ class TestLogicController(unittest.TestCase):
         fakeMediaSearchQueries = ["fakeMediaSearchQuery1", "fakeMediaSearchQuery2", "fakeMediaSearchQuery3"]
         fakeMediaInfoRecordsWithTorrents = []
         activeMode = PROGRAM_MODE.TV_SEASONS
+        fakeDownloadingItems =  ["downloadingItem1", "downloadingItem2"]
 
         # add fake magnet links
         for mediaInfoRecord in fakeMediaInfoRecords:
@@ -148,6 +151,7 @@ class TestLogicController(unittest.TestCase):
         
         # config mocks
         generateTVSeasonQueriesMock.return_value = fakeMediaSearchQueries
+        getDownloadingItemsMock.return_value = fakeDownloadingItems
         getMediaInfoRecordsWithTorrentsMock.return_value = fakeMediaInfoRecordsWithTorrents
         initTorrentDownloadMock.side_effect = [True, True, True, None]
 
@@ -156,6 +160,8 @@ class TestLogicController(unittest.TestCase):
         
         # mock asserts
         generateTVSeasonQueriesMock.assert_called_with(fakeMediaInfoRecords)
+        getDownloadingItemsMock.assert_called_with(activeMode)
+        auditDumpCompleteDirMock.assert_called_with(activeMode, fakeDownloadingItems)
         getMediaInfoRecordsWithTorrentsMock.assert_called_with(fakeMediaSearchQueries, fakeMediaInfoRecords)
         
         calls = [ call("fakeMagnetLink"), call("fakeMagnetLink"), call("fakeMagnetLink") ]

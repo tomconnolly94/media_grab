@@ -112,7 +112,7 @@ def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, tar
                 reportItemAlreadyExists(seasonDir, completedDownloadDirectory)
 
 
-def auditFolder(mode, filteredDownloadingItems):
+def auditDumpCompleteDir(mode, filteredDownloadingItems):
     targetDir = os.getenv(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
     itemsFromDirectory = FolderInterface.getDirContents(dumpCompleteDirPath)
     completedDownloadFiles = [ item for item in itemsFromDirectory if FolderInterface.fileExists(item) ]

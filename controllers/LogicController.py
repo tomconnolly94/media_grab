@@ -4,8 +4,8 @@
 import logging
 
 # internal dependencies
-from interfaces import TPBInterface, FolderInterface, DownloadsInProgressFileInterface
-from controllers import BittorrentController, QueryGenerationController, TorrentFilterController, NewTorrentController
+from interfaces import TPBInterface, DownloadsInProgressFileInterface
+from controllers import BittorrentController, QueryGenerationController, TorrentFilterController, NewTorrentController, CompletedDownloadsController
 from data_types.ProgramMode import PROGRAM_MODE 
 
 
@@ -50,7 +50,7 @@ def runProgramLogic(mediaInfoRecords, mode):
         raise ValueError(f"mode: {mode} has no handler statement") 
 
     #analyse folder to look for completed downloads
-    FolderInterface.auditFolder(mode, DownloadsInProgressFileInterface.getDownloadingItems(mode))
+    CompletedDownloadsController.auditDumpCompleteDir(mode, DownloadsInProgressFileInterface.getDownloadingItems(mode))
     
     #add torrent madnet links to mediaInfoRecords
     mediaInfoRecordsWithTorrents = getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords)
