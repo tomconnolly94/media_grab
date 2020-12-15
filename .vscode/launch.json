@@ -5,15 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python main.py",
+            "name": "run open file",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "python": "/home/tom/projects/media_grab/venv/bin/python",
+            "args": [
+                "-m", "tv-seasons"
+            ],
             "env": {"PYTHONPATH": "${workspaceRoot}"},
             "envFile": "${workspaceRoot}/.env",
             "justMyCode": false
-        }
+        },
+        {
+            "name": "Python: Attach",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+              "host": "localhost",
+              "port": 5678
+            }
+          }
     ]
 }

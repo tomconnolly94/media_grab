@@ -20,17 +20,22 @@ def getTPBProxySites():
     
 
 def init():
+    useProxyList = False
 
-    sites = getTPBProxySites()
+    if useProxyList:
+        sites = getTPBProxySites()
 
-    if os.getenv('ENVIRONMENT') == "production":
-        randomIndex = randint(1, len(sites))
+        if os.getenv('ENVIRONMENT') == "production":
+            randomIndex = randint(1, len(sites))
+        else:
+            randomIndex = 0 # set random number for dev purposes
+        
+        #define global tpb object
+        global thePirateBay
+        chosenTPBBaseUrl = sites[randomIndex]
     else:
-        randomIndex = 0 # set random number for dev purposes
-    
-    #define global tpb object
-    global thePirateBay
-    thePirateBay = TPB(sites[randomIndex]) # create a TPB object with domain
+        chosenTPBBaseUrl = "https://thepiratebay0.org/"
+    thePirateBay = TPB(chosenTPBBaseUrl) # create a TPB object with domain
     
     
 def query(queryTerm):

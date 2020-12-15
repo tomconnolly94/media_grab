@@ -21,7 +21,8 @@ LoggingController.initLogging()
 
 def interpretArguments(argv):
 	mode = ''
-	permitted_modes = "|".join(PROGRAM_MODE_MAP.keys())
+	keys = PROGRAM_MODE_MAP.keys()
+	permitted_modes = "|".join([key for key in PROGRAM_MODE_MAP.keys() if isinstance(key, str)])
 	usage = f"""Usage:
 	python {os.path.basename(__file__)} -m <mode> [{permitted_modes}]"""
 
