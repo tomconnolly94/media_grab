@@ -56,7 +56,7 @@ def main(argv):
 
 	# catch all exceptions so they are always reported
 	try:
-		TPBInterface.init()
+		TPBInterface.init(False)
 		mediaInfoRecords = MediaIndexFileInterface.loadMediaFile() # information about the wanted media
 		LogicController.runProgramLogic(mediaInfoRecords, mode)
 	

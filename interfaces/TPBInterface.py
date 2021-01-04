@@ -19,8 +19,7 @@ def getTPBProxySites():
     return domains
     
 
-def init():
-    useProxyList = False
+def init(useProxyList):
 
     if useProxyList:
         sites = getTPBProxySites()

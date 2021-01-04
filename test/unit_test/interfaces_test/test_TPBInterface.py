@@ -17,7 +17,7 @@ class TestTPBInterface(unittest.TestCase):
         getTPBProxySitesMock.return_value = fakeProxySites
         osGetEnvMock.return_value = "notProduction"
 
-        TPBInterface.init()
+        TPBInterface.init(True)
 
         tpbMock.assert_called_once_with(fakeProxySites[0])
 

@@ -26,8 +26,10 @@ def generateTVSeasonQueryGroup(mediaName, relevantSeason):
 
 	for template in seasonTemplates:
 		# create search url
-		#queries.append(f"{mediaName} {template}{relevantSeason:>02}") # force season number to two digits, e.g. "1" -> "01"
-		queries.append(f"{mediaName} {template}{relevantSeason}")
+		if " " in template:
+			queries.append(f"{mediaName} {template}{relevantSeason}")
+		else:
+			queries.append(f"{mediaName} {template}{relevantSeason:>02}") # force season number to two digits, e.g. "1" -> "01"
 
 	return queries
 	

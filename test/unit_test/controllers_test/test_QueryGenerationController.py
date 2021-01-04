@@ -17,9 +17,9 @@ class TestQueryGenerationController(unittest.TestCase):
 
         expectedQueries = [
             "rick and morty s02",
-            "rick and morty s 02",
+            "rick and morty s 2",
             "rick and morty season02",
-            "rick and morty season 02"
+            "rick and morty season 2"
         ]
 
         seasonQueryGroup = QueryGenerationController.generateTVSeasonQueryGroup(name, relevantSeason)
