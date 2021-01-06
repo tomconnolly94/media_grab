@@ -115,6 +115,8 @@ def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, tar
 def auditDumpCompleteDir(mode, filteredDownloadingItems):
     targetDir = os.getenv(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
     itemsFromDirectory = FolderInterface.getDirContents(dumpCompleteDirPath)
+
+    # filter items into files and directories
     completedDownloadFiles = [ item for item in itemsFromDirectory if FolderInterface.fileExists(item) ]
     completedDownloadDirectories = [ item for item in itemsFromDirectory if FolderInterface.directoryExists(item) ]
 

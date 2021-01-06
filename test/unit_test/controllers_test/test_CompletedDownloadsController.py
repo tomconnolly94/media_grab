@@ -284,6 +284,49 @@ class TestCompletedDownloadsController(unittest.TestCase):
         # Case 3 end ############################################################################
 
 
+    @mock.patch("controllers.CompletedDownloadsController.reportItemAlreadyExists")
+    @mock.patch("os.rename")
+    @mock.patch("controllers.CompletedDownloadsController.extractSeasonNumber")
+    @mock.patch("interfaces.FolderInterface.directoryExists")
+    @mock.patch("interfaces.FolderInterface.createDirectory")
+    @mock.patch('os.getenv')
+    def test_auditFilesWithFileSystem(self, getEnvMock, createDirectoryMock, directoryExistsMock, extractSeasonNumberMock, osRenameMock, reportItemAlreadyExistsMock):
+
+        # init items
+        downloadingItems = {
+            "tv-seasons": [],
+            "tv-episodes": [
+                "fakeDownloadingFile1",
+                "fakeDownloadingFile2",
+                "fakeDownloadingFile3"
+            ]
+        }
+        targetTvDir = "dummy_directories/tv"
+        dumpCompleteDir = "dummy_directories/dump_complete"
+
+        # config fake data
+        mode = "fakeMode"
+        fakeFilteredDownloadingItems = downloadingItems
+
+        # config mocks
+        getEnvMock.return_value = dumpCompleteDir
+
+        # setup fake files
+        for episode in downloadingItems["tv-episodes"]:
+            os.mknod(episode)
+
+        # run auditDumpCompleteDir
+        CompletedDownloadsController.auditDumpCompleteDir(mode, fakeFilteredDownloadingItems)
+
+        # clean up moved files
+        cleanUpDirs = [ targetTvDir, dumpCompleteDir ]
+
+        for dir in cleanUpDirs:
+            for root, dirs, files in os.walk(dir):
+                for file in files:
+                    os.remove(os.path.join(root, file))
+
+
 if __name__ == '__main__':
     unittest.main()
 
