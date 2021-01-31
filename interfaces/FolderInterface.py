@@ -27,4 +27,4 @@ def fileExists(fileName):
 
 
 def getDirContents(directory):
-    return os.scandir(directory)
+    return list(os.scandir(directory))

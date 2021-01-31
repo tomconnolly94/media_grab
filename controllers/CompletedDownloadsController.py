@@ -9,9 +9,6 @@ import re
 from data_types.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
 from interfaces import FolderInterface, MailInterface
 
-# access env variables
-dumpCompleteDirPath = os.getenv("DUMP_COMPLETE_DIR")
-
 def extractShowName(fileName):
     
     try:
@@ -83,7 +80,7 @@ def auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir):
             
             if not FolderInterface.fileExists(prospectiveFile):
                #move file to season directory
-                os.rename(f"{dumpCompleteDirPath}/{completedDownloadFile}", prospectiveFile)
+                os.rename(f"{os.getenv('DUMP_COMPLETE_DIR')}/{completedDownloadFile}", prospectiveFile)
             else:
                 # report problem
                 reportItemAlreadyExists(prospectiveFile, completedDownloadFile)
@@ -106,7 +103,8 @@ def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, tar
             
             if not FolderInterface.directoryExists(seasonDir):
                 # move file to season directory
-                os.rename(f"{dumpCompleteDirPath}/{completedDownloadDirectory}", seasonDir)
+                dump_complete_dir = os.getenv("DUMP_COMPLETE_DIR")
+                os.rename(f"{dump_complete_dir}/{completedDownloadDirectory}", seasonDir)
             else:
                 # report problem
                 reportItemAlreadyExists(seasonDir, completedDownloadDirectory)
@@ -114,11 +112,20 @@ def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, tar
 
 def auditDumpCompleteDir(mode, filteredDownloadingItems):
     targetDir = os.getenv(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
-    itemsFromDirectory = FolderInterface.getDirContents(dumpCompleteDirPath)
+    itemsFromDirectory = FolderInterface.getDirContents(os.getenv("DUMP_COMPLETE_DIR"))
 
     # filter items into files and directories
-    completedDownloadFiles = [ item for item in itemsFromDirectory if FolderInterface.fileExists(item) ]
-    completedDownloadDirectories = [ item for item in itemsFromDirectory if FolderInterface.directoryExists(item) ]
+    # completedDownloadFiles = [ item for item in itemsFromDirectory if FolderInterface.fileExists(item) ]
+    # completedDownloadDirectories = [ item for item in itemsFromDirectory if FolderInterface.directoryExists(item) ]
+
+    completedDownloadFiles = []
+    completedDownloadDirectories = []
+
+    for item in itemsFromDirectory:
+        if item.is_file():
+            completedDownloadFiles.append(item)
+        else:
+            completedDownloadDirectories.append(item)
 
 
     # Rules:
