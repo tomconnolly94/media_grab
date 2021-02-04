@@ -21,13 +21,12 @@ LoggingController.initLogging()
 
 def interpretArguments(argv):
 	mode = ''
-	keys = PROGRAM_MODE_MAP.keys()
 	permitted_modes = "|".join([key for key in PROGRAM_MODE_MAP.keys() if isinstance(key, str)])
 	usage = f"""Usage:
 	python {os.path.basename(__file__)} -m <mode> [{permitted_modes}]"""
 
 	try:
-		opts, args = getopt.getopt(argv,"hm:",["mode="])
+		opts = getopt.getopt(argv,"hm:",["mode="])[0]
 	except getopt.GetoptError:
 		print(usage)
 		sys.exit(2)
