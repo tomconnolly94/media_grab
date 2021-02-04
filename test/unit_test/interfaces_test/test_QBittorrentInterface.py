@@ -3,12 +3,12 @@ import unittest
 import mock
 
 # internal dependencies
-from controllers import BittorrentController
+from interfaces import QBittorrentInterface
 
-class TestBittorrentController(unittest.TestCase):
+class TestQBittorrentInterface(unittest.TestCase):
 
-    @mock.patch('controllers.BittorrentController.Client')
-    @mock.patch('controllers.BittorrentController.getQbittorentClient')
+    @mock.patch('interfaces.QBittorrentInterface.Client')
+    @mock.patch('interfaces.QBittorrentInterface.getQbittorentClient')
     def test_UnmockedTorrentDownload(self, getQbittorentClientMock, qbittorrentClientMock):
 
         qbittorrentClientMock.download_from_link.return_value = "Ok."
@@ -17,7 +17,7 @@ class TestBittorrentController(unittest.TestCase):
 
         torrentMagnet = "/torrent/18003297/Silicon_Valley_Season_4_S04_720p_AMZN_WEBRip_x265_HEVC_Complete"
 
-        self.assertTrue(BittorrentController.initTorrentDownload(torrentMagnet))
+        self.assertTrue(QBittorrentInterface.initTorrentDownload(torrentMagnet))
 
 
 if __name__ == '__main__':
