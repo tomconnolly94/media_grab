@@ -4,8 +4,8 @@
 import logging
 
 # internal dependencies
-from interfaces import TPBInterface, DownloadsInProgressFileInterface
-from controllers import BittorrentController, QueryGenerationController, TorrentFilterController, NewTorrentController, CompletedDownloadsController
+from interfaces import TPBInterface, DownloadsInProgressFileInterface, QBittorrentInterface
+from controllers import QueryGenerationController, TorrentFilterController, NewTorrentController, CompletedDownloadsController
 from data_types.ProgramMode import PROGRAM_MODE 
 
 
@@ -43,19 +43,20 @@ def runProgramLogic(mediaInfoRecords, mode):
 
     # ascertain mode of program
     if mode == PROGRAM_MODE.TV_SEASONS:
-        mediaSearchQueries = QueryGenerationController.generateTVSeasonQueries(mediaInfoRecords)
+        # mediaSearchQueries = QueryGenerationController.generateTVSeasonQueries(mediaInfoRecords)
+        raise ValueError(f"mode: {mode} has no handler statement") 
     elif mode == PROGRAM_MODE.TV_EPISODES:
-        pass # mediaSearchQueries = QueryGenerationController.generateTVEpisodeQueries(mediaInfoRecords)
+        mediaSearchQueries = QueryGenerationController.generateTVEpisodeQueries(mediaInfoRecords)
     else:
         raise ValueError(f"mode: {mode} has no handler statement") 
 
     #analyse folder to look for completed downloads
     CompletedDownloadsController.auditDumpCompleteDir(mode, DownloadsInProgressFileInterface.getDownloadingItems(mode))
     
-    #add torrent madnet links to mediaInfoRecords
+    #add torrent magnet links to mediaInfoRecords
     mediaInfoRecordsWithTorrents = getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords)
 
     for mediaInfoRecord in mediaInfoRecordsWithTorrents:
         magnet = mediaInfoRecord["magnet_link"]
-        if BittorrentController.initTorrentDownload(magnet):
+        if QBittorrentInterface.initTorrentDownload(magnet):
             NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, "latestSeason", magnet, mode)

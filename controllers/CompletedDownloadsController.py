@@ -6,15 +6,16 @@ import logging
 import re
 
 # internal dependencies
-from data_types.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
-from interfaces import FolderInterface, MailInterface
+from data_types.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP, PROGRAM_MODE_MAP
+from data_types.ProgramMode import PROGRAM_MODE
+from interfaces import FolderInterface, MailInterface, DownloadsInProgressFileInterface
 
 def extractShowName(fileName):
     
     try:
         showNameMatch = re.match(r"(.+?)(?:[^a-zA-Z]*(?:season|s|episode|e)+.\d+.*)*?\s*$", fileName, re.IGNORECASE) # extract show name using regex capturing group
         showName = showNameMatch.groups()[0]
-        showName = re.sub(r"[^\w\s]", "", showName) # replace all punctuation
+        showName = re.sub(r"[^\w\s]", " ", showName) # replace all punctuation
         showName = showName.strip() # remove whitespace on left or right
         showName = " ".join(showName.split()) # remove any double spaces
         showName = showName.lower() # convert uppercase letters to lowercase
@@ -50,6 +51,10 @@ def extractEpisodeNumber(fileName):
         return None
 
 
+def extractExtension(fileName):
+    return os.path.splitext(fileName)[1]
+
+
 def reportItemAlreadyExists(newItemLocation, torrentName):
     errorString = f"Downloaded torrent: {torrentName} and attempted to move it to {newItemLocation} but this target already exists."
     logging.error(errorString)
@@ -59,31 +64,38 @@ def reportItemAlreadyExists(newItemLocation, torrentName):
 def auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir):
     # deal with files
     for completedDownloadFile in completedDownloadFiles:
-        if completedDownloadFile in filteredDownloadingItems:
+        completedDownloadFileName = completedDownloadFile.name
+
+        if completedDownloadFileName in filteredDownloadingItems:
             # extract show name
-            showName = extractShowName(completedDownloadFile)
+            showName = extractShowName(completedDownloadFileName)
             tvShowDir = os.path.join(targetDir, showName)
 
             # create tv show directory if it does not exist
             if not FolderInterface.directoryExists(tvShowDir):
                 FolderInterface.createDirectory(tvShowDir)
 
-            seasonNumber = extractSeasonNumber(completedDownloadFile)
-            episodeNumber = extractEpisodeNumber(completedDownloadFile)
+            seasonNumber = extractSeasonNumber(completedDownloadFileName)
+            episodeNumber = extractEpisodeNumber(completedDownloadFileName)
+            extension = extractExtension(completedDownloadFileName)
             seasonDir = os.path.join(tvShowDir, f"Season {seasonNumber}")
 
             # create season directory if it does not exist
             if not FolderInterface.directoryExists(seasonDir):
                 FolderInterface.createDirectory(seasonDir)
 
-            prospectiveFile = os.path.join(seasonDir, f"{showName} - S0{seasonNumber}E0{episodeNumber}")
+            prospectiveFile = os.path.join(seasonDir, f"{showName} - S0{seasonNumber}E0{episodeNumber}{extension}")
             
             if not FolderInterface.fileExists(prospectiveFile):
-               #move file to season directory
-                os.rename(f"{os.getenv('DUMP_COMPLETE_DIR')}/{completedDownloadFile}", prospectiveFile)
+                # move file to season directory
+                existingFile = f"{os.getenv('DUMP_COMPLETE_DIR')}{completedDownloadFileName}"
+                os.rename(existingFile, prospectiveFile)
+                DownloadsInProgressFileInterface.notifyDownloadFinished(completedDownloadFileName, PROGRAM_MODE_MAP[PROGRAM_MODE.TV_EPISODES])
+                logging.info(f"Moved '{existingFile}' to '{prospectiveFile}'")
+
             else:
                 # report problem
-                reportItemAlreadyExists(prospectiveFile, completedDownloadFile)
+                reportItemAlreadyExists(prospectiveFile, completedDownloadFileName)
 
 
 def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, targetDir):
@@ -111,12 +123,9 @@ def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, tar
 
 
 def auditDumpCompleteDir(mode, filteredDownloadingItems):
+
     targetDir = os.getenv(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
     itemsFromDirectory = FolderInterface.getDirContents(os.getenv("DUMP_COMPLETE_DIR"))
-
-    # filter items into files and directories
-    # completedDownloadFiles = [ item for item in itemsFromDirectory if FolderInterface.fileExists(item) ]
-    # completedDownloadDirectories = [ item for item in itemsFromDirectory if FolderInterface.directoryExists(item) ]
 
     completedDownloadFiles = []
     completedDownloadDirectories = []
@@ -148,9 +157,5 @@ def auditDumpCompleteDir(mode, filteredDownloadingItems):
 
 
     # TODO: these functions are incredibly similar, find a way to aggregate the duplicate code
-    auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir)
-    auditDirectories(completedDownloadDirectories, filteredDownloadingItems, targetDir)
-    
-
-
-
+    auditFiles(completedDownloadFiles, filteredDownloadingItems["tv-episodes"], targetDir)
+    # auditDirectories(completedDownloadDirectories, filteredDownloadingItems["tv-seasons"], targetDir)

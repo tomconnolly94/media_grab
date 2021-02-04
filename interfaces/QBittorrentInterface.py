@@ -4,20 +4,14 @@
 from qbittorrent import Client
 import os
 
-# connect to the qbittorent Web UI
-qb = None
+global qb
 
-def getQbittorentClient():
+def init():
+    # create qbittorrent client on program init
     global qb
-    if qb:
-        return qb
-    else:
-        qb = Client(os.getenv('QBT_URL'))
-        return qb
+    qb = Client(os.getenv('QBT_URL'))
 
 def initTorrentDownload(torrentMagnet):
-    global qb
-    qb = getQbittorentClient()
     qb.login(os.getenv('QBT_USERNAME'), os.getenv('QBT_PASSWORD'))
     torrentInitResult = qb.download_from_link(torrentMagnet)
 
