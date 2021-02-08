@@ -7,13 +7,20 @@ from interfaces import QBittorrentInterface
 
 class TestQBittorrentInterface(unittest.TestCase):
 
-    @mock.patch('interfaces.QBittorrentInterface.Client')
-    @mock.patch('interfaces.QBittorrentInterface.getQbittorentClient')
-    def test_UnmockedTorrentDownload(self, getQbittorentClientMock, qbittorrentClientMock):
+    def test_UnmockedTorrentDownload(self):
 
-        qbittorrentClientMock.download_from_link.return_value = "Ok."
-        getQbittorentClientMock.return_value = qbittorrentClientMock
+        class qbMock():
+            def __init__(self):
+                pass
 
+            def login(self, username, password):
+                return True
+
+            def download_from_link(self, torrentMagnet):
+                return "Ok."
+
+
+        QBittorrentInterface.qb = qbMock()
 
         torrentMagnet = "/torrent/18003297/Silicon_Valley_Season_4_S04_720p_AMZN_WEBRip_x265_HEVC_Complete"
 

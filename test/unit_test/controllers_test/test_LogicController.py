@@ -1,4 +1,4 @@
-#external dependencies
+# external dependencies
 import unittest
 import mock
 from unittest.mock import call
@@ -8,7 +8,6 @@ from controllers import LogicController
 from data_types.ProgramMode import PROGRAM_MODE
 
 class TestLogicController(unittest.TestCase):
-
 
     def test_findMediaInfoRecord(self):
 
@@ -107,12 +106,12 @@ class TestLogicController(unittest.TestCase):
 
 
     @mock.patch("controllers.NewTorrentController.onSuccessfulTorrentAdd")
-    @mock.patch("controllers.BittorrentController.initTorrentDownload")
+    @mock.patch("interfaces.QBittorrentInterface.initTorrentDownload")
     @mock.patch("controllers.LogicController.getMediaInfoRecordsWithTorrents")
     @mock.patch("controllers.CompletedDownloadsController.auditDumpCompleteDir")
     @mock.patch("interfaces.DownloadsInProgressFileInterface.getDownloadingItems")
-    @mock.patch("controllers.QueryGenerationController.generateTVSeasonQueries")
-    def test_runProgramLogic(self, generateTVSeasonQueriesMock, getDownloadingItemsMock, auditDumpCompleteDirMock, getMediaInfoRecordsWithTorrentsMock, initTorrentDownloadMock, onSuccessfulTorrentAddMock):
+    @mock.patch("controllers.QueryGenerationController.generateTVEpisodeQueries")
+    def test_runProgramLogic(self, generateTVEpisodeQueriesMock, getDownloadingItemsMock, auditDumpCompleteDirMock, getMediaInfoRecordsWithTorrentsMock, initTorrentDownloadMock, onSuccessfulTorrentAddMock):
         
         fakeMediaSearchQueries = {
             "fakeMediaInfoName1": ["fakeMediaInfoName1Query1", "fakeMediaInfoName1Query2", "fakeMediaInfoName1Query3"],
@@ -139,7 +138,7 @@ class TestLogicController(unittest.TestCase):
         # config fake data
         fakeMediaSearchQueries = ["fakeMediaSearchQuery1", "fakeMediaSearchQuery2", "fakeMediaSearchQuery3"]
         fakeMediaInfoRecordsWithTorrents = []
-        activeMode = PROGRAM_MODE.TV_SEASONS
+        activeMode = PROGRAM_MODE.TV_EPISODES
         fakeDownloadingItems =  ["downloadingItem1", "downloadingItem2"]
 
         # add fake magnet links
@@ -150,7 +149,7 @@ class TestLogicController(unittest.TestCase):
 
         
         # config mocks
-        generateTVSeasonQueriesMock.return_value = fakeMediaSearchQueries
+        generateTVEpisodeQueriesMock.return_value = fakeMediaSearchQueries
         getDownloadingItemsMock.return_value = fakeDownloadingItems
         getMediaInfoRecordsWithTorrentsMock.return_value = fakeMediaInfoRecordsWithTorrents
         initTorrentDownloadMock.side_effect = [True, True, True, None]
@@ -159,7 +158,7 @@ class TestLogicController(unittest.TestCase):
 
         
         # mock asserts
-        generateTVSeasonQueriesMock.assert_called_with(fakeMediaInfoRecords)
+        generateTVEpisodeQueriesMock.assert_called_with(fakeMediaInfoRecords)
         getDownloadingItemsMock.assert_called_with(activeMode)
         auditDumpCompleteDirMock.assert_called_with(activeMode, fakeDownloadingItems)
         getMediaInfoRecordsWithTorrentsMock.assert_called_with(fakeMediaSearchQueries, fakeMediaInfoRecords)

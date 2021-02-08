@@ -13,6 +13,13 @@ seasonTemplates = [
 	"season "
 ]
 
+episodeTemplates = [
+	"e",
+	"e ",
+	"episode",
+	"episode "
+]
+
 
 def generateTVSeasonQueries(mediaInfoRecords):
 	queryUrls = {}
@@ -30,6 +37,26 @@ def generateTVSeasonQueryGroup(mediaName, relevantSeason):
 			queries.append(f"{mediaName} {template}{relevantSeason}")
 		else:
 			queries.append(f"{mediaName} {template}{relevantSeason:>02}") # force season number to two digits, e.g. "1" -> "01"
+
+	return queries
+	
+	
+def generateTVEpisodeQueries(mediaInfoRecords):
+	queryUrls = {}
+	for record in mediaInfoRecords:
+		queryUrls[record["name"]] = generateTVEpisodeQueryGroup(record["name"], int(record["typeSpecificData"]["latestSeason"]), int(record["typeSpecificData"]["latestEpisode"]))
+	return queryUrls
+
+
+def generateTVEpisodeQueryGroup(mediaName, relevantSeason, relevantEpisode):
+	queries = []
+
+	for index, template in enumerate(episodeTemplates):
+		# create search url
+		if " " in template:
+			queries.append(f"{mediaName} {template}{relevantSeason} {seasonTemplates[index]}{relevantEpisode}")
+		else:
+			queries.append(f"{mediaName} {template}{relevantSeason:>02} {seasonTemplates[index]}{relevantEpisode:>02}") # force season number to two digits, e.g. "1" -> "01"
 
 	return queries
 	
