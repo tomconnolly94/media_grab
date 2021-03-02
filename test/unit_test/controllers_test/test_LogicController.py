@@ -59,7 +59,7 @@ class TestLogicController(unittest.TestCase):
         class TorrentRecordMock(object):
             def __init__(self, title, magnetLink):
                 self.title = title
-                self.magnet_link = magnetLink                
+                self.magnet = magnetLink                
 
         fakeTorrentRecords = [
             TorrentRecordMock("fakeTorrentTitle1", "fakeTorrentMagnetLink1"),
@@ -91,14 +91,14 @@ class TestLogicController(unittest.TestCase):
         # expected outputs
         #fakeMediaInfoRecords[0]["magnet"]
         expectedOutputMediaInfoRecords = [
-            {'magnet_link': 'fakeTorrentMagnetLink1', 'name': 'fakeMediaInfoName1', 'typeSpecificData': {'latestEpisode': 1, 'latestSeason': 1}},
-            {'magnet_link': 'fakeTorrentMagnetLink3', 'name': 'fakeMediaInfoName3', 'typeSpecificData': {'latestEpisode': 1, 'latestSeason': 1}}
+            {'magnet': 'fakeTorrentMagnetLink1', 'name': 'fakeMediaInfoName1', 'typeSpecificData': {'latestEpisode': 1, 'latestSeason': 1}},
+            {'magnet': 'fakeTorrentMagnetLink3', 'name': 'fakeMediaInfoName3', 'typeSpecificData': {'latestEpisode': 1, 'latestSeason': 1}}
         ]
 
         actualOutputMediaInfoRecords = LogicController.getMediaInfoRecordsWithTorrents(fakeMediaSearchQueries, fakeMediaInfoRecords)
 
         # mock asserts
-        calls = [ call(f'torrentInfo: {fakeTorrentRecords[0].magnet_link}'), call(f'torrentInfo: {fakeTorrentRecords[2].magnet_link}') ]
+        calls = [ call(f'torrentInfo: {fakeTorrentRecords[0].magnet}'), call(f'torrentInfo: {fakeTorrentRecords[2].magnet}') ]
         loggingInfoMock.assert_has_calls(calls)
 
         #TODO: finish implementation of this test function
@@ -144,7 +144,7 @@ class TestLogicController(unittest.TestCase):
         # add fake magnet links
         for mediaInfoRecord in fakeMediaInfoRecords:
             mediaInfoRecordWithTorrent = dict(mediaInfoRecord)
-            mediaInfoRecordWithTorrent["magnet_link"] = "fakeMagnetLink"
+            mediaInfoRecordWithTorrent["magnet"] = "fakeMagnetLink"
             fakeMediaInfoRecordsWithTorrents.append(mediaInfoRecordWithTorrent)
 
         

@@ -12,7 +12,7 @@ def filterSeasonTorrents(torrentTitles, mediaData):
 		return []
 
 	name = mediaData["name"]
-	relevantSeason = str(int(mediaData["typeSpecificData"]["latestSeason"]) + 1)
+	relevantSeason = str(int(mediaData["typeSpecificData"]["latestSeason"]))
 
 	seasonRegex = fr''
 

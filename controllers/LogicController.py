@@ -15,6 +15,12 @@ def findMediaInfoRecord(mediaInfoRecords, mediaInfoName):
 			return record
 
 
+def sortTorrents(torrents):
+    # order torrents by number of seeders
+    return sorted(torrents, key=lambda torrent: int(torrent["seeders"]))
+    
+
+
 def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
     mediaInfoRecordsWithTorrents = []
 
@@ -24,16 +30,18 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
 
         #filter torrentRecords by applying regex to torrent titles
         mediaInfoRecord = findMediaInfoRecord(mediaInfoRecords, mediaInfoName)
-        torrentTitles = [ torrent.title for torrent in torrentRecords ]
+        torrentTitles = [ torrent["name"] for torrent in torrentRecords ]
         filteredTorrentTitles = TorrentFilterController.filterSeasonTorrents(torrentTitles, mediaInfoRecord)
 
         #get list of filtered torrent objects
-        filteredTorrents = [ torrent for torrent in torrentRecords if torrent.title in filteredTorrentTitles ]
+        filteredTorrents = [ torrent for torrent in torrentRecords if torrent["name"] in filteredTorrentTitles ]
 
-        if filteredTorrents:
-            chosenTorrent = filteredTorrents[0]
-            logging.info(f'torrentInfo: {chosenTorrent.magnet_link}')
-            mediaInfoRecord["magnet_link"] = chosenTorrent.magnet_link
+        # order torrents by number of seeders
+        filteredSortedTorrents = sortTorrents(filteredTorrents)
+
+        if filteredSortedTorrents:
+            chosenTorrent = filteredSortedTorrents[0]
+            mediaInfoRecord["magnet"] = chosenTorrent["magnet"]
             mediaInfoRecordsWithTorrents.append(mediaInfoRecord)
 
     return mediaInfoRecordsWithTorrents
@@ -57,6 +65,6 @@ def runProgramLogic(mediaInfoRecords, mode):
     mediaInfoRecordsWithTorrents = getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords)
 
     for mediaInfoRecord in mediaInfoRecordsWithTorrents:
-        magnet = mediaInfoRecord["magnet_link"]
+        magnet = mediaInfoRecord["magnet"]
         if QBittorrentInterface.initTorrentDownload(magnet):
             NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, "latestSeason", magnet, mode)

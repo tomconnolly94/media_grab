@@ -12,7 +12,7 @@
             "console": "integratedTerminal",
             "python": "/home/tom/projects/media_grab/venv/bin/python",
             "args": [
-                "-m", "tv-seasons"
+                "-m", "tv-episodes"
             ],
             "env": {"PYTHONPATH": "${workspaceRoot}"},
             "envFile": "${workspaceRoot}/.env",

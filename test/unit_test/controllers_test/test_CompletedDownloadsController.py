@@ -344,7 +344,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         self.assertTrue(len(list(os.scandir(fakeDumpCompleteDir))) == 2)
 
         # run auditDumpCompleteDir
-        CompletedDownloadsController.auditDumpCompleteDir(mode, fakeFilteredDownloadingItems)
+        CompletedDownloadsController.auditDumpCompleteDir(mode, fakeFilteredDownloadingItems["tv-episodes"])
 
         # assert that the contents of downloadingItems has been moved from the `dummy_directories/dump_complete` directory to the `dummy_directories/tv` directory
         self.assertTrue(len(list(os.scandir(f"{fakeTargetTvDir}fake tv show name/Season 1"))) == 2)

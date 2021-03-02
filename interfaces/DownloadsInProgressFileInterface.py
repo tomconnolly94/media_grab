@@ -3,19 +3,23 @@
 # external dependencies
 import json
 import os
+import logging
 
 # internal dependencies
 from data_types.ProgramModeMap import PROGRAM_MODE_MAP
 
-file = os.getenv("DOWNLOADS_IN_PROGRESS_FILE")
 
 def notifyDownloadStarted(mediaName, mediaType):
 
-    if not os.path.exists(file):
-        createDownloadsInProgressFile(file)
+    dipFileLocation = os.getenv("DOWNLOADS_IN_PROGRESS_FILE")
+    
+    if not os.path.exists(dipFileLocation):
+        createDownloadsInProgressFile(dipFileLocation)
 
-    def operation(media, mediaName=mediaName, mediaType=mediaType):
-        media[mediaType].append(mediaName)
+    typeKey = PROGRAM_MODE_MAP[mediaType]
+
+    def operation(media, mediaName=mediaName, typeKey=typeKey):
+        media[typeKey].append(mediaName)
         return media
 
     updateFile(operation)
@@ -28,25 +32,31 @@ def createDownloadsInProgressFile(fileLocation):
     }
     
     initialFileContent = json.dumps(initialFileDict, sort_keys=False)
-
-    file = open(fileLocation, "x")
-    file.write(initialFileContent)
+    
+    with open(fileLocation, 'x') as dipFile:
+        dipFile.write(initialFileContent)
 
 
 def notifyDownloadFinished(mediaName, mediaType):
     
-    if not os.path.exists(file):
+    dipFileLocation = os.getenv("DOWNLOADS_IN_PROGRESS_FILE")
+    
+    if not os.path.exists(dipFileLocation):
         return
 
-    def operation(media, mediaName=mediaName, mediaType=mediaType):
-        media[mediaType].remove(mediaName)
+    typeKey = PROGRAM_MODE_MAP[mediaType]
+
+    def operation(media, mediaName=mediaName, typeKey=typeKey):
+        media[typeKey].remove(mediaName)
         return media
 
     updateFile(operation)
 
 
 def updateFile(operation):
-    with open(file, 'r+') as dipFile:
+    dipFileLocation = os.getenv("DOWNLOADS_IN_PROGRESS_FILE")
+    
+    with open(dipFileLocation, 'r+') as dipFile:
         #load file contents to dict
         fileContent = dipFile.read()
         media = json.loads(fileContent)
@@ -56,12 +66,16 @@ def updateFile(operation):
 
         #write new contents of file
         dipFile.seek(0)
-        dipFile.write(media)
+        dipFile.write(json.dumps(media))
 
 
 def getDownloadingItems(mode):
-    with open(file, 'r') as dipFile:
+    dipFileLocation = os.getenv("DOWNLOADS_IN_PROGRESS_FILE")
+    
+    logging.info(f" DownloadsInProgress File: {dipFileLocation}")
+    with open(dipFileLocation, 'r') as dipFile:
         #load file contents to dict
         fileContent = dipFile.read()
         media = json.loads(fileContent)
         return media[PROGRAM_MODE_MAP[mode]]
+

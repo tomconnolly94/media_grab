@@ -157,5 +157,7 @@ def auditDumpCompleteDir(mode, filteredDownloadingItems):
 
 
     # TODO: these functions are incredibly similar, find a way to aggregate the duplicate code
-    auditFiles(completedDownloadFiles, filteredDownloadingItems["tv-episodes"], targetDir)
+    logging.info("filteredDownloadingItems:")
+    logging.info(filteredDownloadingItems)
+    auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir)
     # auditDirectories(completedDownloadDirectories, filteredDownloadingItems["tv-seasons"], targetDir)

@@ -5,9 +5,7 @@ from random import randint
 import requests
 import logging
 import os
-
-# internal dependencies
-from tpb import TPB, CATEGORIES, ORDERS
+import json
 
 
 def getTPBProxySites():
@@ -33,32 +31,36 @@ def init(useProxyList):
         global thePirateBay
         chosenTPBBaseUrl = sites[randomIndex]
     else:
-        chosenTPBBaseUrl = "https://thepiratebay0.org/"
-    thePirateBay = TPB(chosenTPBBaseUrl) # create a TPB object with domain
-    
-    
-def query(queryTerm):
-    return thePirateBay.search(queryTerm, category=CATEGORIES.VIDEO.TV_SHOWS).order(ORDERS.SEEDERS.ASC).page(1)
+        chosenTPBBaseUrl = "https://thepiratebay33.org/"
     
 
 def getTorrentRecords(queries):
 
-    torrentRecords = []
+    torrents = []
     # make query for the mediaInfoRecord, if none are found, try the next query format
     for queryStr in queries:
-        torrentQuery = query(queryStr)
-
-        # this is necessary to force the TPB to make the http requests here and save the value
-        # if this is not done then every time the torrentQuery object is used a new http 
-        # request is made
-        for torrent in torrentQuery:
-            torrentRecords.append(torrent)
+        torrents = queryAPI(queryStr)
         
         #logging
-        logging.info(f"Torrent search performed for: '{queryStr}' - {len(torrentRecords)} results.")
+        logging.info(f"Torrent search performed for: '{queryStr}' - {len(torrents)} results.")
 
         #if we have some results then break the loop and return the torrentRecords
-        if torrentRecords:
+        if torrents:
             break
     
-    return torrentRecords
+    return torrents
+
+
+def queryAPI(queryTerm):
+    
+    # create query url
+    queryUrl = f"https://apibay.org/q.php?q={queryTerm}"
+
+    # make query and load json data
+    response = requests.get(queryUrl)
+    torrents = json.loads(response.content)
+
+    for torrent in torrents:
+        torrent["magnet"] = f"magnet:?xt=urn:btih:{torrent.get('info_hash')}&dn={torrent.get('name')}"
+
+    return torrents

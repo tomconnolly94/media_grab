@@ -8,7 +8,7 @@ import logging
 import getopt
 
 # internal dependencies
-from interfaces import TPBInterface, MediaIndexFileInterface
+from interfaces import TPBInterface, MediaIndexFileInterface, QBittorrentInterface
 from controllers import LoggingController, LogicController
 from data_types.ProgramModeMap import PROGRAM_MODE_MAP 
 
@@ -41,6 +41,11 @@ def interpretArguments(argv):
 			else:
 				print(usage)
 				sys.exit(4)
+
+	if not mode:
+		logging.error("Mode was not provided")
+		print(usage)
+		sys.exit(5)
 			
 	print(f"Mode is {mode}")
 
@@ -56,6 +61,7 @@ def main(argv):
 	# catch all exceptions so they are always reported
 	try:
 		TPBInterface.init(False)
+		QBittorrentInterface.init()
 		mediaInfoRecords = MediaIndexFileInterface.loadMediaFile() # information about the wanted media
 		LogicController.runProgramLogic(mediaInfoRecords, mode)
 	
