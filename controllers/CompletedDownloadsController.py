@@ -101,16 +101,20 @@ def auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir):
 def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, targetDir):
     # deal with directories
     for completedDownloadDirectory in completedDownloadDirectories:
+        completedDownloadDirectoryName = completedDownloadDirectory.name
+
         if completedDownloadDirectory in filteredDownloadingItems:
             # extract show name
-            showName = extractShowName(completedDownloadDirectory)
+            showName = extractShowName(completedDownloadDirectoryName)
             tvShowDir = os.path.join(targetDir, showName)
 
             # create tv show directory if it does not exist
             if not FolderInterface.directoryExists(tvShowDir):
                 FolderInterface.createDirectory(tvShowDir)
-
-            seasonNumber = extractSeasonNumber(completedDownloadDirectory)
+            
+            seasonNumber = extractSeasonNumber(completedDownloadDirectoryName)
+            episodeNumber = extractEpisodeNumber(completedDownloadDirectoryName)
+            extension = extractExtension(completedDownloadDirectoryName)
             seasonDir = os.path.join(tvShowDir, f"Season {seasonNumber}")
             
             if not FolderInterface.directoryExists(seasonDir):
@@ -160,4 +164,4 @@ def auditDumpCompleteDir(mode, filteredDownloadingItems):
     logging.info("filteredDownloadingItems:")
     logging.info(filteredDownloadingItems)
     auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir)
-    # auditDirectories(completedDownloadDirectories, filteredDownloadingItems["tv-seasons"], targetDir)
+    auditDirectories(completedDownloadDirectories, filteredDownloadingItems, targetDir)
