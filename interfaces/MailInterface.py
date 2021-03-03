@@ -37,8 +37,6 @@ def sendMail(heading, messageBody):
 
 def sendNewTorrentMail(torrentName, torrentExtraInfo, torrentMagnet):
     messageBody = f'ADDED TORRENT: {torrentName} {torrentExtraInfo} \n\n Magnet:{torrentMagnet}'
-
-    logging.info(messageBody)
     sendMail("Media Grab: A new torrent has just been added.", messageBody)
 
 

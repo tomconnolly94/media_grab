@@ -41,8 +41,26 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
         filteredSortedTorrents = sortTorrents(filteredTorrents)
 
         if filteredSortedTorrents:
-            chosenTorrent = filteredSortedTorrents[0]
+            chosenTorrent = None
+
+            downloadIds = [ torrent["name"] for torrent in filteredSortedTorrents ]
+            chosenDownloadId = DownloadsInProgressFileInterface.findNewDownload(downloadIds)
+
+            if not chosenDownloadId:
+                return []
+
+            for torrent in filteredSortedTorrents:
+                if chosenDownloadId == torrent["name"]:
+                    chosenTorrent = torrent 
+
+
+            # if torrent was not found, return early
+            if not chosenTorrent:
+                logging.info("No new torrents found,")
+                return []
+
             mediaInfoRecord["magnet"] = chosenTorrent["magnet"]
+            mediaInfoRecord["torrentName"] = chosenTorrent["name"]
             mediaInfoRecordsWithTorrents.append(mediaInfoRecord)
 
     return mediaInfoRecordsWithTorrents

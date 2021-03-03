@@ -13,7 +13,7 @@ def onSuccessfulTorrentAdd(queryRecord, updateableField, torrentMagnet, mode):
 
 	# send email notification
 	torrentExtraInfo = f"{updateableField} {queryRecord['typeSpecificData'][updateableField]}"
-	MailInterface.sendNewTorrentMail(queryRecord["name"], torrentExtraInfo, torrentMagnet)
+	MailInterface.sendNewTorrentMail(queryRecord["torrentName"], torrentExtraInfo, torrentMagnet)
 
 	# notify DownloadsInProgress file
-	DownloadsInProgressFileInterface.notifyDownloadStarted(queryRecord["name"], mode)
+	DownloadsInProgressFileInterface.notifyDownloadStarted(queryRecord["torrentName"], mode)

@@ -7,6 +7,7 @@ import logging
 
 # internal dependencies
 from data_types.ProgramModeMap import PROGRAM_MODE_MAP
+from data_types.ProgramMode import PROGRAM_MODE
 
 
 def notifyDownloadStarted(mediaName, mediaType):
@@ -79,3 +80,13 @@ def getDownloadingItems(mode):
         media = json.loads(fileContent)
         return media[PROGRAM_MODE_MAP[mode]]
 
+
+def findNewDownload(downloadIds):
+
+    downloadingItems = getDownloadingItems(PROGRAM_MODE.TV_EPISODES)
+
+    for downloadId in downloadIds:
+        if downloadId not in downloadingItems:
+            return downloadId
+
+    return None
