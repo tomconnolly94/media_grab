@@ -3,6 +3,7 @@
 # external dependencies
 from qbittorrent import Client
 import os
+import logging
 
 global qb
 
@@ -19,6 +20,6 @@ def initTorrentDownload(torrentMagnet):
     try:
         qb.download_from_link([torrentMagnet])
         return True
-    except Exception as torrentFailedException:
-		logging.error("Exception occurred", exc_info=True)
+    except Exception:
+        logging.error("Exception occurred", exc_info=True)
         return False
