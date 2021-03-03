@@ -45,10 +45,10 @@ class TestLogicController(unittest.TestCase):
 
 
     @mock.patch("logging.info")
-    @mock.patch("controllers.TorrentFilterController.filterSeasonTorrents")
+    @mock.patch("controllers.TorrentFilterController.filterEpisodeTorrents")
     @mock.patch("controllers.LogicController.findMediaInfoRecord")
     @mock.patch("interfaces.TPBInterface.getTorrentRecords")
-    def test_getMediaInfoRecordsWithTorrents(self, getTorrentRecordsMock, findMediaInfoRecordMock, filterSeasonTorrentsMock, loggingInfoMock):
+    def test_getMediaInfoRecordsWithTorrents(self, getTorrentRecordsMock, findMediaInfoRecordMock, filterEpisodeTorrentsMock, loggingInfoMock):
         
         fakeMediaSearchQueries = {
             "fakeMediaInfoName1": ["fakeMediaInfoName1Query1", "fakeMediaInfoName1Query2", "fakeMediaInfoName1Query3"],
@@ -81,7 +81,7 @@ class TestLogicController(unittest.TestCase):
         # configure mocks
         getTorrentRecordsMock.return_value = fakeTorrentRecords
         findMediaInfoRecordMock.side_effect = [fakeMediaInfoRecords[0], fakeMediaInfoRecords[1], fakeMediaInfoRecords[2]]
-        filterSeasonTorrentsMock.side_effect = [["fakeTorrentTitle1", "fakeTorrentTitle3"], [], ["fakeTorrentTitle3"]]
+        filterEpisodeTorrentsMock.side_effect = [["fakeTorrentTitle1", "fakeTorrentTitle3"], [], ["fakeTorrentTitle3"]]
 
         # expected outputs
         #fakeMediaInfoRecords[0]["magnet"]
