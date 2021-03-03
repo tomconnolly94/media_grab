@@ -9,6 +9,7 @@ from interfaces import MediaIndexFileInterface, MailInterface, DownloadsInProgre
 
 def onSuccessfulTorrentAdd(queryRecord, updateableField, torrentMagnet, mode):
 
+	# notify MediaIndex file
 	MediaIndexFileInterface.writeMediaFile(queryRecord, updateableField)
 
 	# send email notification

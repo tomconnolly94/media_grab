@@ -4,14 +4,14 @@
 import os
 import json
 
-writeFile = None
+writeFile = True
 
 
 def updateMedia(mediaInfoRecords, queryRecord, updateableField):
 
 	for mediaRecord in mediaInfoRecords:
 		if mediaRecord["name"] == queryRecord["name"]:
-			mediaRecord["typeSpecificData"][updateableField] = queryRecord["typeSpecificData"][updateableField]
+			mediaRecord["typeSpecificData"][updateableField] = str(int(queryRecord["typeSpecificData"][updateableField]) + 1)
 			return mediaInfoRecords
 	return None
 

@@ -73,7 +73,7 @@ def updateFile(operation):
 def getDownloadingItems(mode):
     dipFileLocation = os.getenv("DOWNLOADS_IN_PROGRESS_FILE")
     
-    logging.info(f" DownloadsInProgress File: {dipFileLocation}")
+    logging.info(f"DownloadsInProgress File: {dipFileLocation}")
     with open(dipFileLocation, 'r') as dipFile:
         #load file contents to dict
         fileContent = dipFile.read()
