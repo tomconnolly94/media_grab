@@ -17,23 +17,6 @@ def getTPBProxySites():
     return domains
     
 
-def init(useProxyList):
-
-    if useProxyList:
-        sites = getTPBProxySites()
-
-        if os.getenv('ENVIRONMENT') == "production":
-            randomIndex = randint(1, len(sites))
-        else:
-            randomIndex = 0 # set random number for dev purposes
-        
-        #define global tpb object
-        global thePirateBay
-        chosenTPBBaseUrl = sites[randomIndex]
-    else:
-        chosenTPBBaseUrl = "https://thepiratebay33.org/"
-    
-
 def getTorrentRecords(queries):
 
     torrents = []

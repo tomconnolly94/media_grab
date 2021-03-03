@@ -2,17 +2,19 @@
 import unittest
 import mock
 from unittest.mock import mock_open
+import json
 
 # internal dependencies
 from interfaces import DownloadsInProgressFileInterface
-
+from data_types.ProgramMode import PROGRAM_MODE
+from data_types.ProgramModeMap import PROGRAM_MODE_MAP
 
 # constants
-openReadMockDataEmpty = '{ "tv_seasons": [], "tv_episodes": [], "fakeMediaType": [] }'
-openReadMockDataWithEntries = '{ "tv_seasons": [], "tv_episodes": [], "fakeMediaType": ["fakeMediaName1", "fakeMediaName2"] }'
+openReadMockDataEmpty = '{ "tv-seasons": [], "tv-episodes": [] }'
+openReadMockDataWithEntries = '{ "tv-seasons": [], "tv-episodes": ["fakeMediaName1", "fakeMediaName2"] }'
 #fake data
 fakeMediaName = "fakeMediaName"
-fakeMediaType = "fakeMediaType"
+fakeMediaType = PROGRAM_MODE.TV_EPISODES
 
 
 class TestDownloadsInProgressFileInterface(unittest.TestCase):
@@ -27,11 +29,11 @@ class TestDownloadsInProgressFileInterface(unittest.TestCase):
         DownloadsInProgressFileInterface.notifyDownloadStarted(fakeMediaName, fakeMediaType)
 
         actualLambda = updateFileMock.call_args.args[0]
-        media = { "tv_seasons": [], "tv_episodes": [], fakeMediaType: [] }
+        media = { "tv-seasons": [], "tv-episodes": [] }
         actualLambda(media)
 
-        self.assertEqual(1, len(media[fakeMediaType]))
-        self.assertEqual(fakeMediaName, media[fakeMediaType][0])
+        self.assertEqual(1, len(media["tv-episodes"]))
+        self.assertEqual(fakeMediaName, media["tv-episodes"][0])
 
 
     @mock.patch("interfaces.DownloadsInProgressFileInterface.updateFile")
@@ -44,46 +46,50 @@ class TestDownloadsInProgressFileInterface(unittest.TestCase):
         DownloadsInProgressFileInterface.notifyDownloadFinished(fakeMediaName, fakeMediaType)
 
         actualLambda = updateFileMock.call_args.args[0]
-        media = { "tv_seasons": [], "tv_episodes": [], fakeMediaType: [fakeMediaName] }
+        media = { "tv-seasons": [], "tv-episodes": [fakeMediaName] }
         actualLambda(media)
 
-        self.assertEqual(0, len(media[fakeMediaType]))
+        self.assertEqual(0, len(media["tv-episodes"]))
 
 
     @mock.patch("builtins.open", new_callable=mock_open, read_data=openReadMockDataEmpty)
     def test_updateFileAdd(self, openMock):
 
+        typeKey = PROGRAM_MODE_MAP[fakeMediaType]
+
         # prepare injectable operation
-        def operation(media, mediaName=fakeMediaName, mediaType=fakeMediaType):
-            media[mediaType].append(mediaName)
+        def operation(media, mediaName=fakeMediaName, typeKey=typeKey):
+            media[typeKey].append(mediaName)
             return media
 
         # run testable function
         DownloadsInProgressFileInterface.updateFile(operation)
 
-        expectedResultDict = { "tv_seasons": [], "tv_episodes": [], fakeMediaType: [fakeMediaName] }
+        expectedResultDict = { "tv-seasons": [], "tv-episodes": [fakeMediaName] }
         # get handle to mocked 'builtins.open' object 
         handle = openMock()
 
-        handle.write.assert_called_once_with(expectedResultDict)
+        handle.write.assert_called_once_with(json.dumps(expectedResultDict))
 
 
     @mock.patch("builtins.open", new_callable=mock_open, read_data=openReadMockDataWithEntries)
     def test_updateFileRemove(self, openMock):
 
+        typeKey = PROGRAM_MODE_MAP[fakeMediaType]
+
         # prepare injectable operation
-        def operation(media, mediaName="fakeMediaName1", mediaType=fakeMediaType):
-            media[mediaType].remove(mediaName)
+        def operation(media, mediaName="fakeMediaName1", typeKey=typeKey):
+            media[typeKey].remove(mediaName)
             return media
 
         # run testable function
         DownloadsInProgressFileInterface.updateFile(operation)
 
-        expectedResultDict = { "tv_seasons": [], "tv_episodes": [], fakeMediaType: ["fakeMediaName2"] }
+        expectedResultDict = { "tv-seasons": [], "tv-episodes": ["fakeMediaName2"] }
         # get handle to mocked 'builtins.open' object 
         handle = openMock()
 
-        handle.write.assert_called_once_with(expectedResultDict)
+        handle.write.assert_called_once_with(json.dumps(expectedResultDict))
 
 
 if __name__ == '__main__':

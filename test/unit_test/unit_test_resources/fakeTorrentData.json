@@ -1,5 +1,60 @@
 {
-    "torrents": [
+    "episodeTorrentData": [
+        
+        {
+            "itemText": "Rick.and.morty",
+            "passesFilter": false
+        },
+        {
+            "itemText": "Rick.and.Morty.Season.1",
+            "passesFilter": false
+        },
+        {
+            "itemText": "Rick.and.Morty.episode.1",
+            "passesFilter": false
+        },
+        {
+            "itemText": "Rick.and.Morty.season.3.episode.1",
+            "passesFilter": false
+        },
+        {
+            "itemText": "Rick.and.Morty.Season.3",
+            "passesFilter": false
+        },
+        {
+            "itemText": "Rick..and.Morty.Season.3",
+            "passesFilter": false
+        },
+        {
+            "itemText": "Rick.and.Morty.S03E03.1080p.WEBRip.x264-STRiFE",
+            "passesFilter": false
+        },
+        {
+            "itemText": "Rick.and.Morty.S03E02.HDTV.x264-BATV",
+            "passesFilter": true
+        },
+        {
+            "itemText": "Rick.and.Morty.S03E02.720p.HDTV.x264-BATV[ettv]",
+            "passesFilter": true
+        },
+        {
+            "itemText": "Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE",
+            "passesFilter": true
+        },
+        {
+            "itemText": "Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE",
+            "passesFilter": true
+        },
+        {
+            "itemText": " Rick and Morty S03E02 1080p PT-BR Subs Tocatoon ",
+            "passesFilter": true
+        },
+        {
+            "itemText": "Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon ",
+            "passesFilter": true
+        }
+    ],
+    "seasonTorrentData": [
         {
             "itemText": "Rick.and.morty",
             "passesFilter": false

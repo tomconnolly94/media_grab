@@ -6,30 +6,7 @@ import logging
 from num2words import num2words
 
 
-def filterSeasonTorrents(torrentTitles, mediaData):
-
-	if not torrentTitles:
-		return []
-
-	name = mediaData["name"]
-	relevantSeason = str(int(mediaData["typeSpecificData"]["latestSeason"]))
-
-	seasonRegex = fr''
-
-	for word in name.split():
-		seasonRegex += word + '.{0,3}'
-	
-	seasonRegex += r'(?:season|s).{0,3}\d*'
-	seasonRegex += f'(?:{relevantSeason}|{num2words(relevantSeason)})(?!.*episode).*$'
-
-	logging.info(f"seasonRegex: {seasonRegex}")
-
-	filteredTorrents = [ torrentTitle for torrentTitle in torrentTitles if re.search(seasonRegex, torrentTitle, re.IGNORECASE)]
-
-	return filteredTorrents
-
-
-def filterEpisodeTorrentPageUrls(torrentPageUrls, mediaData):
+def filterEpisodeTorrents(torrentPageUrls, mediaData):
 
 	if not torrentPageUrls:
 		return []
@@ -37,11 +14,35 @@ def filterEpisodeTorrentPageUrls(torrentPageUrls, mediaData):
 	name = mediaData["name"]
 	nameFirstLetter = name[0].lower()
 	restOfName = name[1:]
-	relevantSeason = mediaData["typeSpecificData"]["latestSeason"]
-	relevantEpisode = mediaData["typeSpecificData"]["latestEpisode"]
+	restOfName = restOfName.replace(" ", "\\D*")
+	relevantSeason = mediaData["typeSpecificData"]["latestSeason"].zfill(2)
+	relevantEpisode = mediaData["typeSpecificData"]["latestEpisode"].zfill(2)
 
-	episodeRegex = fr'[{nameFirstLetter.upper()}|{nameFirstLetter}]{restOfName}\D*[Ss]0{relevantSeason}[Ee]0{relevantEpisode}'
+	episodeRegex = rf"[{nameFirstLetter.upper()}|{nameFirstLetter}]{restOfName}\D*[Ss]{relevantSeason}[Ee]{relevantEpisode}"
 	logging.info(f"episodeRegex: {episodeRegex}")
-	episodeRegex = re.compile(episodeRegex)
+	episodeRegex = re.compile(episodeRegex, flags=re.IGNORECASE | re.MULTILINE)
 	filteredTorrentPageUrls = list(filter(episodeRegex.search, torrentPageUrls))
 	return filteredTorrentPageUrls
+
+
+# def filterSeasonTorrents(torrentTitles, mediaData):
+
+# 	if not torrentTitles:
+# 		return []
+
+# 	name = mediaData["name"]
+# 	relevantSeason = str(int(mediaData["typeSpecificData"]["latestSeason"]))
+
+# 	seasonRegex = fr''
+
+# 	for word in name.split():
+# 		seasonRegex += word + '.{0,3}'
+	
+# 	seasonRegex += r'(?:season|s).{0,3}\d*'
+# 	seasonRegex += f'(?:{relevantSeason}|{num2words(relevantSeason)})(?!.*episode).*$'
+
+# 	logging.info(f"seasonRegex: {seasonRegex}")
+
+# 	filteredTorrents = [ torrentTitle for torrentTitle in torrentTitles if re.search(seasonRegex, torrentTitle, re.IGNORECASE)]
+
+# 	return filteredTorrents

@@ -60,7 +60,6 @@ def main(argv):
 
 	# catch all exceptions so they are always reported
 	try:
-		TPBInterface.init(False)
 		QBittorrentInterface.init()
 		mediaInfoRecords = MediaIndexFileInterface.loadMediaFile() # information about the wanted media
 		LogicController.runProgramLogic(mediaInfoRecords, mode)

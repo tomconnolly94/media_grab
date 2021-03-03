@@ -54,18 +54,13 @@ class TestLogicController(unittest.TestCase):
             "fakeMediaInfoName1": ["fakeMediaInfoName1Query1", "fakeMediaInfoName1Query2", "fakeMediaInfoName1Query3"],
             "fakeMediaInfoName2": ["fakeMediaInfoName2Query1", "fakeMediaInfoName2Query2", "fakeMediaInfoName2Query3"],
             "fakeMediaInfoName3": ["fakeMediaInfoName3Query1", "fakeMediaInfoName3Query2", "fakeMediaInfoName3Query3"]
-        }
-
-        class TorrentRecordMock(object):
-            def __init__(self, title, magnetLink):
-                self.title = title
-                self.magnet = magnetLink                
+        }              
 
         fakeTorrentRecords = [
-            TorrentRecordMock("fakeTorrentTitle1", "fakeTorrentMagnetLink1"),
-            TorrentRecordMock("fakeTorrentTitle2", "fakeTorrentMagnetLink2"),
-            TorrentRecordMock("fakeTorrentTitle3", "fakeTorrentMagnetLink3"),
-            TorrentRecordMock("fakeTorrentTitle4", "fakeTorrentMagnetLink4")
+            { "name": "fakeTorrentTitle1", "magnet": "fakeTorrentMagnetLink1", "seeders": 4 },
+            { "name": "fakeTorrentTitle2", "magnet": "fakeTorrentMagnetLink2", "seeders": 6 },
+            { "name": "fakeTorrentTitle3", "magnet": "fakeTorrentMagnetLink3", "seeders": 8 },
+            { "name": "fakeTorrentTitle4", "magnet": "fakeTorrentMagnetLink4", "seeders": 10 }
         ]
 
         fakeMediaInfoRecords = [
@@ -98,8 +93,6 @@ class TestLogicController(unittest.TestCase):
         actualOutputMediaInfoRecords = LogicController.getMediaInfoRecordsWithTorrents(fakeMediaSearchQueries, fakeMediaInfoRecords)
 
         # mock asserts
-        calls = [ call(f'torrentInfo: {fakeTorrentRecords[0].magnet}'), call(f'torrentInfo: {fakeTorrentRecords[2].magnet}') ]
-        loggingInfoMock.assert_has_calls(calls)
 
         #TODO: finish implementation of this test function
         self.assertEqual(expectedOutputMediaInfoRecords, actualOutputMediaInfoRecords)

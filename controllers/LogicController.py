@@ -31,7 +31,8 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
         #filter torrentRecords by applying regex to torrent titles
         mediaInfoRecord = findMediaInfoRecord(mediaInfoRecords, mediaInfoName)
         torrentTitles = [ torrent["name"] for torrent in torrentRecords ]
-        filteredTorrentTitles = TorrentFilterController.filterSeasonTorrents(torrentTitles, mediaInfoRecord)
+        filteredTorrentTitles = TorrentFilterController.filterEpisodeTorrentPageUrls(torrentTitles, mediaInfoRecord)
+        logging.info(f"{len(torrentTitles)} torrents filtered down to {len(filteredTorrentTitles)}")
 
         #get list of filtered torrent objects
         filteredTorrents = [ torrent for torrent in torrentRecords if torrent["name"] in filteredTorrentTitles ]

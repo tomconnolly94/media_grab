@@ -16,11 +16,9 @@ def initTorrentDownload(torrentMagnet):
 
     torrentMagnet = torrentMagnet.replace(" ", "+")
 
-    print(torrentMagnet)
     try:
         qb.download_from_link([torrentMagnet])
         return True
-    # except (UnsupportedMediaType415Error, TorrentFileNotFoundError, TorrentFilePermissionError) as torrentFailedException:
-    except Exception as torrentFailedException:    
-        print(torrentFailedException)
+    except Exception as torrentFailedException:
+		logging.error("Exception occurred", exc_info=True)
         return False

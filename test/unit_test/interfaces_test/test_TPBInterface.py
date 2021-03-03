@@ -8,19 +8,6 @@ from interfaces import TPBInterface
 
 class TestTPBInterface(unittest.TestCase):
 
-    @mock.patch("interfaces.TPBInterface.TPB")
-    @mock.patch("os.getenv")
-    @mock.patch("interfaces.TPBInterface.getTPBProxySites")
-    def test_initDev(self, getTPBProxySitesMock, osGetEnvMock, tpbMock):
-
-        fakeProxySites = ["proxyTPBUrl1", "proxyTPBUrl2", "proxyTPBUrl3"]
-        getTPBProxySitesMock.return_value = fakeProxySites
-        osGetEnvMock.return_value = "notProduction"
-
-        TPBInterface.init(True)
-
-        tpbMock.assert_called_once_with(fakeProxySites[0])
-
     
     @mock.patch("requests.get")
     def test_getTPBProxySites(self, getMock):
@@ -41,7 +28,7 @@ class TestTPBInterface(unittest.TestCase):
         self.assertEqual(expectedProxySites, actualProxySites)
 
 
-    @mock.patch("interfaces.TPBInterface.query")
+    @mock.patch("interfaces.TPBInterface.queryAPI")
     def test_getTorrentRecords(self, queryMock):
         TPBQueryResponses = [[], ["torrent1", "torrent2", "torrent3"]]
         queryMock.side_effect = TPBQueryResponses
