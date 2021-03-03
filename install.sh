@@ -7,7 +7,7 @@ virtualenv venv
 source venv/bin/activate
 
 # install pip requirements
-pip install requirements.txt
+pip install -r requirements.txt
 
 # create and fill env file
 touch .env
@@ -22,7 +22,6 @@ MAIL_PASSWORD=mail_password
 ENVIRONMENT=production
 DUMP_COMPLETE_DIR=./dump_complete_dir
 TV_TARGET_DIR=./tv_target_dir
-... 
 EOL
 
 # create data files
@@ -31,14 +30,15 @@ mkdir data
 touch data/MediaIndex.json
 cat >data/MediaIndex.json <<EOL
 {"media": []}
-... 
 EOL
 
 touch data/DownloadsInProgress.json
 cat >data/DownloadsInProgress.json <<EOL
 {"tv-seasons": [], "tv-episodes": []}
-... 
 EOL
+
+# create logs directory
+mkdir logs
 
 echo "Please remember to update your new .env file."
 
