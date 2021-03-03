@@ -116,7 +116,13 @@ def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, tar
             episodeNumber = extractEpisodeNumber(completedDownloadDirectoryName)
             extension = extractExtension(completedDownloadDirectoryName)
             seasonDir = os.path.join(tvShowDir, f"Season {seasonNumber}")
-            
+
+            # create season directory if it does not exist
+            if not FolderInterface.directoryExists(seasonDir):
+                FolderInterface.createDirectory(seasonDir)
+
+            prospectiveFile = os.path.join(seasonDir, f"{showName} - S0{seasonNumber}E0{episodeNumber}{extension}")
+                        
             if not FolderInterface.directoryExists(seasonDir):
                 # move file to season directory
                 dump_complete_dir = os.getenv("DUMP_COMPLETE_DIR")
