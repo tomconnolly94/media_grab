@@ -40,6 +40,8 @@ EOL
 # create logs directory
 mkdir logs
 
+echo ""
 echo "Please remember to update your new .env file."
+echo "All done. Enjoy! :)"
 
 # setup cronjob to run program periodically
