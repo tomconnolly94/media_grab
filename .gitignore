@@ -11,3 +11,4 @@ data/DownloadsInProgress.json
 # dev dir
 test/dummy_directories/dump_complete
 test/dummy_directories/tv
+test/dummy_directories/recycle_bin

@@ -4,6 +4,7 @@
 import os
 import logging
 import re
+import shutil
 
 # internal dependencies
 from data_types.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP, PROGRAM_MODE_MAP
@@ -96,7 +97,7 @@ def auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir):
                 # move file to season directory
                 existingFile = os.path.join(os.getenv('DUMP_COMPLETE_DIR'), completedDownloadFileName)
                 os.rename(existingFile, prospectiveFile)
-                DownloadsInProgressFileInterface.notifyDownloadFinished(completedDownloadFileName, PROGRAM_MODE_MAP[PROGRAM_MODE.TV_EPISODES])
+                DownloadsInProgressFileInterface.notifyDownloadFinished(completedDownloadFileName, PROGRAM_MODE.TV_EPISODES)
                 logging.info(f"Moved '{existingFile}' to '{prospectiveFile}'")
 
             else:
@@ -146,6 +147,15 @@ def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, tar
                 # move file to season directory
                 originalFileLocation = os.path.join(dumpCompleteDir, completedDownloadDirectoryName, episodeFile.name)
                 os.rename(originalFileLocation, prospectiveFile)
+                DownloadsInProgressFileInterface.notifyDownloadFinished(completedDownloadDirectoryName, PROGRAM_MODE.TV_EPISODES)
+                logging.info(f"Moved '{originalFileLocation}' to '{prospectiveFile}'")
+
+                ## Try to remove tree; if failed show an error using try...except on screen
+                try:
+                    shutil.move(os.path.join(dumpCompleteDir, completedDownloadDirectoryName), os.getenv("RECYCLE_BIN_DIR"))
+                except OSError:
+                    logging.error("Exception occurred", exc_info=True)
+
             else:
                 # report problem
                 reportItemAlreadyExists(prospectiveFile, completedDownloadDirectoryName)

@@ -68,6 +68,7 @@ def updateFile(operation):
         #write new contents of file
         dipFile.seek(0)
         dipFile.write(json.dumps(media))
+        dipFile.truncate()
 
 
 def getDownloadingItems(mode):
