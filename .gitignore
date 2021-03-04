@@ -1,12 +1,13 @@
-#python build files
+# python build files
 venv
 *.pyc
 .env
 logs/*
 
-#data files
+# data files
 data/MediaIndex.json
 data/DownloadsInProgress.json
 
-#dev dir
-dump_complete
+# dev dir
+test/dummy_directories/dump_complete
+test/dummy_directories/tv

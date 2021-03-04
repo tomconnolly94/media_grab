@@ -60,6 +60,12 @@ def reportItemAlreadyExists(newItemLocation, torrentName):
     logging.error(errorString)
     MailInterface.sendMail("Houston we have a problem", errorString)
 
+
+def getLargestFileInDir(directory):
+    filesInDir = list(os.scandir(directory))
+    filesInDir = sorted(filesInDir, key=lambda file: -1 * int(os.path.getsize(f"{directory}/{file.name}")))
+    return filesInDir[0]
+
     
 def auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir):
     # deal with files
@@ -99,14 +105,18 @@ def auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir):
 
 
 def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, targetDir):
+
+    dumpCompleteDir = os.getenv("DUMP_COMPLETE_DIR")
+
     # deal with directories
     for completedDownloadDirectory in completedDownloadDirectories:
         completedDownloadDirectoryName = completedDownloadDirectory.name
 
-        if completedDownloadDirectory in filteredDownloadingItems:
+        if completedDownloadDirectoryName in filteredDownloadingItems:
             # extract show name
-            showName = extractShowName(completedDownloadDirectoryName)
+            showName = extractShowName(completedDownloadDirectoryName).capitalize()
             tvShowDir = os.path.join(targetDir, showName)
+            episodeFile = ""
 
             # create tv show directory if it does not exist
             if not FolderInterface.directoryExists(tvShowDir):
@@ -114,8 +124,17 @@ def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, tar
             
             seasonNumber = extractSeasonNumber(completedDownloadDirectoryName)
             episodeNumber = extractEpisodeNumber(completedDownloadDirectoryName)
-            extension = extractExtension(completedDownloadDirectoryName)
             seasonDir = os.path.join(tvShowDir, f"Season {seasonNumber}")
+
+            # if an episode number was extracted from the directory name we can safely assume that we have 
+            # an episode file inside (probably the largest file)
+            if episodeNumber:
+                episodeFile = getLargestFileInDir(os.path.join(dumpCompleteDir, completedDownloadDirectoryName))
+            else:
+                # TODO: eventually we should deal with the download of a full season directoy, unnecessary at this point, for now we can assume that if no episode can be found
+                return None
+
+            extension = extractExtension(episodeFile)
 
             # create season directory if it does not exist
             if not FolderInterface.directoryExists(seasonDir):
@@ -123,13 +142,13 @@ def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, tar
 
             prospectiveFile = os.path.join(seasonDir, f"{showName} - S0{seasonNumber}E0{episodeNumber}{extension}")
                         
-            if not FolderInterface.directoryExists(seasonDir):
+            if not FolderInterface.fileExists(prospectiveFile):
                 # move file to season directory
-                dump_complete_dir = os.getenv("DUMP_COMPLETE_DIR")
-                os.rename(f"{dump_complete_dir}/{completedDownloadDirectory}", seasonDir)
+                originalFileLocation = os.path.join(dumpCompleteDir, completedDownloadDirectoryName, episodeFile.name)
+                os.rename(originalFileLocation, prospectiveFile)
             else:
                 # report problem
-                reportItemAlreadyExists(seasonDir, completedDownloadDirectory)
+                reportItemAlreadyExists(seasonDir, completedDownloadDirectoryName)
 
 
 def auditDumpCompleteDir(mode, filteredDownloadingItems):
