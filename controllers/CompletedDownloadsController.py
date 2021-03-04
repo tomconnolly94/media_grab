@@ -74,7 +74,7 @@ def auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir):
 
         if completedDownloadFileName in filteredDownloadingItems:
             # extract show name
-            showName = extractShowName(completedDownloadFileName)
+            showName = extractShowName(completedDownloadFileName).capitalize()
             tvShowDir = os.path.join(targetDir, showName)
 
             # create tv show directory if it does not exist
@@ -94,7 +94,7 @@ def auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir):
             
             if not FolderInterface.fileExists(prospectiveFile):
                 # move file to season directory
-                existingFile = f"{os.getenv('DUMP_COMPLETE_DIR')}{completedDownloadFileName}"
+                existingFile = os.path.join(os.getenv('DUMP_COMPLETE_DIR'), completedDownloadFileName)
                 os.rename(existingFile, prospectiveFile)
                 DownloadsInProgressFileInterface.notifyDownloadFinished(completedDownloadFileName, PROGRAM_MODE_MAP[PROGRAM_MODE.TV_EPISODES])
                 logging.info(f"Moved '{existingFile}' to '{prospectiveFile}'")
@@ -148,7 +148,7 @@ def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, tar
                 os.rename(originalFileLocation, prospectiveFile)
             else:
                 # report problem
-                reportItemAlreadyExists(seasonDir, completedDownloadDirectoryName)
+                reportItemAlreadyExists(prospectiveFile, completedDownloadDirectoryName)
 
 
 def auditDumpCompleteDir(mode, filteredDownloadingItems):

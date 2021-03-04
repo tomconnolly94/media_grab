@@ -86,8 +86,26 @@ class TestLogicController(unittest.TestCase):
         # expected outputs
         #fakeMediaInfoRecords[0]["magnet"]
         expectedOutputMediaInfoRecords = [
-            {'magnet': 'fakeTorrentMagnetLink1', 'name': 'fakeMediaInfoName1', 'typeSpecificData': {'latestEpisode': 1, 'latestSeason': 1}},
-            {'magnet': 'fakeTorrentMagnetLink3', 'name': 'fakeMediaInfoName3', 'typeSpecificData': {'latestEpisode': 1, 'latestSeason': 1}}
+            {
+                'magnet': 'fakeTorrentMagnetLink1', 
+                'name': 'fakeMediaInfoName1', 
+                'torrentName': 'fakeTorrentTitle1',
+                'typeSpecificData': 
+                {
+                    'latestEpisode': 1, 
+                    'latestSeason': 1
+                }
+            },
+            {
+                'magnet': 'fakeTorrentMagnetLink3', 
+                'name': 'fakeMediaInfoName3', 
+                'torrentName': 'fakeTorrentTitle3',
+                'typeSpecificData': 
+                {
+                    'latestEpisode': 1, 
+                    'latestSeason': 1
+                }
+            }
         ]
 
         actualOutputMediaInfoRecords = LogicController.getMediaInfoRecordsWithTorrents(fakeMediaSearchQueries, fakeMediaInfoRecords)
@@ -160,8 +178,8 @@ class TestLogicController(unittest.TestCase):
         initTorrentDownloadMock.assert_has_calls(calls)
 
         calls = [ 
-            call(fakeMediaInfoRecordsWithTorrents[0], "latestSeason", "fakeMagnetLink", activeMode), 
-            call(fakeMediaInfoRecordsWithTorrents[1],"latestSeason", "fakeMagnetLink", activeMode) ]
+            call(fakeMediaInfoRecordsWithTorrents[0], "latestEpisode", "fakeMagnetLink", activeMode), 
+            call(fakeMediaInfoRecordsWithTorrents[1],"latestEpisode", "fakeMagnetLink", activeMode) ]
         onSuccessfulTorrentAddMock.assert_has_calls(calls)
 
 

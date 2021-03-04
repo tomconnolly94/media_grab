@@ -7,7 +7,7 @@ from interfaces import MediaIndexFileInterface
 
 class TestMediaIndexFileInterface(unittest.TestCase):
 
-    def test_sendMailDev(self):
+    def test_updateMedia(self):
 
         # config inputs        
         fakeMediaInfoRecords = [
@@ -28,21 +28,19 @@ class TestMediaIndexFileInterface(unittest.TestCase):
         relevantRecord = 1
         relevantField = "latestSeason"
         queryRecord = fakeMediaInfoRecords[0]
-        queryRecord["typeSpecificData"][relevantField] = 2
 
         # called testable method
         updatedMedia = MediaIndexFileInterface.updateMedia(fakeMediaInfoRecords, queryRecord, relevantField)
 
-        self.assertEqual(2, updatedMedia[0]["typeSpecificData"][relevantField])
+        self.assertEqual("2", updatedMedia[0]["typeSpecificData"][relevantField])
 
         relevantRecord = 1
         relevantField = "latestEpisode"
         queryRecord = fakeMediaInfoRecords[relevantRecord]
-        queryRecord["typeSpecificData"]["latestEpisode"] = 2
         # called testable method
         updatedMedia = MediaIndexFileInterface.updateMedia(fakeMediaInfoRecords, queryRecord, relevantField)
 
-        self.assertEqual(2, updatedMedia[relevantRecord]["typeSpecificData"][relevantField])
+        self.assertEqual("2", updatedMedia[relevantRecord]["typeSpecificData"][relevantField])
 
         nonExistentRecord = {
             "name": "fakeMediaInfoName4",

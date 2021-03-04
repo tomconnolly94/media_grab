@@ -18,7 +18,8 @@ class TestNewTorrentController(unittest.TestCase):
             "typeSpecificData": {
                 "latestSeason": 1,
                 "latestEpisode": 1
-            }
+            },
+            "torrentName": "fakeTorrentName"
         }
         fakeUpdateableField = "latestSeason"
         fakeTorrentMagnetLink = "fakeTorrentMagnet"
@@ -28,8 +29,8 @@ class TestNewTorrentController(unittest.TestCase):
         
         # mock function asserts
         writeMediaFileMock.assert_called_once_with(fakeQueryRecord, fakeUpdateableField)
-        sendNewTorrentMailMock.assert_called_once_with(fakeQueryRecord['name'], f"{fakeUpdateableField} {fakeQueryRecord['typeSpecificData']['latestSeason']}", fakeTorrentMagnetLink)
-        notifyDownloadStartedMock.assert_called_once_with(fakeQueryRecord["name"], activeMode)
+        sendNewTorrentMailMock.assert_called_once_with(fakeQueryRecord['torrentName'], f"{fakeUpdateableField} {fakeQueryRecord['typeSpecificData']['latestSeason']}", fakeTorrentMagnetLink)
+        notifyDownloadStartedMock.assert_called_once_with(fakeQueryRecord["torrentName"], activeMode)
 
 
 if __name__ == '__main__':

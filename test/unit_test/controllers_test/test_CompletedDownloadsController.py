@@ -10,8 +10,8 @@ from controllers import CompletedDownloadsController
 from data_types.ProgramMode import PROGRAM_MODE 
 
 # fake directories for use across multiple tests
-fakeTargetTvDir = "test/dummy_directories/tv/"
-fakeDumpCompleteDir = "test/dummy_directories/dump_complete/"
+fakeTargetTvDir = "test/dummy_directories/tv"
+fakeDumpCompleteDir = "test/dummy_directories/dump_complete"
 
 # re-usable getEnvMock function
 def getEnvMockFunc(param):
@@ -108,7 +108,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         # config fake data
         fakeEpisodeNumber = 2
         fakeSeasonNumber = 1
-        fakeTVShowName = "fakeTVShowName"
+        fakeTVShowName = "Faketvshowname"
         fakeFile1 = f"{fakeTVShowName}.S0{fakeSeasonNumber}.E0{fakeEpisodeNumber}.mp4"
         class FakeFile:
             def __init__(self, name):
@@ -132,7 +132,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         CompletedDownloadsController.auditFiles(fakeFiles, fakeFilteredDownloadingItems, fakeTargetTvDir)
 
         # config expected values
-        expectedProspectiveFile = f"{fakeTargetTvDir}{fakeTVShowName}/Season {fakeSeasonNumber}/{fakeTVShowName} - S0{fakeSeasonNumber}E0{fakeEpisodeNumber}.mp4"
+        expectedProspectiveFile = os.path.join(fakeTargetTvDir, fakeTVShowName, f"Season {fakeSeasonNumber}", f"{fakeTVShowName} - S0{fakeSeasonNumber}E0{fakeEpisodeNumber}.mp4")
 
         # asserts
         createDirectoryMock.assert_not_called()
@@ -154,13 +154,10 @@ class TestCompletedDownloadsController(unittest.TestCase):
 
         CompletedDownloadsController.auditFiles(fakeFiles, fakeFilteredDownloadingItems, fakeTargetTvDir)
 
-        # config expected values
-        expectedProspectiveFile = f"{fakeTargetTvDir}{fakeTVShowName}/Season {fakeSeasonNumber}/{fakeTVShowName} - S0{fakeSeasonNumber}E0{fakeEpisodeNumber}.mp4"
-
         # asserts
         createDirectoryMock.assert_not_called()
         reportItemAlreadyExistsMock.assert_not_called()
-        osRenameMock.assert_called_with(f"{fakeDumpCompleteDir}{fakeFile1}", expectedProspectiveFile)
+        osRenameMock.assert_called_with(os.path.join(fakeDumpCompleteDir, fakeFile1), expectedProspectiveFile)
 
         # Case 2 end ############################################################################
 
@@ -179,14 +176,13 @@ class TestCompletedDownloadsController(unittest.TestCase):
         CompletedDownloadsController.auditFiles(fakeFiles, fakeFilteredDownloadingItems, fakeTargetTvDir)
 
         # config expected values
-        expectedProspectiveFile = f"{fakeTargetTvDir}{fakeTVShowName}/Season {fakeSeasonNumber}/{fakeTVShowName} - S0{fakeSeasonNumber}E0{fakeEpisodeNumber}.mp4"
         expectedSeasonDir = os.path.join(fakeTargetTvDir, fakeTVShowName, f"Season {fakeSeasonNumber}")
         expectedCreateDirectoryCalls = [call(expectedSeasonDir)]
 
         # asserts
         createDirectoryMock.assert_has_calls(expectedCreateDirectoryCalls)
         reportItemAlreadyExistsMock.assert_not_called()
-        osRenameMock.assert_called_with(f"{fakeDumpCompleteDir}{fakeFile1}", expectedProspectiveFile)
+        osRenameMock.assert_called_with(os.path.join(fakeDumpCompleteDir, fakeFile1), expectedProspectiveFile)
 
         # Case 3 end ############################################################################
 
@@ -205,7 +201,6 @@ class TestCompletedDownloadsController(unittest.TestCase):
         CompletedDownloadsController.auditFiles(fakeFiles, fakeFilteredDownloadingItems, fakeTargetTvDir)
 
         # config expected values
-        expectedProspectiveFile = f"{fakeTargetTvDir}{fakeTVShowName}/Season {fakeSeasonNumber}/{fakeTVShowName} - S0{fakeSeasonNumber}E0{fakeEpisodeNumber}.mp4"
         expectedSeasonDir = os.path.join(fakeTargetTvDir, fakeTVShowName, f"Season {fakeSeasonNumber}")
         expectedTvDir = os.path.join(fakeTargetTvDir, fakeTVShowName)
         expectedCreateDirectoryCalls = [call(expectedSeasonDir), call(expectedTvDir)]
@@ -213,45 +208,63 @@ class TestCompletedDownloadsController(unittest.TestCase):
         # asserts
         createDirectoryMock.assert_has_calls(expectedCreateDirectoryCalls)
         reportItemAlreadyExistsMock.assert_not_called()
-        osRenameMock.assert_called_with(f"{fakeDumpCompleteDir}{fakeFile1}", expectedProspectiveFile)
+        osRenameMock.assert_called_with(os.path.join(fakeDumpCompleteDir, fakeFile1), expectedProspectiveFile)
 
         # Case 4 end ############################################################################
 
 
     @mock.patch("controllers.CompletedDownloadsController.reportItemAlreadyExists")
     @mock.patch("os.rename")
+    @mock.patch("interfaces.FolderInterface.fileExists")
+    @mock.patch("controllers.CompletedDownloadsController.extractExtension")
+    @mock.patch("controllers.CompletedDownloadsController.getLargestFileInDir")
+    @mock.patch("controllers.CompletedDownloadsController.extractEpisodeNumber")
     @mock.patch("controllers.CompletedDownloadsController.extractSeasonNumber")
     @mock.patch("interfaces.FolderInterface.directoryExists")
     @mock.patch("interfaces.FolderInterface.createDirectory")
     @mock.patch('controllers.CompletedDownloadsController.extractShowName')
     @mock.patch('os.getenv')
-    def test_auditDirectories(self, getEnvMock, extractShowNameMock, createDirectoryMock, directoryExistsMock, extractSeasonNumberMock, osRenameMock, reportItemAlreadyExistsMock):
+    def test_auditDirectories(self, getEnvMock, extractShowNameMock, createDirectoryMock, directoryExistsMock, extractSeasonNumberMock, extractEpisodeNumberMock, getLargestFileInDirMock, extractExtensionMock, fileExistsMock, osRenameMock, reportItemAlreadyExistsMock):
+
+        class FakeFileSystemItem:
+            
+            def __init__(self, dirName):
+                self.name = dirName
 
         # config fake data
         fakeSeasonNumber = 1
+        fakeEpisodeNumber = 1
         fakeTVShowName = "fake TV Show Name"
-        fakeDir1 = f"{fakeTVShowName}.S0{fakeSeasonNumber}"
+        fakeDirName = f"{fakeTVShowName}.S0{fakeSeasonNumber}.E0{fakeEpisodeNumber}"
+        fakeDir1 = FakeFileSystemItem(fakeDirName)
+        fakeExtension = ".mp4"
+        fakeFile1 = f"{fakeDirName}{fakeExtension}"
         fakeDirs = [ fakeDir1 ]
-        fakeFilteredDownloadingItems = [ fakeDir1 ]
+        fakeFilteredDownloadingItems = [ fakeDirName ]
 
         # config mocks
         getEnvMock.side_effect = getEnvMockFunc
         extractShowNameMock.return_value = fakeTVShowName
         directoryExistsMock.side_effect = [ True, True ]
+        fileExistsMock.return_value = True
         extractSeasonNumberMock.return_value = fakeSeasonNumber
+        extractEpisodeNumberMock.return_value = fakeEpisodeNumber
+        getLargestFileInDirMock.return_value = FakeFileSystemItem(f"{fakeDirName}.mp4")
+        extractExtensionMock.return_value = ".mp4"
 
+        # config expected values
+        expectedProspectiveFile = os.path.join(fakeTargetTvDir, fakeTVShowName.capitalize(), f"Season {fakeSeasonNumber}", f"{fakeTVShowName.capitalize()} - S0{fakeSeasonNumber}E0{fakeEpisodeNumber}{fakeExtension}")
 
         # Case 1 start ############################################################################
         #   * show dir exists
         #   * season dir exists
+        #   * file exists
         CompletedDownloadsController.auditDirectories(fakeDirs, fakeFilteredDownloadingItems, fakeTargetTvDir)
 
-        # config expected values
-        expectedProspectiveDirectory = f"{fakeTargetTvDir}{fakeTVShowName}/Season {fakeSeasonNumber}"
 
         # asserts
         createDirectoryMock.assert_not_called()
-        reportItemAlreadyExistsMock.assert_called_with(expectedProspectiveDirectory, fakeDir1)
+        reportItemAlreadyExistsMock.assert_called_with(expectedProspectiveFile, fakeDirName)
         osRenameMock.assert_not_called()
 
         # Case 1 end ############################################################################
@@ -259,47 +272,73 @@ class TestCompletedDownloadsController(unittest.TestCase):
 
         # Case 2 start ############################################################################
         #   * show dir exists
+        #   * season dir exists
+        #   * file does not exist
+
+        # reconfig mocks
+        directoryExistsMock.side_effect = [ True, True ]
+        fileExistsMock.return_value = False
+        reportItemAlreadyExistsMock.reset_mock()
+        expectedOriginalFileLocation = os.path.join(fakeDumpCompleteDir, fakeDirName, fakeFile1)
+
+        CompletedDownloadsController.auditDirectories(fakeDirs, fakeFilteredDownloadingItems, fakeTargetTvDir)
+
+        # asserts
+        createDirectoryMock.assert_not_called()
+        reportItemAlreadyExistsMock.assert_not_called()
+        osRenameMock.assert_called_with(expectedOriginalFileLocation, expectedProspectiveFile)
+
+        # Case 2 end ############################################################################
+
+        # Case 3 start ############################################################################
+        #   * show dir exists
         #   * season dir does not exist
+        #   * file does not exist
 
         # reconfig mocks
         directoryExistsMock.side_effect = [ True, False ]
+        fileExistsMock.return_value = False
         reportItemAlreadyExistsMock.reset_mock()
 
         CompletedDownloadsController.auditDirectories(fakeDirs, fakeFilteredDownloadingItems, fakeTargetTvDir)
 
         # config expected values
-        expectedSeasonDir = os.path.join(fakeTargetTvDir, fakeTVShowName, f"Season {fakeSeasonNumber}")
+        # expectedSeasonDir = os.path.join(seasonDir, f"{showName} - S0{seasonNumber}E0{episodeNumber}{extension}")
+
+        expectedSeasonDir = os.path.join(fakeTargetTvDir, fakeTVShowName.capitalize(), f"Season {fakeSeasonNumber}")
+        expectedCreateDirectoryCalls = [call(expectedSeasonDir)]
 
         # asserts
-        createDirectoryMock.assert_not_called()
+        createDirectoryMock.assert_has_calls(expectedCreateDirectoryCalls)
         reportItemAlreadyExistsMock.assert_not_called()
-        osRenameMock.assert_called_with(f"{fakeDumpCompleteDir}/{fakeDir1}", expectedSeasonDir)
+        osRenameMock.assert_called_with(expectedOriginalFileLocation, expectedProspectiveFile)
 
-        # Case 2 end ############################################################################
+        # Case 3 end ############################################################################
 
 
-        # Case 3 start ############################################################################
+        # Case 4 start ############################################################################
         #   * show dir does not exist
         #   * season dir does not exist
+        #   * file does not exist
 
         # reconfig mocks
         directoryExistsMock.side_effect = [ False, False ]
+        fileExistsMock.return_value = False
         reportItemAlreadyExistsMock.reset_mock()
         osRenameMock.reset_mock()
 
         CompletedDownloadsController.auditDirectories(fakeDirs, fakeFilteredDownloadingItems, fakeTargetTvDir)
 
         # config expected values
-        expectedSeasonDir = os.path.join(fakeTargetTvDir, fakeTVShowName, f"Season {fakeSeasonNumber}")
-        expectedTvDir = os.path.join(fakeTargetTvDir, fakeTVShowName)
-        expectedCreateDirectoryCalls = [call(expectedTvDir)]
+        expectedTvDir = os.path.join(fakeTargetTvDir, fakeTVShowName.capitalize())
+        expectedCreateDirectoryCalls = [ call(expectedTvDir), call(expectedSeasonDir) ]
 
         # asserts
         createDirectoryMock.assert_has_calls(expectedCreateDirectoryCalls)
         reportItemAlreadyExistsMock.assert_not_called()
-        osRenameMock.assert_called_with(f"{fakeDumpCompleteDir}/{fakeDir1}", expectedSeasonDir)
+        osRenameMock.assert_called_with(expectedOriginalFileLocation, expectedProspectiveFile)
 
-        # Case 3 end ############################################################################
+        # Case 4 end ############################################################################
 
 
     @mock.patch("logging.info")
@@ -347,7 +386,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         CompletedDownloadsController.auditDumpCompleteDir(mode, fakeFilteredDownloadingItems["tv-episodes"])
 
         # assert that the contents of downloadingItems has been moved from the `dummy_directories/dump_complete` directory to the `dummy_directories/tv` directory
-        self.assertTrue(len(list(os.scandir(f"{fakeTargetTvDir}fake tv show name/Season 1"))) == 2)
+        self.assertTrue(len(list(os.scandir(os.path.join(fakeTargetTvDir, "Fake tv show name/Season 1")))) == 2)
         self.assertTrue(len(list(os.scandir(fakeDumpCompleteDir))) == 0)
         notifyDownloadFinishedMock.assert_called()
         loggingInfoMock.assert_called()
