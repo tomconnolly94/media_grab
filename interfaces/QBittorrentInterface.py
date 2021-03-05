@@ -15,8 +15,9 @@ def init():
 def initTorrentDownload(torrentMagnet):
     logging.info(f"Torrent added: {torrentMagnet}")
     try:
-        qb.download_from_link([torrentMagnet])
-        return True
+        if qb.download_from_link([torrentMagnet]) == "Ok.":
+            return True
+        return False
     except Exception:
         logging.error("Exception occurred", exc_info=True)
         return False

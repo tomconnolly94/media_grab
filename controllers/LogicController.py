@@ -28,7 +28,7 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
 
         torrentRecords = TPBInterface.getTorrentRecords(queries)
         if not torrentRecords:
-            return []
+            continue
         # filter torrentRecords by applying regex to torrent titles
         mediaInfoRecord = findMediaInfoRecord(mediaInfoRecords, mediaInfoName)
         torrentTitles = [ torrent["name"] for torrent in torrentRecords ]
@@ -48,7 +48,7 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
             chosenDownloadId = DownloadsInProgressFileInterface.findNewDownload(downloadIds)
 
             if not chosenDownloadId:
-                return []
+                continue
 
 
             for torrent in filteredSortedTorrents:
@@ -60,8 +60,8 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
 
             # if torrent was not found, return early
             if not chosenTorrent:
-                logging.info("No new torrents found,")
-                return []
+                logging.info("No new torrents found")
+                continue
 
             mediaInfoRecord["magnet"] = chosenTorrent["magnet"].replace(" ", "+")
             mediaInfoRecord["torrentName"] = chosenTorrent["name"]
