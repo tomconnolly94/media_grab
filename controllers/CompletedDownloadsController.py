@@ -127,8 +127,9 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
                 if itemIsDirectory:
                     # attempt to move the rest of the files to the recycle_bin folder so if the program made an error, it is recoverable
                     try:
-                        shutil.move(fileSystemItem.path, os.getenv("RECYCLE_BIN_DIR"))
-                        logging.info(f"Stored '{targetFile.path}' in '{prospectiveFile}', in case it is needed. Please remember to delete items from here.")
+                        recycle_bin_dir = os.getenv("RECYCLE_BIN_DIR")
+                        shutil.move(fileSystemItem.path, recycle_bin_dir)
+                        logging.info(f"Stored '{fileSystemItem.path}' in '{recycle_bin_dir}', in case it is needed. Please remember to delete items from here.")
                     except OSError:
                         logging.error("Exception occurred", exc_info=True)
 
