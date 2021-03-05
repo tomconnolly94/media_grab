@@ -13,10 +13,7 @@ def init():
     qb = Client(os.getenv('QBT_URL'), verify=False)
 
 def initTorrentDownload(torrentMagnet):
-    # qb.login(os.getenv('QBT_USERNAME'), os.getenv('QBT_PASSWORD'))
-
-    torrentMagnet = torrentMagnet.replace(" ", "+")
-
+    logging.info(f"Torrent added: {torrentMagnet}")
     try:
         qb.download_from_link([torrentMagnet])
         return True

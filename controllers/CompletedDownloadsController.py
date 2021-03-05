@@ -70,15 +70,20 @@ def getLargestFileInDir(directory):
 
 def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
     
+    logging.info("File auditing started.")
     targetDir = os.getenv(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
     dumpCompleteDir = os.getenv("DUMP_COMPLETE_DIR")
     fileSystemItemsFromDirectory = FolderInterface.getDirContents(dumpCompleteDir)
+    logging.info(f"Items in dump_complete directory: {[item.name for item in fileSystemItemsFromDirectory] }")
 
     # deal with directories
     for fileSystemItem in fileSystemItemsFromDirectory:
         fileSystemItemName = fileSystemItem.name
 
         if fileSystemItemName in filteredDownloadingItems:
+
+            logging.info(f"{fileSystemItemName} has finished downloading and will be moved.")
+            
             # extract show name
             showName = extractShowName(fileSystemItemName).capitalize()
             tvShowDir = os.path.join(targetDir, showName)
@@ -87,6 +92,7 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
 
             # create tv show directory if it does not exist
             if not FolderInterface.directoryExists(tvShowDir):
+                logging.info(f"Creating directory `{tvShowDir}`")
                 FolderInterface.createDirectory(tvShowDir)
             
             seasonNumber = extractSeasonNumber(fileSystemItemName)
@@ -98,6 +104,7 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
                 # an episode file inside (probably the largest file)
                 if episodeNumber:
                     targetFile = getLargestFileInDir(fileSystemItem.path)
+                    logging.info(f"{fileSystemItem.name} is a directory. The file {targetFile.name} has been extracted as the media item of interest.")
                 else:
                     # TODO: eventually we should deal with the download of a full season directoy, unnecessary at this point, for now we can assume that if no episode can be found
                     return None
@@ -106,6 +113,7 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
 
             # create season directory if it does not exist
             if not FolderInterface.directoryExists(seasonDir):
+                logging.info(f"Creating directory `{seasonDir}`")
                 FolderInterface.createDirectory(seasonDir)
 
             prospectiveFile = os.path.join(seasonDir, f"{showName} - S0{seasonNumber}E0{episodeNumber}{extension}")
@@ -120,6 +128,7 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
                     # attempt to move the rest of the files to the recycle_bin folder so if the program made an error, it is recoverable
                     try:
                         shutil.move(fileSystemItem.path, os.getenv("RECYCLE_BIN_DIR"))
+                        logging.info(f"Stored '{targetFile.path}' in '{prospectiveFile}', in case it is needed. Please remember to delete items from here.")
                     except OSError:
                         logging.error("Exception occurred", exc_info=True)
 

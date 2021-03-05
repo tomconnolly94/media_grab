@@ -17,7 +17,7 @@ def findMediaInfoRecord(mediaInfoRecords, mediaInfoName):
 
 def sortTorrents(torrents):
     # order torrents by number of seeders
-    return sorted(torrents, key=lambda torrent: int(torrent["seeders"]))
+    return sorted(torrents, key=lambda torrent: -1 * int(torrent["seeders"]))
     
 
 
@@ -28,13 +28,13 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
 
         torrentRecords = TPBInterface.getTorrentRecords(queries)
 
-        #filter torrentRecords by applying regex to torrent titles
+        # filter torrentRecords by applying regex to torrent titles
         mediaInfoRecord = findMediaInfoRecord(mediaInfoRecords, mediaInfoName)
         torrentTitles = [ torrent["name"] for torrent in torrentRecords ]
         filteredTorrentTitles = TorrentFilterController.filterEpisodeTorrents(torrentTitles, mediaInfoRecord)
         logging.info(f"{len(torrentTitles)} torrents filtered down to {len(filteredTorrentTitles)}")
 
-        #get list of filtered torrent objects
+        # get list of filtered torrent objects
         filteredTorrents = [ torrent for torrent in torrentRecords if torrent["name"] in filteredTorrentTitles ]
 
         # order torrents by number of seeders
@@ -49,9 +49,12 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
             if not chosenDownloadId:
                 return []
 
+
             for torrent in filteredSortedTorrents:
                 if chosenDownloadId == torrent["name"]:
                     chosenTorrent = torrent 
+                    logging.info(f"Selected torrent: {chosenTorrent['name']} - seeders: {chosenTorrent['seeders']}")
+                    break
 
 
             # if torrent was not found, return early
@@ -59,7 +62,7 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
                 logging.info("No new torrents found,")
                 return []
 
-            mediaInfoRecord["magnet"] = chosenTorrent["magnet"]
+            mediaInfoRecord["magnet"] = chosenTorrent["magnet"].replace(" ", "+")
             mediaInfoRecord["torrentName"] = chosenTorrent["name"]
             mediaInfoRecordsWithTorrents.append(mediaInfoRecord)
 

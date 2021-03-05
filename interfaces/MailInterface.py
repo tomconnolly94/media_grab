@@ -8,16 +8,25 @@ import logging
 enterLogMessage = "MailInterface:sendMail called."
 finishLogMessage = "Sent notification for torrent add."
 toEmailAddress = "tom.connolly@protonmail.com"
-environmentEnv = os.getenv("ENVIRONMENT")
-mailUsername = os.getenv("MAIL_USERNAME")
-mailPassword = os.getenv("MAIL_PASSWORD")
+environment = None
+mailUsername = None
+mailPassword = None
+
+
+def init():
+    global environment
+    environment = os.getenv("ENVIRONMENT")
+    global mailUsername
+    mailUsername = os.getenv("MAIL_USERNAME")
+    global mailPassword
+    mailPassword = os.getenv("MAIL_PASSWORD")
 
 
 def sendMail(heading, messageBody):
     logging.info(enterLogMessage)
 
     #only send mail when in production mode
-    if environmentEnv == "production":
+    if environment == "production":
         with smtplib.SMTP('smtp.gmail.com', 587) as server:
             server.starttls()
             server.ehlo()
@@ -31,8 +40,10 @@ def sendMail(heading, messageBody):
             server.sendmail(mailUsername, toEmailAddress, mailContent)
 
             logging.info(finishLogMessage)
+    elif environment == "dev":
+        logging.info(f"Program is running in {environment} mode. No email has been sent.")
     else:
-        logging.info(f"Program is running in {environmentEnv} mode. No email has been sent.")
+        logging.info(f"Environment mode: {environment} is not recognised.")
 
 
 def sendNewTorrentMail(torrentName, torrentExtraInfo, torrentMagnet):
@@ -42,10 +53,11 @@ def sendNewTorrentMail(torrentName, torrentExtraInfo, torrentMagnet):
 
 def sendTestMail():
     # test setup to send email using static mail account
-    global environmentEnv
-    environmentEnv = "production"
+    global environment
+    environment = "production"
     sendMail("Media Grab: Test Message", "test message generated from running the interfaces/MailInterface.py as __main__")
 
 
 if __name__== "__main__":
-    sendTestMail()
+    #sendTestMail()
+    pass
