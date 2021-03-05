@@ -6,12 +6,12 @@ import logging
 import time
 
 def initLogging():
-    
     logFormat = '%(asctime)s - %(levelname)s - %(message)s'
     logDateFormat = '%d-%b-%y %H:%M:%S'
+    projectBaseDir = os.path.dirname(os.path.dirname(__file__))
 
     if os.getenv("ENVIRONMENT") == "production":
-        logFilename = f"logs/media-grab_{time.strftime('%d-%m-%Y_%H-%M')}.log"
+        logFilename = os.path.join(projectBaseDir, "logs", f"media-grab_{time.strftime('%d-%m-%Y_%H-%M')}.log")
         logging.basicConfig(filename=logFilename, filemode='w', format=logFormat, datefmt=logDateFormat, level=logging.INFO)
     else:
         logging.basicConfig(format=logFormat, datefmt=logDateFormat, level=logging.INFO)
