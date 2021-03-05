@@ -92,7 +92,6 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
 
             # create tv show directory if it does not exist
             if not FolderInterface.directoryExists(tvShowDir):
-                logging.info(f"Creating directory `{tvShowDir}`")
                 FolderInterface.createDirectory(tvShowDir)
             
             seasonNumber = extractSeasonNumber(fileSystemItemName)
@@ -113,7 +112,6 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
 
             # create season directory if it does not exist
             if not FolderInterface.directoryExists(seasonDir):
-                logging.info(f"Creating directory `{seasonDir}`")
                 FolderInterface.createDirectory(seasonDir)
 
             prospectiveFile = os.path.join(seasonDir, f"{showName} - S0{seasonNumber}E0{episodeNumber}{extension}")
