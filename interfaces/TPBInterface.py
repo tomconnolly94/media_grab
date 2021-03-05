@@ -53,5 +53,4 @@ def queryAPI(queryTerm):
 
         return torrents
     except json.decoder.JSONDecodeError:
-        logging.error("Exception occurred", exc_info=True)
         return []
