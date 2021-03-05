@@ -67,75 +67,42 @@ def getLargestFileInDir(directory):
     filesInDir = sorted(filesInDir, key=lambda file: -1 * int(os.path.getsize(f"{directory}/{file.name}")))
     return filesInDir[0]
 
+
+def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
     
-def auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir):
-    # deal with files
-    for completedDownloadFile in completedDownloadFiles:
-        completedDownloadFileName = completedDownloadFile.name
-
-        if completedDownloadFileName in filteredDownloadingItems:
-            # extract show name
-            showName = extractShowName(completedDownloadFileName).capitalize()
-            tvShowDir = os.path.join(targetDir, showName)
-
-            # create tv show directory if it does not exist
-            if not FolderInterface.directoryExists(tvShowDir):
-                FolderInterface.createDirectory(tvShowDir)
-
-            seasonNumber = extractSeasonNumber(completedDownloadFileName)
-            episodeNumber = extractEpisodeNumber(completedDownloadFileName)
-            extension = extractExtension(completedDownloadFileName)
-            seasonDir = os.path.join(tvShowDir, f"Season {seasonNumber}")
-
-            # create season directory if it does not exist
-            if not FolderInterface.directoryExists(seasonDir):
-                FolderInterface.createDirectory(seasonDir)
-
-            prospectiveFile = os.path.join(seasonDir, f"{showName} - S0{seasonNumber}E0{episodeNumber}{extension}")
-            
-            if not FolderInterface.fileExists(prospectiveFile):
-                # move file to season directory
-                existingFile = os.path.join(os.getenv('DUMP_COMPLETE_DIR'), completedDownloadFileName)
-                os.rename(existingFile, prospectiveFile)
-                DownloadsInProgressFileInterface.notifyDownloadFinished(completedDownloadFileName, PROGRAM_MODE.TV_EPISODES)
-                logging.info(f"Moved '{existingFile}' to '{prospectiveFile}'")
-
-            else:
-                # report problem
-                reportItemAlreadyExists(prospectiveFile, completedDownloadFileName)
-
-
-def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, targetDir):
-
+    targetDir = os.getenv(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
     dumpCompleteDir = os.getenv("DUMP_COMPLETE_DIR")
+    fileSystemItemsFromDirectory = FolderInterface.getDirContents(dumpCompleteDir)
 
     # deal with directories
-    for completedDownloadDirectory in completedDownloadDirectories:
-        completedDownloadDirectoryName = completedDownloadDirectory.name
+    for fileSystemItem in fileSystemItemsFromDirectory:
+        fileSystemItemName = fileSystemItem.name
 
-        if completedDownloadDirectoryName in filteredDownloadingItems:
+        if fileSystemItemName in filteredDownloadingItems:
             # extract show name
-            showName = extractShowName(completedDownloadDirectoryName).capitalize()
+            showName = extractShowName(fileSystemItemName).capitalize()
             tvShowDir = os.path.join(targetDir, showName)
-            episodeFile = ""
+            targetFile = fileSystemItem
+            itemIsDirectory = FolderInterface.directoryExists(fileSystemItem.path)
 
             # create tv show directory if it does not exist
             if not FolderInterface.directoryExists(tvShowDir):
                 FolderInterface.createDirectory(tvShowDir)
             
-            seasonNumber = extractSeasonNumber(completedDownloadDirectoryName)
-            episodeNumber = extractEpisodeNumber(completedDownloadDirectoryName)
+            seasonNumber = extractSeasonNumber(fileSystemItemName)
+            episodeNumber = extractEpisodeNumber(fileSystemItemName)
             seasonDir = os.path.join(tvShowDir, f"Season {seasonNumber}")
 
-            # if an episode number was extracted from the directory name we can safely assume that we have 
-            # an episode file inside (probably the largest file)
-            if episodeNumber:
-                episodeFile = getLargestFileInDir(os.path.join(dumpCompleteDir, completedDownloadDirectoryName))
-            else:
-                # TODO: eventually we should deal with the download of a full season directoy, unnecessary at this point, for now we can assume that if no episode can be found
-                return None
+            if itemIsDirectory:
+                # if an episode number was extracted from the directory name we can safely assume that we have 
+                # an episode file inside (probably the largest file)
+                if episodeNumber:
+                    targetFile = getLargestFileInDir(fileSystemItem.path)
+                else:
+                    # TODO: eventually we should deal with the download of a full season directoy, unnecessary at this point, for now we can assume that if no episode can be found
+                    return None
 
-            extension = extractExtension(episodeFile)
+            extension = extractExtension(targetFile.name)
 
             # create season directory if it does not exist
             if not FolderInterface.directoryExists(seasonDir):
@@ -144,59 +111,23 @@ def auditDirectories(completedDownloadDirectories, filteredDownloadingItems, tar
             prospectiveFile = os.path.join(seasonDir, f"{showName} - S0{seasonNumber}E0{episodeNumber}{extension}")
                         
             if not FolderInterface.fileExists(prospectiveFile):
-                # move file to season directory
-                originalFileLocation = os.path.join(dumpCompleteDir, completedDownloadDirectoryName, episodeFile.name)
-                os.rename(originalFileLocation, prospectiveFile)
-                DownloadsInProgressFileInterface.notifyDownloadFinished(completedDownloadDirectoryName, PROGRAM_MODE.TV_EPISODES)
-                logging.info(f"Moved '{originalFileLocation}' to '{prospectiveFile}'")
+                # move file to appropriate directory
+                os.rename(targetFile.path, prospectiveFile)
+                logging.info(f"Moved '{targetFile.path}' to '{prospectiveFile}'")
+                DownloadsInProgressFileInterface.notifyDownloadFinished(fileSystemItemName, PROGRAM_MODE.TV_EPISODES)
 
-                ## Try to remove tree; if failed show an error using try...except on screen
-                try:
-                    shutil.move(os.path.join(dumpCompleteDir, completedDownloadDirectoryName), os.getenv("RECYCLE_BIN_DIR"))
-                except OSError:
-                    logging.error("Exception occurred", exc_info=True)
+                if itemIsDirectory:
+                    # attempt to move the rest of the files to the recycle_bin folder so if the program made an error, it is recoverable
+                    try:
+                        shutil.move(fileSystemItem.path, os.getenv("RECYCLE_BIN_DIR"))
+                    except OSError:
+                        logging.error("Exception occurred", exc_info=True)
 
             else:
                 # report problem
-                reportItemAlreadyExists(prospectiveFile, completedDownloadDirectoryName)
+                reportItemAlreadyExists(prospectiveFile, fileSystemItemName)
 
 
 def auditDumpCompleteDir(mode, filteredDownloadingItems):
-
-    targetDir = os.getenv(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
-    itemsFromDirectory = FolderInterface.getDirContents(os.getenv("DUMP_COMPLETE_DIR"))
-
-    completedDownloadFiles = []
-    completedDownloadDirectories = []
-
-    for item in itemsFromDirectory:
-        if item.is_file():
-            completedDownloadFiles.append(item)
-        else:
-            completedDownloadDirectories.append(item)
-
-
-    # Rules:
-    #
-    # TV episodes:
-    #   files: 
-    #       * ascertain whether Season directory for this show already exists from the show name found 
-    #           in the DownloadsInProgress file
-    #       * find the correct season using aregex on the torrent name S0X
-    #   directories:
-    #       * ascertain how many relevant media files are present in the directory, 
-    #           * if only one, treat this file as above, move all other files and the directory itself 
-    #               to the recycle directory
-    #           * if there are multiple files, assume this directory is a full season and deposit the 
-    #               full directory inside the directory that shares the same name as this show (found 
-    #               in the DownloadsInProgress file), any non media file should be moved to the recycle 
-    #               directory
-    #       * logs are required for everything, what is moved where and the reason for that decision, 
-    #               this will help with traceability of errors later
-
-
-    # TODO: these functions are incredibly similar, find a way to aggregate the duplicate code
-    logging.info("filteredDownloadingItems:")
-    logging.info(filteredDownloadingItems)
-    auditFiles(completedDownloadFiles, filteredDownloadingItems, targetDir)
-    auditDirectories(completedDownloadDirectories, filteredDownloadingItems, targetDir)
+    # look for episodes
+    auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems)
