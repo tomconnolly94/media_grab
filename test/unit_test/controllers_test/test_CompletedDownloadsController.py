@@ -24,6 +24,18 @@ def getEnvMockFunc(param):
         return fakeRecycleBinDir
     else:
         assert(None)
+        
+def cleanUpDirs(directories, downloadingItems):
+    for dir in directories:
+        for root, dirs, files in os.walk(dir):
+            for file in files:
+                if file in downloadingItems:
+                    os.remove(os.path.join(root, file))
+
+            downloadingItemDirs = [ item.split("/")[0] for item in downloadingItems ]
+            for dir in dirs:
+                if dir in downloadingItemDirs:
+                    shutil.rmtree(os.path.join(root, dir))
 
 class TestCompletedDownloadsController(unittest.TestCase):
 
@@ -400,6 +412,8 @@ class TestCompletedDownloadsController(unittest.TestCase):
                 "fakeDownloadingFile3.mp4"
             ]
         } # this should be the content of the DownloadsInProgressFile 
+        expectedTvShowName = "Fake tv show name"
+        directoriesToCleanUp = [ fakeTargetTvDir, fakeDumpCompleteDir ]
 
         # config mocks
         getEnvMock.side_effect = getEnvMockFunc
@@ -410,34 +424,36 @@ class TestCompletedDownloadsController(unittest.TestCase):
             newDir = ""
             if len(pathParts) > 1:
                 newDir = "/".join(pathParts[:-1])
-                os.mkdir(f"{fakeDumpCompleteDir}{newDir}")
+                dirPath = f"{fakeDumpCompleteDir}{newDir}"
+                if not os.path.isdir(dirPath):
+                    os.mkdir(dirPath)
+
             episodeFile = f"{fakeDumpCompleteDir}{newDir}/{pathParts[-1]}"
-            os.mknod(episodeFile)
+            if not os.path.isfile(episodeFile):
+                os.mknod(episodeFile)
 
-        # assert state is as expected before audit method is called
-        self.assertTrue(len(list(os.scandir(fakeTargetTvDir))) == 0)
-        numItemsInDumpCompleteBefore = len(list(os.scandir(fakeDumpCompleteDir)))
-        self.assertTrue(numItemsInDumpCompleteBefore >= 2)
+        # this is required so that the new folder created under fakeTargetTvDir can be found and cleaned up
+        downloadingItems.append(expectedTvShowName) 
 
-        # run auditDumpCompleteDir
-        CompletedDownloadsController.auditDumpCompleteDir(mode, fakeFilteredDownloadingItems["tv-episodes"])
+        try:
+            # assert state is as expected before audit method is called
+            self.assertTrue(len(list(os.scandir(fakeTargetTvDir))) == 0)
+            numItemsInDumpCompleteBefore = len(list(os.scandir(fakeDumpCompleteDir)))
+            self.assertTrue(numItemsInDumpCompleteBefore >= 2)
 
-        # assert that the contents of downloadingItems has been moved from the `dummy_directories/dump_complete` directory to the `dummy_directories/tv` directory
-        self.assertTrue(len(list(os.scandir(os.path.join(fakeTargetTvDir, "Fake tv show name/Season 1")))) == 2)
-        self.assertTrue(len(list(os.scandir(fakeDumpCompleteDir))) == numItemsInDumpCompleteBefore - 2)
-        notifyDownloadFinishedMock.assert_called()
-        loggingInfoMock.assert_called()
-        reportItemAlreadyExistsMock.assert_not_called()
+            # run auditDumpCompleteDir
+            CompletedDownloadsController.auditDumpCompleteDir(mode, fakeFilteredDownloadingItems["tv-episodes"])
 
-        # clean up moved files
-        cleanUpDirs = [ fakeTargetTvDir ]
+            # assert that the contents of downloadingItems has been moved from the `dummy_directories/dump_complete` directory to the `dummy_directories/tv` directory
+            self.assertTrue(len(list(os.scandir(os.path.join(fakeTargetTvDir, expectedTvShowName, "Season 1")))) == 2)
+            self.assertTrue(len(list(os.scandir(fakeDumpCompleteDir))) == numItemsInDumpCompleteBefore - 2)
+            notifyDownloadFinishedMock.assert_called()
+            loggingInfoMock.assert_called()
+            reportItemAlreadyExistsMock.assert_not_called()
 
-        for dir in cleanUpDirs:
-            for root, dirs, files in os.walk(dir):
-                for file in files:
-                    os.remove(os.path.join(root, file))
-                for dir in dirs:
-                    shutil.rmtree(os.path.join(root, dir))
+        finally:
+            # clean up moved files
+            cleanUpDirs(directoriesToCleanUp, downloadingItems)
 
 
 if __name__ == '__main__':
