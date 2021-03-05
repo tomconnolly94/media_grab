@@ -27,7 +27,8 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
     for mediaInfoName, queries in mediaSearchQueries.items():
 
         torrentRecords = TPBInterface.getTorrentRecords(queries)
-
+        if not torrentRecords:
+            return []
         # filter torrentRecords by applying regex to torrent titles
         mediaInfoRecord = findMediaInfoRecord(mediaInfoRecords, mediaInfoName)
         torrentTitles = [ torrent["name"] for torrent in torrentRecords ]

@@ -39,11 +39,19 @@ def queryAPI(queryTerm):
     # create query url
     queryUrl = f"https://apibay.org/q.php?q={queryTerm}"
 
-    # make query and load json data
-    response = requests.get(queryUrl)
-    torrents = json.loads(response.content)
+    try:
+        # make query and load json data
+        response = requests.get(queryUrl)
+        torrents = json.loads(response.content)
 
-    for torrent in torrents:
-        torrent["magnet"] = f"magnet:?xt=urn:btih:{torrent.get('info_hash')}&dn={torrent.get('name')}"
+        # handle no response returned garcefully
+        if len(torrents) == 1 and torrents[0]["id"] == "0":
+            return []
 
-    return torrents
+        for torrent in torrents:
+            torrent["magnet"] = f"magnet:?xt=urn:btih:{torrent.get('info_hash')}&dn={torrent.get('name')}"
+
+        return torrents
+    except json.decoder.JSONDecodeError:
+        logging.error("Exception occurred", exc_info=True)
+        return []
