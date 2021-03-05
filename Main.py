@@ -10,7 +10,8 @@ import getopt
 # internal dependencies
 from interfaces import TPBInterface, MediaIndexFileInterface, QBittorrentInterface
 from controllers import LoggingController, LogicController
-from data_types.ProgramModeMap import PROGRAM_MODE_MAP 
+from data_types.ProgramModeMap import PROGRAM_MODE_MAP
+from data_types.ProgramMode import PROGRAM_MODE
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -43,11 +44,10 @@ def interpretArguments(argv):
 				sys.exit(4)
 
 	if not mode:
-		logging.error("Mode was not provided")
-		print(usage)
-		sys.exit(5)
+		# mode defaults to tv-episodes if no mode is provided
+		mode = PROGRAM_MODE.TV_EPISODES
 			
-	print(f"Mode is {mode}")
+	logging.info(f"Mode is {mode}")
 
 	return mode
 
