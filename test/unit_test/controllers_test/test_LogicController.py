@@ -44,11 +44,12 @@ class TestLogicController(unittest.TestCase):
         self.assertEqual(relevantMediaInfoRecord, actualMediaInfoRecord)
 
 
+    @mock.patch("interfaces.DownloadsInProgressFileInterface.findNewDownload")
     @mock.patch("logging.info")
     @mock.patch("controllers.TorrentFilterController.filterEpisodeTorrents")
     @mock.patch("controllers.LogicController.findMediaInfoRecord")
     @mock.patch("interfaces.TPBInterface.getTorrentRecords")
-    def test_getMediaInfoRecordsWithTorrents(self, getTorrentRecordsMock, findMediaInfoRecordMock, filterEpisodeTorrentsMock, loggingInfoMock):
+    def test_getMediaInfoRecordsWithTorrents(self, getTorrentRecordsMock, findMediaInfoRecordMock, filterEpisodeTorrentsMock, loggingInfoMock, findNewDownload):
         
         fakeMediaSearchQueries = {
             "fakeMediaInfoName1": ["fakeMediaInfoName1Query1", "fakeMediaInfoName1Query2", "fakeMediaInfoName1Query3"],
@@ -82,6 +83,7 @@ class TestLogicController(unittest.TestCase):
         getTorrentRecordsMock.return_value = fakeTorrentRecords
         findMediaInfoRecordMock.side_effect = [fakeMediaInfoRecords[0], fakeMediaInfoRecords[1], fakeMediaInfoRecords[2]]
         filterEpisodeTorrentsMock.side_effect = [["fakeTorrentTitle1", "fakeTorrentTitle3"], [], ["fakeTorrentTitle3"]]
+        findNewDownload.side_effect = ["fakeTorrentTitle1", "fakeTorrentTitle3"]
 
         # expected outputs
         #fakeMediaInfoRecords[0]["magnet"]
@@ -174,7 +176,7 @@ class TestLogicController(unittest.TestCase):
         auditDumpCompleteDirMock.assert_called_with(activeMode, fakeDownloadingItems)
         getMediaInfoRecordsWithTorrentsMock.assert_called_with(fakeMediaSearchQueries, fakeMediaInfoRecords)
         
-        calls = [ call("fakeMagnetLink"), call("fakeMagnetLink"), call("fakeMagnetLink") ]
+        calls = [ call(fakeMediaInfoRecordsWithTorrents[0]), call(fakeMediaInfoRecordsWithTorrents[1]), call(fakeMediaInfoRecordsWithTorrents[2]) ]
         initTorrentDownloadMock.assert_has_calls(calls)
 
         calls = [ 

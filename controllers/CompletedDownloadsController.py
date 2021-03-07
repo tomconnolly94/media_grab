@@ -141,11 +141,13 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
                         recycle_bin_dir = os.getenv("RECYCLE_BIN_DIR")
                         shutil.move(fileSystemItem.path, recycle_bin_dir)
                         logging.info(f"Stored '{fileSystemItem.path}' in '{recycle_bin_dir}', in case it is needed. Please remember to delete items from here.")
-                        # handle deletion of the container directory created by qbittorrent
-                        containerDir = os.path.dirname(fileSystemItem.path)
-                        os.rmdir(containerDir)
                     except OSError:
                         logging.error("Exception occurred", exc_info=True)
+                
+                
+                # handle deletion of the container directory created by qbittorrent
+                containerDir = os.path.dirname(fileSystemItem.path)
+                os.rmdir(containerDir)
 
             else:
                 # report problem

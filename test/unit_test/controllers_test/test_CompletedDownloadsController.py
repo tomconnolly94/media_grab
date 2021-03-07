@@ -37,6 +37,7 @@ def cleanUpDirs(directories, downloadingItems):
                 if dir in downloadingItemDirs:
                     shutil.rmtree(os.path.join(root, dir))
 
+
 class TestCompletedDownloadsController(unittest.TestCase):
 
 
@@ -107,6 +108,8 @@ class TestCompletedDownloadsController(unittest.TestCase):
         self.assertEqual(None, CompletedDownloadsController.extractSeasonNumber(""))
 
 
+    @mock.patch("os.rmdir")
+    @mock.patch("os.scandir")
     @mock.patch("logging.info")
     @mock.patch("interfaces.DownloadsInProgressFileInterface.notifyDownloadFinished")
     @mock.patch("controllers.CompletedDownloadsController.reportItemAlreadyExists")
@@ -120,7 +123,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
     @mock.patch("interfaces.FolderInterface.createDirectory")
     @mock.patch('controllers.CompletedDownloadsController.extractShowName')
     @mock.patch('os.getenv')
-    def test_auditFiles(self, getEnvMock, extractShowNameMock, createDirectoryMock, directoryExistsMock, extractSeasonNumberMock, extractEpisodeNumberMock, extractExtensionMock, getDirContentsMock, fileExistsMock, osRenameMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, loggingInfoMock):
+    def test_auditFiles(self, getEnvMock, extractShowNameMock, createDirectoryMock, directoryExistsMock, extractSeasonNumberMock, extractEpisodeNumberMock, extractExtensionMock, getDirContentsMock, fileExistsMock, osRenameMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, loggingInfoMock, osScandirMock, osRmdirMock):
 
         # config fake data
         fakeEpisodeNumber = 2
@@ -146,6 +149,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         fileExistsMock.return_value = True
         extractExtensionMock.return_value = ".mp4"
         getDirContentsMock.return_value = fakeFiles
+        osScandirMock.return_value = fakeFiles
 
 
         # Case 1 start ############################################################################
@@ -243,6 +247,8 @@ class TestCompletedDownloadsController(unittest.TestCase):
         # Case 4 end ############################################################################
 
 
+    @mock.patch("os.rmdir")
+    @mock.patch("os.scandir")
     @mock.patch("shutil.move")
     @mock.patch("interfaces.DownloadsInProgressFileInterface.notifyDownloadFinished")
     @mock.patch("controllers.CompletedDownloadsController.reportItemAlreadyExists")
@@ -257,7 +263,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
     @mock.patch("interfaces.FolderInterface.createDirectory")
     @mock.patch('controllers.CompletedDownloadsController.extractShowName')
     @mock.patch('os.getenv')
-    def test_auditDirectories(self, getEnvMock, extractShowNameMock, createDirectoryMock, directoryExistsMock, extractSeasonNumberMock, extractEpisodeNumberMock, getLargestFileInDirMock, extractExtensionMock, getDirContentsMock, fileExistsMock, osRenameMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, shutilMoveMock):
+    def test_auditDirectories(self, getEnvMock, extractShowNameMock, createDirectoryMock, directoryExistsMock, extractSeasonNumberMock, extractEpisodeNumberMock, getLargestFileInDirMock, extractExtensionMock, getDirContentsMock, fileExistsMock, osRenameMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, shutilMoveMock, osScandirMock, osRmdirMock):
 
         class FakeFileSystemItem:
             
@@ -288,6 +294,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         getLargestFileInDirMock.return_value = FakeFileSystemItem(fakeFile1, os.path.join(fakeDumpCompleteDir, fakeDirName, fakeFile1))
         extractExtensionMock.return_value = ".mp4"
         getDirContentsMock.return_value = fakeDirs
+        osScandirMock.return_value = fakeDirs
 
         # config expected values
         expectedProspectiveFile = os.path.join(fakeTargetTvDir, fakeTVShowName.capitalize(), f"Season {fakeSeasonNumber}", f"{fakeTVShowName.capitalize()} - S0{fakeSeasonNumber}E0{fakeEpisodeNumber}{fakeExtension}")
@@ -393,7 +400,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
     @mock.patch("interfaces.DownloadsInProgressFileInterface.notifyDownloadFinished")
     @mock.patch("controllers.CompletedDownloadsController.reportItemAlreadyExists")
     @mock.patch('os.getenv')
-    def test_auditFilesWithFileSystem(self, getEnvMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock,  loggingInfoMock):
+    def test_auditFilesWithFileSystem(self, getEnvMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, loggingInfoMock):
 
         # init items
         downloadingItems = [
@@ -422,13 +429,19 @@ class TestCompletedDownloadsController(unittest.TestCase):
         for path in downloadingItems:
             pathParts = path.split("/")
             newDir = ""
+
+            newDir = "/".join(pathParts[:-1])
+            baseDirPath = os.path.join(fakeDumpCompleteDir, pathParts[0])
+            if not os.path.isdir(baseDirPath):
+                os.mkdir(baseDirPath)
+                
             if len(pathParts) > 1:
                 newDir = "/".join(pathParts[:-1])
-                dirPath = f"{fakeDumpCompleteDir}{newDir}"
+                dirPath = f"{baseDirPath}{newDir}"
                 if not os.path.isdir(dirPath):
                     os.mkdir(dirPath)
 
-            episodeFile = f"{fakeDumpCompleteDir}{newDir}/{pathParts[-1]}"
+            episodeFile = f"{baseDirPath}{newDir}/{pathParts[-1]}"
             if not os.path.isfile(episodeFile):
                 os.mknod(episodeFile)
 

@@ -3,15 +3,25 @@
 # external dependencies
 import os
 import json
+from interfaces import TheMovieDatabaseInterface
+
 
 writeFile = True
 
 
-def updateMedia(mediaInfoRecords, queryRecord, updateableField):
+def incrementEpisode(mediaInfoRecords, queryRecord):
 
 	for mediaRecord in mediaInfoRecords:
 		if mediaRecord["name"] == queryRecord["name"]:
-			mediaRecord["typeSpecificData"][updateableField] = str(int(queryRecord["typeSpecificData"][updateableField]) + 1)
+			maxNumberOfEpisodes = TheMovieDatabaseInterface.getShowEpisodeCount(mediaRecord["name"], mediaRecord["typeSpecificData"]["latestSeason"])
+
+			if int(mediaRecord["typeSpecificData"]["latestEpisode"]) + 1 > maxNumberOfEpisodes:
+				# set data to next season first episode
+				mediaRecord["typeSpecificData"]["latestSeason"] = str(int(queryRecord["typeSpecificData"]["latestSeason"]) + 1)
+				mediaRecord["typeSpecificData"]["latestEpisode"] = str(1)
+			else:
+				mediaRecord["typeSpecificData"]["latestEpisode"] = str(int(queryRecord["typeSpecificData"]["latestEpisode"]) + 1)
+
 			return mediaInfoRecords
 	return None
 
@@ -20,8 +30,9 @@ def writeMediaFile(queryRecord, updateableField):
 	
 	with open(os.getenv("MEDIA_FILE"), 'r') as mediaFileSrc:
 		media = json.load(mediaFileSrc)["media"]
+	
 
-	updatedMedia = updateMedia(media, queryRecord, updateableField)
+	updatedMedia = incrementEpisode(media, queryRecord)
 
 	if not updatedMedia:
 		return

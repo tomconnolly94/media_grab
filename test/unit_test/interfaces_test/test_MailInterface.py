@@ -2,6 +2,7 @@
 import unittest
 import mock
 from unittest.mock import call, ANY
+import os
 
 # internal dependencies
 from interfaces import MailInterface
@@ -12,9 +13,8 @@ class TestMailInterface(unittest.TestCase):
     @mock.patch('os.getenv')
     @mock.patch('logging.info')
     def test_sendMailDev(self, loggingInfoDevMock, osGetEnvMock, smtpMock):
-
-        # config mocks
-        osGetEnvMock.return_value = "notProduction"
+        
+        MailInterface.environment = "dev"
         
         # config inputs
         fakeHeading = "fake heading"
@@ -40,7 +40,7 @@ class TestMailInterface(unittest.TestCase):
 
         # override env values
         MailInterface.toEmailAddress = fakeToEmailAddress
-        MailInterface.environmentEnv = envValue
+        MailInterface.environment = envValue
         MailInterface.mailUsername = fakeMailUsername
         MailInterface.mailPassword = fakeMailPassword
 
@@ -65,7 +65,7 @@ class TestMailInterface(unittest.TestCase):
         ]
         smtpMock.assert_has_calls(calls)
 
-        self.assertIsNotNone(MailInterface.environmentEnv)
+        self.assertIsNotNone(MailInterface.environment)
         self.assertIsNotNone(MailInterface.mailUsername)
         self.assertIsNotNone(MailInterface.mailPassword)
 

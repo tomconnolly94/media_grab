@@ -7,7 +7,7 @@ from interfaces import QBittorrentInterface
 
 class TestQBittorrentInterface(unittest.TestCase):
 
-    def test_UnmockedTorrentDownload(self):
+    def test_torrentDownload(self):
 
         class qbMock():
             def __init__(self):
@@ -16,15 +16,19 @@ class TestQBittorrentInterface(unittest.TestCase):
             def login(self, username, password):
                 return True
 
-            def download_from_link(self, torrentMagnet):
+            def download_from_link(self, torrentMagnet, savepath):
                 return "Ok."
 
 
         QBittorrentInterface.qb = qbMock()
 
         torrentMagnet = "/torrent/18003297/Silicon_Valley_Season_4_S04_720p_AMZN_WEBRip_x265_HEVC_Complete"
+        torrent = {
+            "torrentName": "fakeTorrentName1",
+            "magnet": torrentMagnet
+        }
 
-        self.assertTrue(QBittorrentInterface.initTorrentDownload(torrentMagnet))
+        self.assertTrue(QBittorrentInterface.initTorrentDownload(torrent))
 
 
 if __name__ == '__main__':
