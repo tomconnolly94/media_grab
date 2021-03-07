@@ -136,11 +136,14 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
                 DownloadsInProgressFileInterface.notifyDownloadFinished(fileSystemItemName, PROGRAM_MODE.TV_EPISODES)
 
                 if itemIsDirectory:
-                    # attempt to move the rest of the files to the recycle_bin folder so if the program made an error, it is recoverable
+                    # attempt to move the rest of the files to the recycle_bin folder so if the program made an error, the downloaded content still might be recoverable
                     try:
                         recycle_bin_dir = os.getenv("RECYCLE_BIN_DIR")
                         shutil.move(fileSystemItem.path, recycle_bin_dir)
                         logging.info(f"Stored '{fileSystemItem.path}' in '{recycle_bin_dir}', in case it is needed. Please remember to delete items from here.")
+                        # handle deletion of the container directory created by qbittorrent
+                        containerDir = os.path.dirname(fileSystemItem.path)
+                        os.rmdir(containerDir)
                     except OSError:
                         logging.error("Exception occurred", exc_info=True)
 
