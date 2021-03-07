@@ -78,9 +78,10 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
 
     # deal with directories
     for fileSystemItem in fileSystemItemsFromDirectory:
-        fileSystemItemName = fileSystemItem.name
-
-        if fileSystemItemName in filteredDownloadingItems:
+        if fileSystemItem.name in filteredDownloadingItems:            
+            #browse past the fake directory with the known name that we passed to qbittorrent
+            fileSystemItem = list(os.scandir(fileSystemItem.path))[0]
+            fileSystemItemName = fileSystemItem.name
 
             logging.info(f"{fileSystemItemName} has finished downloading and will be moved.")
             
