@@ -65,8 +65,11 @@ def reportItemAlreadyExists(newItemLocation, torrentName):
 def getLargestFileInDir(directory):
     filesInDir = list(os.scandir(directory))
     filesInDir = sorted(filesInDir, key=lambda file: -1 * int(os.path.getsize(f"{directory}/{file.name}")))
-    return filesInDir[0]
-
+    if filesInDir:
+        return filesInDir[0]
+        
+    logging.info(f"Tried to getLargestFileInDir from {directory} but a file cold not be located")
+    return None
 
 def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
     
@@ -80,7 +83,13 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
     for fileSystemItem in fileSystemItemsFromDirectory:
         if fileSystemItem.name in filteredDownloadingItems:            
             #browse past the fake directory with the known name that we passed to qbittorrent
-            fileSystemItem = list(os.scandir(fileSystemItem.path))[0]
+            fileSystemSubItems = list(os.scandir(fileSystemItem.path))
+            
+            if not fileSystemSubItems:
+                logging.info(f"Tried to browse past the directory created by qbittorrent ({fileSystemItem.path}) but nothing was found inside.")
+                return None
+
+            fileSystemItem = fileSystemSubItems[0]
             fileSystemItemName = fileSystemItem.name
 
             logging.info(f"{fileSystemItemName} has finished downloading and will be moved.")
@@ -104,9 +113,12 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
                 # an episode file inside (probably the largest file)
                 if episodeNumber:
                     targetFile = getLargestFileInDir(fileSystemItem.path)
+
+                    if not targetFile:
+                        return None
                     logging.info(f"{fileSystemItem.name} is a directory. The file {targetFile.name} has been extracted as the media item of interest.")
                 else:
-                    # TODO: eventually we should deal with the download of a full season directoy, unnecessary at this point, for now we can assume that if no episode can be found
+                    # TODO: eventually we should deal with the download of a full season directory, unnecessary at this point, for now we can assume that if no episode can be found
                     return None
 
             extension = extractExtension(targetFile.name)
