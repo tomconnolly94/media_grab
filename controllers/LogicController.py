@@ -88,6 +88,5 @@ def runProgramLogic(mediaInfoRecords, mode):
     mediaInfoRecordsWithTorrents = getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords)
 
     for mediaInfoRecord in mediaInfoRecordsWithTorrents:
-        magnet = mediaInfoRecord["magnet"]
-        if QBittorrentInterface.initTorrentDownload(magnet):
-            NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, "latestEpisode", magnet, mode)
+        if QBittorrentInterface.initTorrentDownload(mediaInfoRecord):
+            NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, "latestEpisode", mediaInfoRecord["magnet"], mode)
