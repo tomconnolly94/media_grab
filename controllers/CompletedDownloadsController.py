@@ -121,11 +121,11 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
                     targetFile = getLargestFileInDir(fileSystemItem.path)
 
                     if not targetFile:
-                        return None
+                        continue
                     logging.info(f"{fileSystemItem.name} is a directory. The file {targetFile.name} has been extracted as the media item of interest.")
                 else:
                     # TODO: eventually we should deal with the download of a full season directory, unnecessary at this point, for now we can assume that if no episode can be found
-                    return None
+                    continue
 
             extension = extractExtension(targetFile.name)
 
