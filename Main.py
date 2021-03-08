@@ -8,7 +8,7 @@ import logging
 import getopt
 
 # internal dependencies
-from interfaces import TPBInterface, MediaIndexFileInterface, QBittorrentInterface, MailInterface, TheMovieDatabaseInterface
+from interfaces import TPBInterface, QBittorrentInterface, MailInterface, TheMovieDatabaseInterface
 from controllers import LoggingController, LogicController, ErrorController
 from data_types.ProgramModeMap import PROGRAM_MODE_MAP
 from data_types.ProgramMode import PROGRAM_MODE
@@ -63,9 +63,7 @@ def main(argv):
 		MailInterface.init()
 		TheMovieDatabaseInterface.init()
 		QBittorrentInterface.init() 
-		# load information about the requested media
-		mediaInfoRecords = MediaIndexFileInterface.loadMediaFile()
-		LogicController.runProgramLogic(mediaInfoRecords, mode)		
+		LogicController.runProgramLogic(mode)		
 		logging.info("Media grab app exiting.")
 	
 	except Exception as exception:

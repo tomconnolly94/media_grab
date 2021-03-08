@@ -146,7 +146,8 @@ class TestLogicController(unittest.TestCase):
     @mock.patch("controllers.CompletedDownloadsController.auditDumpCompleteDir")
     @mock.patch("interfaces.DownloadsInProgressFileInterface.getDownloadingItems")
     @mock.patch("controllers.QueryGenerationController.generateTVEpisodeQueries")
-    def test_runProgramLogic(self, generateTVEpisodeQueriesMock, getDownloadingItemsMock, auditDumpCompleteDirMock, getMediaInfoRecordsWithTorrentsMock, initTorrentDownloadMock, onSuccessfulTorrentAddMock):
+    @mock.patch("interfaces.MediaIndexFileInterface.loadMediaFile")
+    def test_runProgramLogic(self, loadMediaFileMock, generateTVEpisodeQueriesMock, getDownloadingItemsMock, auditDumpCompleteDirMock, getMediaInfoRecordsWithTorrentsMock, initTorrentDownloadMock, onSuccessfulTorrentAddMock):
         
         fakeMediaSearchQueries = {
             "fakeMediaInfoName1": ["fakeMediaInfoName1Query1", "fakeMediaInfoName1Query2", "fakeMediaInfoName1Query3"],
@@ -186,10 +187,11 @@ class TestLogicController(unittest.TestCase):
         # config mocks
         generateTVEpisodeQueriesMock.return_value = fakeMediaSearchQueries
         getDownloadingItemsMock.return_value = fakeDownloadingItems
-        getMediaInfoRecordsWithTorrentsMock.return_value = fakeMediaInfoRecordsWithTorrents
+        getMediaInfoRecordsWithTorrentsMock.side_effect = [fakeMediaInfoRecordsWithTorrents, []]
         initTorrentDownloadMock.side_effect = [True, True, True, None]
+        loadMediaFileMock.return_value = fakeMediaInfoRecords
 
-        LogicController.runProgramLogic(fakeMediaInfoRecords, activeMode)
+        LogicController.runProgramLogic(activeMode)
 
         
         # mock asserts

@@ -59,5 +59,7 @@ def writeMediaFile(queryRecord, updateableField):
     
 
 def loadMediaFile():
-	with open(os.getenv("MEDIA_FILE"), "r") as mediaIndexfile:
+	mediaIndexFileLocation = os.getenv("MEDIA_FILE")
+	logging.info(f"MediaIndex File: {mediaIndexFileLocation}")
+	with open(mediaIndexFileLocation, "r") as mediaIndexfile:
 		return json.loads(mediaIndexfile.read())["media"]
