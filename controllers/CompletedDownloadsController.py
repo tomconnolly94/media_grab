@@ -11,6 +11,7 @@ from data_types.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP, PROGRAM_MO
 from data_types.ProgramMode import PROGRAM_MODE
 from interfaces import FolderInterface, MailInterface, DownloadsInProgressFileInterface, QBittorrentInterface
 
+
 def extractShowName(fileName):
     
     try:
@@ -30,25 +31,31 @@ def extractShowName(fileName):
 
 def extractSeasonNumber(fileName):
     try:
-        seasonNumber = re.match(r".*?(?:season|s)+?[ -_.,!\"'/$]*?(\d+)", fileName, re.IGNORECASE)
-        seasonNumber = int(seasonNumber.groups()[0])
+        regexRaw = r"(?:S|Season)(\d{1,2})"        
+        matches = re.search(regexRaw, fileName, re.IGNORECASE | re.MULTILINE)        
+        seasonNumber = int(matches.groups()[0])
+        
         if seasonNumber:
             return seasonNumber
         else:
             return None
-    except:
+    except Exception:
+        logging.error("Exception occurred", exc_info=True)
         return None
 
 
 def extractEpisodeNumber(fileName):
     try:
-        episodeNumber = re.match(r".*?(?:episode|e)+?[ -_.,!\"'/$]?(\d+)", fileName, re.IGNORECASE)
-        episodeNumber = int(episodeNumber.groups()[0])
+        regexRaw = r"(?:E|Episode)(\d{1,2})"        
+        matches = re.search(regexRaw, fileName, re.IGNORECASE | re.MULTILINE)        
+        episodeNumber = int(matches.groups()[0])        
+
         if episodeNumber:
             return episodeNumber
         else:
             return None
-    except:
+    except Exception:
+        logging.error("Exception occurred", exc_info=True)
         return None
 
 
