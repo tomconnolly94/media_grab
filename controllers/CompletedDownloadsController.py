@@ -157,7 +157,7 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
 
             else:
                 # report problem
-                reportItemAlreadyExists(prospectiveFile, fileSystemItemName)
+                reportItemAlreadyExists(prospectiveFile, fileSystemItem.path)
 
 
 def auditDumpCompleteDir(mode, filteredDownloadingItems):
