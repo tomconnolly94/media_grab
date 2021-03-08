@@ -405,7 +405,8 @@ class TestCompletedDownloadsController(unittest.TestCase):
         # init items
         downloadingItems = [
             "fake-tv-show-name.s01.e01.mp4",
-            "fake-tv-show-name.s01.e02.mp4"
+            "fake-tv-show-name.s01.e02.mp4",
+            "fake-tv-show-name.s01.e03/fake-tv-show-name.s01.e03.mp4"
         ] # representation of what is in the dump_complete folder
 
         # config fake data #
@@ -415,12 +416,13 @@ class TestCompletedDownloadsController(unittest.TestCase):
             "tv-episodes": [
                 "fake-tv-show-name.s01.e01.mp4",
                 "fake-tv-show-name.s01.e02.mp4",
+                "fake-tv-show-name.s01.e03.mp4",
                 "downloadingFile.S01.E03/fakeDownloadingFile2.mp4",
                 "fakeDownloadingFile3.mp4"
             ]
         } # this should be the content of the DownloadsInProgressFile 
         expectedTvShowName = "Fake tv show name"
-        directoriesToCleanUp = [ fakeTargetTvDir, fakeDumpCompleteDir ]
+        directoriesToCleanUp = [ fakeTargetTvDir, fakeDumpCompleteDir, fakeRecycleBinDir ]
 
         # config mocks
         getEnvMock.side_effect = getEnvMockFunc
@@ -431,17 +433,17 @@ class TestCompletedDownloadsController(unittest.TestCase):
             newDir = ""
 
             newDir = "/".join(pathParts[:-1])
-            baseDirPath = os.path.join(fakeDumpCompleteDir, pathParts[0])
+            baseDirPath = os.path.join(fakeDumpCompleteDir, pathParts[-1])
             if not os.path.isdir(baseDirPath):
                 os.mkdir(baseDirPath)
                 
             if len(pathParts) > 1:
                 newDir = "/".join(pathParts[:-1])
-                dirPath = f"{baseDirPath}{newDir}"
+                dirPath = os.path.join(baseDirPath, newDir)
                 if not os.path.isdir(dirPath):
                     os.mkdir(dirPath)
 
-            episodeFile = f"{baseDirPath}{newDir}/{pathParts[-1]}"
+            episodeFile = os.path.join(baseDirPath, newDir, pathParts[-1])
             if not os.path.isfile(episodeFile):
                 os.mknod(episodeFile)
 
@@ -453,13 +455,16 @@ class TestCompletedDownloadsController(unittest.TestCase):
             self.assertTrue(len(list(os.scandir(fakeTargetTvDir))) == 0)
             numItemsInDumpCompleteBefore = len(list(os.scandir(fakeDumpCompleteDir)))
             self.assertTrue(numItemsInDumpCompleteBefore >= 2)
+            self.assertTrue(len(list(os.scandir(fakeRecycleBinDir))) == 0)
 
             # run auditDumpCompleteDir
             CompletedDownloadsController.auditDumpCompleteDir(mode, fakeFilteredDownloadingItems["tv-episodes"])
 
+            expectedNumItems = len(downloadingItems) - 1
             # assert that the contents of downloadingItems has been moved from the `dummy_directories/dump_complete` directory to the `dummy_directories/tv` directory
-            self.assertTrue(len(list(os.scandir(os.path.join(fakeTargetTvDir, expectedTvShowName, "Season 1")))) == 2)
-            self.assertTrue(len(list(os.scandir(fakeDumpCompleteDir))) == numItemsInDumpCompleteBefore - 2)
+            self.assertTrue(len(list(os.scandir(os.path.join(fakeTargetTvDir, expectedTvShowName, "Season 1")))) == expectedNumItems)
+            self.assertTrue(len(list(os.scandir(fakeDumpCompleteDir))) == numItemsInDumpCompleteBefore - expectedNumItems)
+            self.assertTrue(len(list(os.scandir(fakeRecycleBinDir))) == 1)
             notifyDownloadFinishedMock.assert_called()
             loggingInfoMock.assert_called()
             reportItemAlreadyExistsMock.assert_not_called()
