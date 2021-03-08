@@ -20,6 +20,7 @@ def notifyDownloadStarted(mediaName, mediaType):
     typeKey = PROGRAM_MODE_MAP[mediaType]
 
     def operation(media, mediaName=mediaName, typeKey=typeKey):
+        logging.info(f"Attempting to add {mediaName} to {media[typeKey]}")
         media[typeKey].append(mediaName)
         return media
 
@@ -48,6 +49,7 @@ def notifyDownloadFinished(mediaName, mediaType):
     typeKey = PROGRAM_MODE_MAP[mediaType]
 
     def operation(media, mediaName=mediaName, typeKey=typeKey):
+        logging.info(f"Attempting to remove {mediaName} from {media[typeKey]}")
         media[typeKey].remove(mediaName)
         return media
 

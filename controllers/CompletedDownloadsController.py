@@ -93,7 +93,7 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
             
             if not fileSystemSubItems:
                 logging.info(f"Tried to browse past the directory created by qbittorrent ({fileSystemItem.path}) but nothing was found inside.")
-                return None
+                continue
 
             fileSystemItem = fileSystemSubItems[0]
             fileSystemItemName = fileSystemItem.name
