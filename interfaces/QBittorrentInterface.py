@@ -31,18 +31,10 @@ def initTorrentDownload(torrent):
 
 
 def pauseTorrent(torrentName):
-    torrents = qb.torrents(filter='downloading')
+    torrents = qb.torrents()
 
     for torrent in torrents:
         if torrent["name"] == torrentName:
             qb.pause(torrent["hash"])
             return True
     return False
-
-    
-
-
-
-if __name__== "__main__":
-    init()
-    pauseTorrent("The West Wing Season 1 to 7 Mp4 1080p")
