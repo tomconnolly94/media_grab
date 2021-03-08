@@ -5,6 +5,9 @@ from qbittorrent import Client
 import os
 import logging
 
+# internal dependencies
+from controllers import ErrorController
+
 global qb
 
 def init():
@@ -25,8 +28,8 @@ def initTorrentDownload(torrent):
             logging.info(f"Torrent added: {torrent['torrentName']}")
             return True
         return False
-    except Exception:
-        logging.error("Exception occurred", exc_info=True)
+    except Exception as exception:
+        ErrorController.reportError("Exception occurred when submitting torrent magnet to qbittorrent", exception=exception, sendEmail=True)
         return False
 
 

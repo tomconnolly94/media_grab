@@ -9,7 +9,7 @@ import getopt
 
 # internal dependencies
 from interfaces import TPBInterface, MediaIndexFileInterface, QBittorrentInterface, MailInterface, TheMovieDatabaseInterface
-from controllers import LoggingController, LogicController
+from controllers import LoggingController, LogicController, ErrorController
 from data_types.ProgramModeMap import PROGRAM_MODE_MAP
 from data_types.ProgramMode import PROGRAM_MODE
 
@@ -60,14 +60,14 @@ def main(argv):
 
 	# catch all exceptions so they are always reported
 	try:
-		TheMovieDatabaseInterface.init()
 		MailInterface.init()
+		TheMovieDatabaseInterface.init()
 		QBittorrentInterface.init()
 		mediaInfoRecords = MediaIndexFileInterface.loadMediaFile() # information about the wanted media
 		LogicController.runProgramLogic(mediaInfoRecords, mode)
 	
-	except Exception:
-		logging.error("Exception occurred", exc_info=True)
+	except Exception as exception:
+		ErrorController.reportError("Exception occurred", exception=exception, sendEmail=True)
 
 
 if __name__== "__main__":

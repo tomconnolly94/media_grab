@@ -10,6 +10,7 @@ import shutil
 from data_types.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP, PROGRAM_MODE_MAP
 from data_types.ProgramMode import PROGRAM_MODE
 from interfaces import FolderInterface, MailInterface, DownloadsInProgressFileInterface, QBittorrentInterface
+from controllers import ErrorController
 
 
 def extractShowName(fileName):
@@ -39,8 +40,8 @@ def extractSeasonNumber(fileName):
             return seasonNumber
         else:
             return None
-    except Exception:
-        logging.error("Exception occurred", exc_info=True)
+    except Exception as exception:
+        ErrorController.reportError("Exception occurred when extracting season number with regex", exception=exception, sendEmail=True)
         return None
 
 
@@ -54,8 +55,8 @@ def extractEpisodeNumber(fileName):
             return episodeNumber
         else:
             return None
-    except Exception:
-        logging.error("Exception occurred", exc_info=True)
+    except Exception as exception:
+        ErrorController.reportError("Exception occurred when extracting episode number with regex", exception=exception, sendEmail=True)
         return None
 
 
@@ -65,8 +66,7 @@ def extractExtension(fileName):
 
 def reportItemAlreadyExists(newItemLocation, torrentName):
     errorString = f"Downloaded torrent: {torrentName} and attempted to move it to {newItemLocation} but this target already exists."
-    logging.error(errorString)
-    MailInterface.sendMail("Houston we have a problem", errorString)
+    ErrorController.reportError(errorString, sendEmail=True)
 
 
 def getLargestFileInDir(directory):
@@ -155,8 +155,9 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
                         recycle_bin_dir = os.getenv("RECYCLE_BIN_DIR")
                         shutil.move(fileSystemItem.path, recycle_bin_dir)
                         logging.info(f"Stored '{fileSystemItem.path}' in '{recycle_bin_dir}', in case it is needed. Please remember to delete items from here.")
-                    except OSError:
-                        logging.error("Exception occurred", exc_info=True)
+                    except OSError as exception:
+                        ErrorController.reportError("Exception occurred when moving residual files to the recycle bin dir", exception=exception, sendEmail=True)
+                        continue
                 
                 
                 # handle deletion of the container directory created by qbittorrent
