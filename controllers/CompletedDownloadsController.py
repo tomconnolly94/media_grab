@@ -9,7 +9,7 @@ import shutil
 # internal dependencies
 from data_types.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP, PROGRAM_MODE_MAP
 from data_types.ProgramMode import PROGRAM_MODE
-from interfaces import FolderInterface, MailInterface, DownloadsInProgressFileInterface
+from interfaces import FolderInterface, MailInterface, DownloadsInProgressFileInterface, QBittorrentInterface
 
 def extractShowName(fileName):
     
@@ -84,6 +84,12 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
         if fileSystemItem.name in filteredDownloadingItems:            
             #browse past the fake directory with the known name that we passed to qbittorrent
             fileSystemSubItems = list(os.scandir(fileSystemItem.path))
+            
+            # attempt to pause torrent
+            if QBittorrentInterface.pauseTorrent(fileSystemItem.name):
+                logging.info(f"Paused torrent activity: ({fileSystemItem.name})")
+            else:
+                logging.info(f"Failed to pause torrent activity: ({fileSystemItem.name})")
             
             if not fileSystemSubItems:
                 logging.info(f"Tried to browse past the directory created by qbittorrent ({fileSystemItem.path}) but nothing was found inside.")
