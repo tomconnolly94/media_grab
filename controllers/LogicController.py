@@ -5,7 +5,7 @@ import logging
 
 # internal dependencies
 from interfaces import TPBInterface, DownloadsInProgressFileInterface, QBittorrentInterface
-from controllers import QueryGenerationController, TorrentFilterController, NewTorrentController, CompletedDownloadsController
+from controllers import QueryGenerationController, NewTorrentController, CompletedDownloadsController
 from data_types.ProgramMode import PROGRAM_MODE 
 
 
@@ -15,43 +15,29 @@ def findMediaInfoRecord(mediaInfoRecords, mediaInfoName):
 			return record
 
 
-def sortTorrents(torrents):
-    # order torrents by number of seeders
-    return sorted(torrents, key=lambda torrent: -1 * int(torrent["seeders"]))
-    
-
-
 def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
     mediaInfoRecordsWithTorrents = []
 
     for mediaInfoName, queries in mediaSearchQueries.items():
-
-        torrentRecords = TPBInterface.getTorrentRecords(queries)
-        if not torrentRecords:
-            continue
+        
         # filter torrentRecords by applying regex to torrent titles
         mediaInfoRecord = findMediaInfoRecord(mediaInfoRecords, mediaInfoName)
-        torrentTitles = [ torrent["name"] for torrent in torrentRecords ]
-        filteredTorrentTitles = TorrentFilterController.filterEpisodeTorrents(torrentTitles, mediaInfoRecord)
-        logging.info(f"{len(torrentTitles)} torrents filtered down to {len(filteredTorrentTitles)}")
+        
+        torrentRecords = TPBInterface.getTorrentRecords(queries, mediaInfoRecord)
+        if not torrentRecords:
+            continue
 
-        # get list of filtered torrent objects
-        filteredTorrents = [ torrent for torrent in torrentRecords if torrent["name"] in filteredTorrentTitles ]
-
-        # order torrents by number of seeders
-        filteredSortedTorrents = sortTorrents(filteredTorrents)
-
-        if filteredSortedTorrents:
+        if torrentRecords:
             chosenTorrent = None
 
-            downloadIds = [ torrent["name"] for torrent in filteredSortedTorrents ]
+            downloadIds = [ torrent["name"] for torrent in torrentRecords ]
             chosenDownloadId = DownloadsInProgressFileInterface.findNewDownload(downloadIds)
 
             if not chosenDownloadId:
                 continue
 
 
-            for torrent in filteredSortedTorrents:
+            for torrent in torrentRecords:
                 if chosenDownloadId == torrent["name"]:
                     chosenTorrent = torrent 
                     logging.info(f"Selected torrent: {chosenTorrent['name']} - seeders: {chosenTorrent['seeders']}")

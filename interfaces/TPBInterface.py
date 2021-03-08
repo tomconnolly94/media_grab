@@ -7,6 +7,13 @@ import logging
 import os
 import json
 
+# internal dependencies
+from controllers import TorrentFilterController
+
+def sortTorrents(torrents):
+    # order torrents by number of seeders
+    return sorted(torrents, key=lambda torrent: -1 * int(torrent["seeders"]))
+
 
 def getTPBProxySites():
     proxyUrl = "https://piratebay-proxylist.se/api/v1/proxies"
@@ -17,21 +24,38 @@ def getTPBProxySites():
     return domains
     
 
-def getTorrentRecords(queries):
+def getTorrentRecords(queries, mediaInfoRecord):
 
-    torrents = []
     # make query for the mediaInfoRecord, if none are found, try the next query format
     for queryStr in queries:
-        torrents = queryAPI(queryStr)
+        torrentRecords = queryAPI(queryStr)
         
         #logging
-        logging.info(f"Torrent search performed for: '{queryStr}' - {len(torrents)} results.")
+        logging.info(f"Torrent search performed for: '{queryStr}' - {len(torrentRecords)} results.")
+
+        if not torrentRecords:
+            continue
+        
+        # access torrent titles for filtering
+        torrentTitles = [ torrent["name"] for torrent in torrentRecords ]
+
+        filteredTorrentTitles = TorrentFilterController.filterEpisodeTorrents(torrentTitles, mediaInfoRecord)
+        logging.info(f"{len(torrentTitles)} torrents filtered down to {len(filteredTorrentTitles)}")
+
+        if not filteredTorrentTitles:
+            logging.info("No torrents survived the filter, trying the next query")
+            continue
+
+        # get list of filtered torrent objects
+        filteredTorrents = [ torrent for torrent in torrentRecords if torrent["name"] in filteredTorrentTitles ]
+
+        # order torrents by number of seeders
+        filteredSortedTorrents = sortTorrents(filteredTorrents)
 
         #if we have some results then break the loop and return the torrentRecords
-        if torrents:
-            break
-    
-    return torrents
+        return filteredSortedTorrents
+
+    return None
 
 
 def queryAPI(queryTerm):

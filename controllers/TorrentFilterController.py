@@ -19,7 +19,7 @@ def filterEpisodeTorrents(torrentPageUrls, mediaData):
 	relevantEpisode = mediaData["typeSpecificData"]["latestEpisode"].zfill(2)
 
 	episodeRegex = rf"[{nameFirstLetter.upper()}|{nameFirstLetter}]{restOfName}\D*[Ss]{relevantSeason}[Ee]{relevantEpisode}"
-	logging.info(f"episodeRegex: {episodeRegex}")
+	logging.info(f"Regex filter used: {episodeRegex}")
 	episodeRegex = re.compile(episodeRegex, flags=re.IGNORECASE | re.MULTILINE)
 	filteredTorrentPageUrls = list(filter(episodeRegex.search, torrentPageUrls))
 	return filteredTorrentPageUrls

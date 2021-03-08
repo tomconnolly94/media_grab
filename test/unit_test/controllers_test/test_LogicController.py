@@ -46,10 +46,9 @@ class TestLogicController(unittest.TestCase):
 
     @mock.patch("interfaces.DownloadsInProgressFileInterface.findNewDownload")
     @mock.patch("logging.info")
-    @mock.patch("controllers.TorrentFilterController.filterEpisodeTorrents")
-    @mock.patch("controllers.LogicController.findMediaInfoRecord")
     @mock.patch("interfaces.TPBInterface.getTorrentRecords")
-    def test_getMediaInfoRecordsWithTorrents(self, getTorrentRecordsMock, findMediaInfoRecordMock, filterEpisodeTorrentsMock, loggingInfoMock, findNewDownload):
+    @mock.patch("controllers.LogicController.findMediaInfoRecord")
+    def test_getMediaInfoRecordsWithTorrents(self, findMediaInfoRecordMock, getTorrentRecordsMock, loggingInfoMock, findNewDownloadMock):
         
         fakeMediaSearchQueries = {
             "fakeMediaInfoName1": ["fakeMediaInfoName1Query1", "fakeMediaInfoName1Query2", "fakeMediaInfoName1Query3"],
@@ -80,10 +79,9 @@ class TestLogicController(unittest.TestCase):
         ]
 
         # configure mocks
+        findMediaInfoRecordMock.side_effect = fakeMediaInfoRecords
         getTorrentRecordsMock.return_value = fakeTorrentRecords
-        findMediaInfoRecordMock.side_effect = [fakeMediaInfoRecords[0], fakeMediaInfoRecords[1], fakeMediaInfoRecords[2]]
-        filterEpisodeTorrentsMock.side_effect = [["fakeTorrentTitle1", "fakeTorrentTitle3"], [], ["fakeTorrentTitle3"]]
-        findNewDownload.side_effect = ["fakeTorrentTitle1", "fakeTorrentTitle3"]
+        findNewDownloadMock.side_effect = ["fakeTorrentTitle1", None, "fakeTorrentTitle3"]
 
         # expected outputs
         #fakeMediaInfoRecords[0]["magnet"]
@@ -112,10 +110,34 @@ class TestLogicController(unittest.TestCase):
 
         actualOutputMediaInfoRecords = LogicController.getMediaInfoRecordsWithTorrents(fakeMediaSearchQueries, fakeMediaInfoRecords)
 
-        # mock asserts
-
-        #TODO: finish implementation of this test function
+        # asserts
         self.assertEqual(expectedOutputMediaInfoRecords, actualOutputMediaInfoRecords)
+        findMediaInfoRecordCalls = [
+            call(fakeMediaInfoRecords, "fakeMediaInfoName1"),
+            call(fakeMediaInfoRecords, "fakeMediaInfoName2"),
+            call(fakeMediaInfoRecords, "fakeMediaInfoName3")
+        ]
+        findMediaInfoRecordMock.has_calls(findMediaInfoRecordCalls)
+
+        getTorrentRecordsCalls = [
+            call(fakeMediaSearchQueries["fakeMediaInfoName1"], fakeMediaInfoRecords[0]),
+            call(fakeMediaSearchQueries["fakeMediaInfoName2"], fakeMediaInfoRecords[1]),
+            call(fakeMediaSearchQueries["fakeMediaInfoName3"], fakeMediaInfoRecords[2])
+        ]
+        getTorrentRecordsMock.has_calls(getTorrentRecordsCalls)
+
+        loggingInfoCalls = [
+            call("Selected torrent: fakeMediaInfoName1 - seeders: 2"),
+            call("Selected torrent: fakeMediaInfoName3 - seeders: 8"),
+        ]
+        loggingInfoMock.has_calls(loggingInfoCalls)
+
+        fakeTorrentRecordsNames = [ torrent["name"] for torrent in fakeTorrentRecords ]        
+        findNewDownloadCalls = [
+            call(fakeTorrentRecordsNames),
+            call(fakeTorrentRecordsNames),
+        ]
+        findNewDownloadMock.has_calls(findNewDownloadCalls)
 
 
     @mock.patch("controllers.NewTorrentController.onSuccessfulTorrentAdd")

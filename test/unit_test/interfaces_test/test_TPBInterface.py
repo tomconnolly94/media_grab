@@ -1,6 +1,7 @@
 # external dependencies
 import unittest
 import mock
+from mock import call
 import json
 
 # internal dependencies
@@ -28,15 +29,41 @@ class TestTPBInterface(unittest.TestCase):
         self.assertEqual(expectedProxySites, actualProxySites)
 
 
+    @mock.patch("controllers.TorrentFilterController.filterEpisodeTorrents")
+    @mock.patch("logging.info")
     @mock.patch("interfaces.TPBInterface.queryAPI")
-    def test_getTorrentRecords(self, queryMock):
-        TPBQueryResponses = [[], ["torrent1", "torrent2", "torrent3"]]
-        queryMock.side_effect = TPBQueryResponses
+    def test_getTorrentRecords(self, queryMock, loggingInfoMock, filterEpisodeTorrentsMock):
+        
+        # config fake data
+        fakeTPBQueryResponses = [[], [{"name": "torrent1", "seeders": "5"}, {"name": "torrent2", "seeders": "10"}, {"name": "torrent3", "seeders": "0"}]]
         queries = ["fakeQueryString1", "fakeQueryString2", "fakeQueryString3"]
+        fakeMediaInfoRecord = "fakeMediaInfoRecord"
+        fakeTorrentNames = [ torrent["name"] for torrent in fakeTPBQueryResponses[1] ]
+        fakeFilteredTorrents = fakeTPBQueryResponses[1][:2]
+        fakeFilteredTorrentNames = [ torrent["name"] for torrent in fakeFilteredTorrents ]
 
-        torrentRecords = TPBInterface.getTorrentRecords(queries)
+        # config mocks
+        queryMock.side_effect = fakeTPBQueryResponses
+        filterEpisodeTorrentsMock.return_value = fakeFilteredTorrentNames
 
-        self.assertEqual(TPBQueryResponses[1], torrentRecords)
+        # run testable function
+        torrentRecords = TPBInterface.getTorrentRecords(queries, fakeMediaInfoRecord)
+
+        # asserts
+        expectedTorrentRecords = [ fakeFilteredTorrents[1], fakeFilteredTorrents[0] ]
+        self.assertEqual(expectedTorrentRecords, torrentRecords)
+        queryAPI = [
+            call(queries[0]),
+            call(queries[1])
+        ]
+        queryMock.has_calls(queryAPI)
+        filterEpisodeTorrentsMock.assert_called_with(fakeTorrentNames, fakeMediaInfoRecord)
+        logCalls = [
+            call(f"Torrent search performed for: '{queries[0]}' - {len(fakeTPBQueryResponses[0])} results."),
+            call(f"Torrent search performed for: '{queries[1]}' - {len(fakeTPBQueryResponses[1])} results."),
+            call(f"{len(fakeTPBQueryResponses[1])} torrents filtered down to {len(fakeFilteredTorrents)}")
+        ]
+        loggingInfoMock.has_calls(logCalls)
 
 
 if __name__ == '__main__':
