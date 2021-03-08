@@ -84,6 +84,7 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
         if fileSystemItem.name in filteredDownloadingItems:            
             #browse past the fake directory with the known name that we passed to qbittorrent
             fileSystemSubItems = list(os.scandir(fileSystemItem.path))
+            itemId = fileSystemItem.name
             
             # attempt to pause torrent
             if QBittorrentInterface.pauseTorrent(fileSystemItem.name):
@@ -139,7 +140,7 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
                 # move file to appropriate directory
                 os.rename(targetFile.path, prospectiveFile)
                 logging.info(f"Moved '{targetFile.path}' to '{prospectiveFile}'")
-                DownloadsInProgressFileInterface.notifyDownloadFinished(fileSystemItemName, PROGRAM_MODE.TV_EPISODES)
+                DownloadsInProgressFileInterface.notifyDownloadFinished(itemId, PROGRAM_MODE.TV_EPISODES)
 
                 if itemIsDirectory:
                     # attempt to move the rest of the files to the recycle_bin folder so if the program made an error, the downloaded content still might be recoverable
