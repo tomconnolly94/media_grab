@@ -60,7 +60,7 @@ class TestMailInterface(unittest.TestCase):
             call().__enter__().starttls(),
             call().__enter__().ehlo(),
             call().__enter__().login(fakeMailUsername, fakeMailPassword),
-            call().__enter__().sendmail(fakeMailUsername, fakeToEmailAddress, f'Subject: {fakeHeading}\n\n{fakeMessage}'),
+            call().__enter__().sendmail(fakeMailUsername, fakeToEmailAddress, f'Subject: [Media Grab] {fakeHeading}\n\n{fakeMessage}'),
             call().__exit__(None, None, None)
         ]
         smtpMock.assert_has_calls(calls)
