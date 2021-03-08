@@ -35,7 +35,7 @@ def sendMail(heading, messageBody):
             server.login(mailUsername, mailPassword)
             #server.login('tomconnollyapps@gmail.com', 'Ring6Door9Sofa3')
 
-            mailContent = f'Subject: {heading}\n\n{messageBody}'
+            mailContent = f'Subject: [Media Grab] {heading}\n\n{messageBody}'
             #Send the email
             server.sendmail(mailUsername, toEmailAddress, mailContent)
 
@@ -48,7 +48,7 @@ def sendMail(heading, messageBody):
 
 def sendNewTorrentMail(torrentName, torrentExtraInfo, torrentMagnet):
     messageBody = f'ADDED TORRENT: {torrentName} {torrentExtraInfo} \n\n Magnet:{torrentMagnet}'
-    sendMail("Media Grab: A new torrent has just been added.", messageBody)
+    sendMail("A new torrent has just been added.", messageBody)
 
 
 def sendTestMail():
