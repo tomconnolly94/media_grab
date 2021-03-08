@@ -62,9 +62,11 @@ def main(argv):
 	try:
 		MailInterface.init()
 		TheMovieDatabaseInterface.init()
-		QBittorrentInterface.init()
-		mediaInfoRecords = MediaIndexFileInterface.loadMediaFile() # information about the wanted media
-		LogicController.runProgramLogic(mediaInfoRecords, mode)
+		QBittorrentInterface.init() 
+		# load information about the requested media
+		mediaInfoRecords = MediaIndexFileInterface.loadMediaFile()
+		LogicController.runProgramLogic(mediaInfoRecords, mode)		
+		logging.info("Media grab app exiting.")
 	
 	except Exception as exception:
 		ErrorController.reportError("Exception occurred", exception=exception, sendEmail=True)
