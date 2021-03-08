@@ -86,6 +86,9 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
             fileSystemSubItems = list(os.scandir(fileSystemItem.path))
             itemId = fileSystemItem.name
             
+            fileSystemItem = fileSystemSubItems[0]
+            fileSystemItemName = fileSystemItem.name
+            
             # attempt to pause torrent
             if QBittorrentInterface.pauseTorrent(fileSystemItem.name):
                 logging.info(f"Paused torrent activity: ({fileSystemItem.name})")
@@ -95,9 +98,6 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
             if not fileSystemSubItems:
                 logging.info(f"Tried to browse past the directory created by qbittorrent ({fileSystemItem.path}) but nothing was found inside.")
                 continue
-
-            fileSystemItem = fileSystemSubItems[0]
-            fileSystemItemName = fileSystemItem.name
 
             logging.info(f"{fileSystemItemName} has finished downloading and will be moved.")
             
