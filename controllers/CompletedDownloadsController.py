@@ -92,6 +92,9 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
             #browse past the fake directory with the known name that we passed to qbittorrent
             fileSystemSubItems = list(os.scandir(fileSystemItem.path))
             itemId = fileSystemItem.name
+
+            if not fileSystemSubItems:
+                continue
             
             fileSystemItem = fileSystemSubItems[0]
             fileSystemItemName = fileSystemItem.name
