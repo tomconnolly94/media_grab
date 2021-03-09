@@ -18,8 +18,7 @@ def incrementEpisode(mediaInfoRecords, queryRecord):
 			prevEpisodeValue = mediaRecord["typeSpecificData"]["latestEpisode"]
 			prevSeasonValue = mediaRecord["typeSpecificData"]["latestSeason"]
 
-
-			if int(mediaRecord["typeSpecificData"]["latestEpisode"]) + 1 > maxNumberOfEpisodes:
+			if maxNumberOfEpisodes and int(mediaRecord["typeSpecificData"]["latestEpisode"]) + 1 > maxNumberOfEpisodes:
 				# set data to next season first episode
 				mediaRecord["typeSpecificData"]["latestSeason"] = str(int(queryRecord["typeSpecificData"]["latestSeason"]) + 1)
 				mediaRecord["typeSpecificData"]["latestEpisode"] = str(1)
