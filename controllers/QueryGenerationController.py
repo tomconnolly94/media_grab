@@ -54,9 +54,9 @@ def generateTVEpisodeQueryGroup(mediaName, relevantSeason, relevantEpisode):
 	for index, template in enumerate(episodeTemplates):
 		# create search url
 		if " " in template:
-			queries.append(f"{mediaName} {seasonTemplates[index]}{relevantSeason} {template}{relevantEpisode}")
+			queries.append(f'"{mediaName}" {seasonTemplates[index]}{relevantSeason} {template}{relevantEpisode}')
 		else:
-			queries.append(f"{mediaName} {seasonTemplates[index]}{relevantSeason:>02}{template}{relevantEpisode:>02}") # force season number to two digits, e.g. "1" -> "01"
+			queries.append(f'"{mediaName}" {seasonTemplates[index]}{relevantSeason:>02}{template}{relevantEpisode:>02}') # force season number to two digits, e.g. "1" -> "01"
 
 	return queries
 	
