@@ -6,7 +6,6 @@ import os
 import logging
 
 enterLogMessage = "MailInterface:sendMail called."
-finishLogMessage = "Sent notification for torrent add."
 toEmailAddress = "tom.connolly@protonmail.com"
 environment = None
 mailUsername = None
@@ -38,8 +37,6 @@ def sendMail(heading, messageBody):
             mailContent = f'Subject: [Media Grab] {heading}\n\n{messageBody}'
             #Send the email
             server.sendmail(mailUsername, toEmailAddress, mailContent)
-
-            logging.info(finishLogMessage)
     elif environment == "dev":
         logging.info(f"Program is running in {environment} mode. No email has been sent.")
     else:

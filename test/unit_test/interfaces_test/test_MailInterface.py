@@ -51,7 +51,7 @@ class TestMailInterface(unittest.TestCase):
         MailInterface.sendMail(fakeHeading, fakeMessage)
 
         # mock asserts
-        calls = [ call("MailInterface:sendMail called."), call('Sent notification for torrent add.') ]
+        calls = [ call("MailInterface:sendMail called.")]
         loggingInfoProdMock.assert_has_calls(calls)
 
         calls = [
