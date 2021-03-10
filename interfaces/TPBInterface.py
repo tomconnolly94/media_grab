@@ -6,9 +6,11 @@ import requests
 import logging
 import os
 import json
+from requests.exceptions import ChunkedEncodingError
+from json.decoder import JSONDecodeError
 
 # internal dependencies
-from controllers import TorrentFilterController
+from controllers import TorrentFilterController, ErrorController
 
 def sortTorrents(torrents):
     # order torrents by number of seeders
@@ -76,5 +78,6 @@ def queryAPI(queryTerm):
             torrent["magnet"] = f"magnet:?xt=urn:btih:{torrent.get('info_hash')}&dn={torrent.get('name')}"
 
         return torrents
-    except json.decoder.JSONDecodeError:
+    except (JSONDecodeError, ChunkedEncodingError) as exception:
+        ErrorController.reportError("Problem with TPB API has occurred.", exception, True)
         return []

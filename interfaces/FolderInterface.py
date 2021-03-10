@@ -7,6 +7,7 @@ import re
 
 #internal dependencies
 from data_types.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
+from controllers import ErrorController
 
 def createDirectory(newDirectoryName):
     try:
@@ -27,4 +28,7 @@ def fileExists(fileName):
 
 
 def getDirContents(directory):
-    return list(os.scandir(directory))
+    try:
+        return list(os.scandir(directory))
+    except OSError as exception:
+        ErrorController.reportError(f"Failed to scan {directory} drive is probably inaccessible.", exception, True)

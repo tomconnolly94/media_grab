@@ -35,11 +35,3 @@ def reportError(message="", exception=None, sendEmail=False):
             message += f"{moreLogsMessage} console output"
 
         MailInterface.sendMail("Houston we have a problem", message)
-
-
-if __name__== "__main__":
-    exception = Exception("big exception!")
-    try:
-        raise exception
-    except:
-        reportError("big error!", exception=exception, sendEmail=True)
