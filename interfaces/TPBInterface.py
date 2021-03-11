@@ -37,19 +37,13 @@ def getTorrentRecords(queries, mediaInfoRecord):
 
         if not torrentRecords:
             continue
-        
-        # access torrent titles for filtering
-        torrentTitles = [ torrent["name"] for torrent in torrentRecords ]
 
-        filteredTorrentTitles = TorrentFilterController.filterEpisodeTorrents(torrentTitles, mediaInfoRecord)
-        logging.info(f"{len(torrentTitles)} torrents filtered down to {len(filteredTorrentTitles)}")
+        filteredTorrents = TorrentFilterController.filterEpisodeTorrents(torrentRecords, mediaInfoRecord)
+        logging.info(f"{len(filteredTorrents)} torrents filtered down to {len(filteredTorrents)}")
 
-        if not filteredTorrentTitles:
+        if not filteredTorrents:
             logging.info("No torrents survived the filter, trying the next query")
             continue
-
-        # get list of filtered torrent objects
-        filteredTorrents = [ torrent for torrent in torrentRecords if torrent["name"] in filteredTorrentTitles ]
 
         # order torrents by number of seeders
         filteredSortedTorrents = sortTorrents(filteredTorrents)

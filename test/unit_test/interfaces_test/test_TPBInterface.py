@@ -38,13 +38,11 @@ class TestTPBInterface(unittest.TestCase):
         fakeTPBQueryResponses = [[], [{"name": "torrent1", "seeders": "5"}, {"name": "torrent2", "seeders": "10"}, {"name": "torrent3", "seeders": "0"}]]
         queries = ["fakeQueryString1", "fakeQueryString2", "fakeQueryString3"]
         fakeMediaInfoRecord = "fakeMediaInfoRecord"
-        fakeTorrentNames = [ torrent["name"] for torrent in fakeTPBQueryResponses[1] ]
         fakeFilteredTorrents = fakeTPBQueryResponses[1][:2]
-        fakeFilteredTorrentNames = [ torrent["name"] for torrent in fakeFilteredTorrents ]
 
         # config mocks
         queryMock.side_effect = fakeTPBQueryResponses
-        filterEpisodeTorrentsMock.return_value = fakeFilteredTorrentNames
+        filterEpisodeTorrentsMock.return_value = fakeFilteredTorrents
 
         # run testable function
         torrentRecords = TPBInterface.getTorrentRecords(queries, fakeMediaInfoRecord)
@@ -57,7 +55,7 @@ class TestTPBInterface(unittest.TestCase):
             call(queries[1])
         ]
         queryMock.has_calls(queryAPI)
-        filterEpisodeTorrentsMock.assert_called_with(fakeTorrentNames, fakeMediaInfoRecord)
+        filterEpisodeTorrentsMock.assert_called_with(fakeTPBQueryResponses[1], fakeMediaInfoRecord)
         logCalls = [
             call(f"Torrent search performed for: '{queries[0]}' - {len(fakeTPBQueryResponses[0])} results."),
             call(f"Torrent search performed for: '{queries[1]}' - {len(fakeTPBQueryResponses[1])} results."),

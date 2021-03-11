@@ -6,10 +6,12 @@ import logging
 from num2words import num2words
 
 
-def filterEpisodeTorrents(torrentPageUrls, mediaData):
+def filterEpisodeTorrents(torrents, mediaData):
 
-	if not torrentPageUrls:
+	if not torrents:
 		return []
+
+	
 		
 	name = mediaData["name"]
 	nameFirstLetter = name[0].lower()
@@ -21,8 +23,14 @@ def filterEpisodeTorrents(torrentPageUrls, mediaData):
 	episodeRegex = rf"[{nameFirstLetter.upper()}|{nameFirstLetter}]{restOfName}\D*[Ss]{relevantSeason}[Ee]{relevantEpisode}"
 	logging.info(f"Regex filter used: {episodeRegex}")
 	episodeRegex = re.compile(episodeRegex, flags=re.IGNORECASE | re.MULTILINE)
-	filteredTorrentPageUrls = list(filter(episodeRegex.search, torrentPageUrls))
-	return filteredTorrentPageUrls
+	
+	torrentTitles = [ torrent["name"] for torrent in torrents ]
+	filteredTorrentTitles = list(filter(episodeRegex.search, torrentTitles))
+	
+    # get a list of filtered in torrent items
+	filteredTorrents = [ torrent for torrent in torrents if torrent["name"] in filteredTorrentTitles and int(torrent["seeders"]) > 0 ]
+
+	return filteredTorrents
 
 
 # def filterSeasonTorrents(torrentTitles, mediaData):

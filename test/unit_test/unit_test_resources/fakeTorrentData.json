@@ -2,230 +2,69 @@
     "episodeTorrentData": [
         
         {
-            "itemText": "Rick.and.morty",
+            "name": "Rick.and.morty",
+            "seeders": 2,
             "passesFilter": false
         },
         {
-            "itemText": "Rick.and.Morty.Season.1",
+            "name": "Rick.and.Morty.Season.1",
+            "seeders": 2,
             "passesFilter": false
         },
         {
-            "itemText": "Rick.and.Morty.episode.1",
+            "name": "Rick.and.Morty.episode.1",
+            "seeders": 2,
             "passesFilter": false
         },
         {
-            "itemText": "Rick.and.Morty.season.3.episode.1",
+            "name": "Rick.and.Morty.season.3.episode.1",
+            "seeders": 2,
             "passesFilter": false
         },
         {
-            "itemText": "Rick.and.Morty.Season.3",
+            "name": "Rick.and.Morty.Season.3",
+            "seeders": 2,
             "passesFilter": false
         },
         {
-            "itemText": "Rick..and.Morty.Season.3",
+            "name": "Rick..and.Morty.Season.3",
+            "seeders": 2,
             "passesFilter": false
         },
         {
-            "itemText": "Rick.and.Morty.S03E03.1080p.WEBRip.x264-STRiFE",
+            "name": "Rick.and.Morty.S03E03.1080p.WEBRip.x264-STRiFE",
+            "seeders": 2,
             "passesFilter": false
         },
         {
-            "itemText": "Rick.and.Morty.S03E02.HDTV.x264-BATV",
+            "name": "Rick.and.Morty.S03E02.HDTV.x264-BATV",
+            "seeders": 2,
             "passesFilter": true
         },
         {
-            "itemText": "Rick.and.Morty.S03E02.720p.HDTV.x264-BATV[ettv]",
+            "name": "Rick.and.Morty.S03E02.720p.HDTV.x264-BATV[ettv]",
+            "seeders": 2,
             "passesFilter": true
         },
         {
-            "itemText": "Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE",
+            "name": "Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE",
+            "seeders": 2,
             "passesFilter": true
         },
         {
-            "itemText": "Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE",
+            "name": "Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE",
+            "seeders": 2,
             "passesFilter": true
         },
         {
-            "itemText": " Rick and Morty S03E02 1080p PT-BR Subs Tocatoon ",
+            "name": " Rick and Morty S03E02 1080p PT-BR Subs Tocatoon ",
+            "seeders": 2,
             "passesFilter": true
         },
         {
-            "itemText": "Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon ",
+            "name": "Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon ",
+            "seeders": 2,
             "passesFilter": true
-        }
-    ],
-    "seasonTorrentData": [
-        {
-            "itemText": "Rick.and.morty",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick.and.Morty.Season.1",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick.and.Morty.episode.1",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick.and.Morty.season.3.episode.1",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick.and.Morty.Season.3",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick..and.Morty.Season.3",
-            "passesFilter": true
-        },
-        {
-            "itemText": "rick.and.morty.season.3",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick and morty Season 3",
-            "passesFilter": true
-        },
-        {
-            "itemText": "rick.and.morty.Season.3",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick,and,morty,Season,3",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick and Morty - Season 3",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick.and.Morty.SEASON.3",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick.and.Morty.S.3",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick.and.Morty.S.03",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick.and.Morty.S03",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick.and.Morty S03",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick.and.Morty.s.3",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick.and.Morty.S03.Complete.720p.BRRip.x264.[1.4GB].[MP4].Season",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick and Morty Season 2 Complete 720p MKV",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick and Morty Season 3 Complete 720p MKV",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick and Morty  Season 1, 720p minified",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick and Morty  Season 3, 720p minified",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick and Morty Season 2",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick and Morty Season 3",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick.And.Morty.S01.Season.1.COMPLETE.720p.HDTV.x264-nsj7762",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick.And.Morty.S03.Season.3.COMPLETE.720p.HDTV.x264-nsj7762",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick.and.Morty.S02.1080p.BluRay.x264-YELLOWBiRD [Season 2 Two]",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick.and.Morty.S03.1080p.BluRay.x264-YELLOWBiRD [Season 3 Three]",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick and Morty  S02 Season 2 [1080p] [REMUX] [BDRip]",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick and Morty  S03 Season 3 [1080p] [REMUX] [BDRip]",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick.and.Morty.S01.1080p.BluRay.x264-DAA [Season 1 One Complete]",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick.and.Morty.S03.1080p.BluRay.x264-DAA [Season 3 Three Complete]",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick.and.Morty.S02.1080p.BluRay.x264-YELLOWBiRD [Season 2 Two]",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick.and.Morty.S03.1080p.BluRay.x264-YELLOWBiRD [Season 3 Three]",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick and Morty COMPLETE Season 1, 2, 3, 4",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick and Morty Season 1 (1280x720) [Phr0stY",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick and Morty Season 3 (1280x720) [Phr0stY",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick.and.Morty.SEASON.03.COMPLETE.720p.BluRay.2CH.x265.HEVC-PSA",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick and Morty - Season 3 - Uncensored - With Commentary - 1080p",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick.and.Morty.Season.3.Complete.720p.Uncensored.x264-Rapta",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick And Morty Season One Full 1080 BluRay ISO",
-            "passesFilter": false
-        },
-        {
-            "itemText": "Rick And Morty Season Three Full 1080 BluRay ISO",
-            "passesFilter": true
-        },
-        {
-            "itemText": "Rick and Morty",
-            "passesFilter": false
         }
     ]
 }
