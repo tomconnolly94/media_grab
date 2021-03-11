@@ -3,26 +3,28 @@ from controllers import QueryGenerationController
 
 class TestQueryGenerationController(unittest.TestCase):
 
-    def test_generateSeasonQueryGroup(self):
+    def test_generateEpisodeQueryGroup(self):
 
         mediaInfo = {
             "name": "rick and morty",
             "typeSpecificData": {
-                "latestSeason": 1
+                "latestSeason": 1,
+                "latestEpisode": 1
             }
         }
 
         name = mediaInfo["name"]
-        relevantSeason = int(mediaInfo["typeSpecificData"]["latestSeason"]) + 1
+        relevantSeason = int(mediaInfo["typeSpecificData"]["latestSeason"]) 
+        relevantEpisode= int(mediaInfo["typeSpecificData"]["latestEpisode"]) + 1
 
         expectedQueries = [
-            "rick and morty s02",
-            "rick and morty s 2",
-            "rick and morty season02",
-            "rick and morty season 2"
+            "\"rick and morty\" s01e02",
+            "\"rick and morty\" s 1 e 2",
+            "\"rick and morty\" season01episode02",
+            "\"rick and morty\" season 1 episode 2"
         ]
 
-        seasonQueryGroup = QueryGenerationController.generateTVSeasonQueryGroup(name, relevantSeason)
+        seasonQueryGroup = QueryGenerationController.generateTVEpisodeQueryGroup(name, relevantSeason, relevantEpisode)
 
         self.assertEqual(expectedQueries, seasonQueryGroup)
 

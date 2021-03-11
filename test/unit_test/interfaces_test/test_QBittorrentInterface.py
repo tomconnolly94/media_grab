@@ -25,7 +25,8 @@ class TestQBittorrentInterface(unittest.TestCase):
         torrentMagnet = "/torrent/18003297/Silicon_Valley_Season_4_S04_720p_AMZN_WEBRip_x265_HEVC_Complete"
         torrent = {
             "torrentName": "fakeTorrentName1",
-            "magnet": torrentMagnet
+            "magnet": torrentMagnet,
+            "mediaGrabId": "fakeTorrentName1--s1e2"
         }
 
         self.assertTrue(QBittorrentInterface.initTorrentDownload(torrent))

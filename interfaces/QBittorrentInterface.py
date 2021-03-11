@@ -19,8 +19,7 @@ def initTorrentDownload(torrent):
     
     dumpCompleteDir = os.getenv("DUMP_COMPLETE_DIR")
     dumpCompleteDir = "/home/shares/public/netShare/download/dump_complete"
-    downloadPath = os.path.join(dumpCompleteDir, torrent["torrentName"])
-    # downloadPath = torrent["torrentName"]
+    downloadPath = os.path.join(dumpCompleteDir, torrent["mediaGrabId"])
     
     try:
         qbittorrentResponse = qb.download_from_link(torrent["magnet"], savepath=downloadPath)

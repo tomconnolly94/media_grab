@@ -13,26 +13,17 @@ from interfaces import FolderInterface, MailInterface, DownloadsInProgressFileIn
 from controllers import ErrorController
 
 
-def extractShowName(fileName):
-    
-    try:
-        showNameMatch = re.match(r"(.+?)(?:[^a-zA-Z]*(?:season|s|episode|e)+.\d+.*)*?\s*$", fileName, re.IGNORECASE) # extract show name using regex capturing group
-        showName = showNameMatch.groups()[0]
-        showName = re.sub(r"[^\w\s]", " ", showName) # replace all punctuation
-        showName = showName.strip() # remove whitespace on left or right
-        showName = " ".join(showName.split()) # remove any double spaces
-        showName = showName.lower() # convert uppercase letters to lowercase
-        if showName:
-            return showName
-        else:
-            return None
-    except:
-        return None
+def extractShowName(mediaGrabId):
+
+    splitId = mediaGrabId.split("--")
+    if splitId and splitId[0]:
+        return splitId[0]
+    return None
 
 
 def extractSeasonNumber(fileName):
     try:
-        regexRaw = r"(?:S|Season)(\d{1,2})"        
+        regexRaw = r"--s(\d+)"        
         matches = re.search(regexRaw, fileName, re.IGNORECASE | re.MULTILINE)        
         seasonNumber = int(matches.groups()[0])
         
@@ -47,7 +38,7 @@ def extractSeasonNumber(fileName):
 
 def extractEpisodeNumber(fileName):
     try:
-        regexRaw = r"(?:E|Episode)(\d{1,2})"        
+        regexRaw = r"--s\d+e(\d+)"        
         matches = re.search(regexRaw, fileName, re.IGNORECASE | re.MULTILINE)        
         episodeNumber = int(matches.groups()[0])        
 
@@ -112,7 +103,7 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
             logging.info(f"{fileSystemItemName} has finished downloading and will be moved.")
             
             # extract show name
-            showName = extractShowName(fileSystemItemName).capitalize()
+            showName = extractShowName(itemId).capitalize()
             tvShowDir = os.path.join(targetDir, showName)
             targetFile = fileSystemItem
             itemIsDirectory = FolderInterface.directoryExists(fileSystemItem.path)
@@ -121,8 +112,8 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
             if not FolderInterface.directoryExists(tvShowDir):
                 FolderInterface.createDirectory(tvShowDir)
             
-            seasonNumber = extractSeasonNumber(fileSystemItemName)
-            episodeNumber = extractEpisodeNumber(fileSystemItemName)
+            seasonNumber = extractSeasonNumber(itemId)
+            episodeNumber = extractEpisodeNumber(itemId)
             seasonDir = os.path.join(tvShowDir, f"Season {seasonNumber}")
 
             if itemIsDirectory:

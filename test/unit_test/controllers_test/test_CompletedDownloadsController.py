@@ -43,66 +43,32 @@ class TestCompletedDownloadsController(unittest.TestCase):
 
     def test_extractShowName(self):
         expectedFakeShowName = "fake show"
-        fakeShowNamesSuccessful = [
-            "fake.Show ", 
-            "fake Show - S01",
-            "fake.Show - S01E01",
-            "fake.Show -   S01E01",
-            "fake.Show.S01E01",
-            "fake.Show.S01.E01",
-            "Fake.Show.S01.E01",
-            "fake.Show.S01"
-        ]
+        fakeShowName = "fake show--s1e1"
 
-        for fakeShowName in fakeShowNamesSuccessful:
-            actualFakeShowName = CompletedDownloadsController.extractShowName(fakeShowName)
-            self.assertEqual(expectedFakeShowName, actualFakeShowName)
+        actualFakeShowName = CompletedDownloadsController.extractShowName(fakeShowName)
+        self.assertEqual(expectedFakeShowName, actualFakeShowName)
         
         # check empty string
         self.assertEqual(None, CompletedDownloadsController.extractShowName(""))
 
 
     def test_extractSeasonNumber(self):
-        expectedSeasonNumber = 1
-        fakeShowNamesSuccessful = [
-            "fakeShow - S01",
-            "fakeShow - S01E01",
-            "fakeShow -   S01E01",
-            "fakeShow.S01E01",
-            "fakeShow.S01.E01",
-            "FakeShow.S01.E01",
-            "fakeShow.S01"
-        ]
+        expectedSeasonNumber = 2
+        fakeShowName = "fake show--s2e1"
 
-        for fakeShowName in fakeShowNamesSuccessful:
-            actualFakeSeasonNumber = CompletedDownloadsController.extractSeasonNumber(fakeShowName)
-            self.assertEqual(expectedSeasonNumber, actualFakeSeasonNumber)
+        actualFakeSeasonNumber = CompletedDownloadsController.extractSeasonNumber(fakeShowName)
+        self.assertEqual(expectedSeasonNumber, actualFakeSeasonNumber)
 
         # check empty string
         self.assertEqual(None, CompletedDownloadsController.extractSeasonNumber(""))
 
 
     def test_extractEpisodeNumber(self):
-        expectedSeasonNumber = 2
-        fakeShowNamesSuccessful = [
-            "fakeShow - S01E02",
-            "fakeShow -   S01E02",
-            "fakeShow.S01E02",
-            "fakeShow.S01.E02",
-            "FakeShow.S01.E02",
-        ]
-        fakeShowNamesUnsuccessful = [
-            "fakeShow - S01",
-            "fakeShow.S01"
-        ]
+        expectedSeasonNumber = 3
+        fakeShowName = "fake show--s1e3"
 
-        for fakeShowName in fakeShowNamesSuccessful:
-            actualFakeSeasonNumber = CompletedDownloadsController.extractEpisodeNumber(fakeShowName)
-            self.assertEqual(expectedSeasonNumber, actualFakeSeasonNumber)
-
-        for fakeShowName in fakeShowNamesUnsuccessful:
-            actualFakeSeasonNumber = CompletedDownloadsController.extractEpisodeNumber(fakeShowName)
-            self.assertEqual(None, actualFakeSeasonNumber)
+        actualFakeSeasonNumber = CompletedDownloadsController.extractEpisodeNumber(fakeShowName)
+        self.assertEqual(expectedSeasonNumber, actualFakeSeasonNumber)
 
         # check empty string
         self.assertEqual(None, CompletedDownloadsController.extractSeasonNumber(""))
@@ -425,9 +391,9 @@ class TestCompletedDownloadsController(unittest.TestCase):
 
         # init items
         downloadingItems = [
-            "fake-tv-show-name.s01.e01.mp4",
-            "fake-tv-show-name.s01.e02.mp4",
-            "fake-tv-show-name.s01.e03/fake-tv-show-name.s01.e03.mp4"
+            "fake tv show name--s01e01.mp4",
+            "fake tv show name--s01e02.mp4",
+            "fake-tv-show-name.s01.e03/fake tv show name--s01e03.mp4"
         ] # representation of what is in the dump_complete folder
 
         # config fake data #
@@ -435,11 +401,11 @@ class TestCompletedDownloadsController(unittest.TestCase):
         fakeFilteredDownloadingItems = {
             "tv-seasons": [],
             "tv-episodes": [
-                "fake-tv-show-name.s01.e01.mp4",
-                "fake-tv-show-name.s01.e02.mp4",
-                "fake-tv-show-name.s01.e03.mp4",
-                "downloadingFile.S01.E03/fakeDownloadingFile2.mp4",
-                "fakeDownloadingFile3.mp4"
+                "fake tv show name--s01e01",
+                "fake tv show name--s01e02",
+                "fake tv show name--s01e03",
+                "fakeDownloadingFile2--s1e4",
+                "fakeDownloadingFile3--s3e6"
             ]
         } # this should be the content of the DownloadsInProgressFile 
         expectedTvShowName = "Fake tv show name"
@@ -453,8 +419,11 @@ class TestCompletedDownloadsController(unittest.TestCase):
             pathParts = path.split("/")
             newDir = ""
 
+
             newDir = "/".join(pathParts[:-1])
-            baseDirPath = os.path.join(fakeDumpCompleteDir, pathParts[-1])
+            fileName = pathParts[-1]
+            fileNameNoExt = fileName.split(".mp4")[0]
+            baseDirPath = os.path.join(fakeDumpCompleteDir, fileNameNoExt)
             if not os.path.isdir(baseDirPath):
                 os.mkdir(baseDirPath)
                 

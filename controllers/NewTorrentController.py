@@ -7,14 +7,14 @@ import logging
 from interfaces import MediaIndexFileInterface, MailInterface, DownloadsInProgressFileInterface
 
 
-def onSuccessfulTorrentAdd(queryRecord, updateableField, torrentMagnet, mode):
+def onSuccessfulTorrentAdd(mediaInfoRecord, updateableField, torrentMagnet, mode):
 
 	# notify MediaIndex file
-	MediaIndexFileInterface.writeMediaFile(queryRecord, updateableField)
+	MediaIndexFileInterface.writeMediaFile(mediaInfoRecord, updateableField)
 
 	# send email notification
-	torrentExtraInfo = f"{updateableField} {queryRecord['typeSpecificData'][updateableField]}"
-	MailInterface.sendNewTorrentMail(queryRecord["torrentName"], torrentExtraInfo, torrentMagnet)
+	torrentExtraInfo = f"{updateableField} {mediaInfoRecord['typeSpecificData'][updateableField]}"
+	MailInterface.sendNewTorrentMail(mediaInfoRecord["torrentName"], torrentExtraInfo, torrentMagnet)
 
 	# notify DownloadsInProgress file
-	DownloadsInProgressFileInterface.notifyDownloadStarted(queryRecord["torrentName"], mode)
+	DownloadsInProgressFileInterface.notifyDownloadStarted(mediaInfoRecord["mediaGrabId"], mode)
