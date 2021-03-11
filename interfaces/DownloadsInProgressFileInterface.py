@@ -8,6 +8,7 @@ import logging
 # internal dependencies
 from data_types.ProgramModeMap import PROGRAM_MODE_MAP
 from data_types.ProgramMode import PROGRAM_MODE
+from controllers import ErrorController
 
 
 def notifyDownloadStarted(mediaName, mediaType):
@@ -20,6 +21,10 @@ def notifyDownloadStarted(mediaName, mediaType):
     typeKey = PROGRAM_MODE_MAP[mediaType]
 
     def operation(media, mediaName=mediaName, typeKey=typeKey):
+        if mediaName in media[typeKey]:
+            ErrorController.reportError(f"Failed to add {mediaName} to {typeKey} list in data/DownloadsInProgress.json {media[typeKey]} because the list already contains this value.")
+            return media
+
         logging.info(f"Adding {mediaName} to {typeKey} list in data/DownloadsInProgress.json {media[typeKey]}")
         media[typeKey].append(mediaName)
         return media
@@ -49,6 +54,9 @@ def notifyDownloadFinished(mediaName, mediaType):
     typeKey = PROGRAM_MODE_MAP[mediaType]
 
     def operation(media, mediaName=mediaName, typeKey=typeKey):
+        if mediaName not in media[typeKey]:
+            ErrorController.reportError(f"Failed to remove {mediaName} from {typeKey} list in data/DownloadsInProgress.json {media[typeKey]} because the list does not contain this value.")
+            return media
         logging.info(f"Removing {mediaName} from {typeKey} list in data/DownloadsInProgress.json {media[typeKey]}")
         media[typeKey].remove(mediaName)
         return media
