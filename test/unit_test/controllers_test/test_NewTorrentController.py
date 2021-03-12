@@ -1,6 +1,7 @@
 # external dependencies
 import unittest
 import mock
+from mock import MagicMock
 
 # internal dependencies
 from controllers import NewTorrentController
@@ -9,10 +10,11 @@ from data_types.ProgramMode import PROGRAM_MODE
 class TestNewTorrentController(unittest.TestCase):
 
     @mock.patch('interfaces.DownloadsInProgressFileInterface.notifyDownloadStarted')
-    @mock.patch('interfaces.MailInterface.sendNewTorrentMail')
+    @mock.patch('interfaces.MailInterface.getInstance')
     @mock.patch('interfaces.MediaIndexFileInterface.writeMediaFile')
-    def test_onSuccessfulTorrentAdd(self, writeMediaFileMock, sendNewTorrentMailMock, notifyDownloadStartedMock):
+    def test_onSuccessfulTorrentAdd(self, writeMediaFileMock, mailInterfaceGetInstanceMock, notifyDownloadStartedMock):
 
+        # config fake values
         fakeQueryRecord = {
             "name": "RecordName",
             "typeSpecificData": {
@@ -26,11 +28,17 @@ class TestNewTorrentController(unittest.TestCase):
         fakeTorrentMagnetLink = "fakeTorrentMagnet"
         activeMode = PROGRAM_MODE.TV_SEASONS
 
+        # config mocks
+        # create mock for mailInterface instance
+        mailInterfaceInstanceMock = MagicMock()
+        # assign mocked MailInterface instance to return_vlue for mocked getInstance()
+        mailInterfaceGetInstanceMock.return_value = mailInterfaceInstanceMock
+
         NewTorrentController.onSuccessfulTorrentAdd(fakeQueryRecord, fakeUpdateableField, fakeTorrentMagnetLink, activeMode)
         
         # mock function asserts
         writeMediaFileMock.assert_called_once_with(fakeQueryRecord, fakeUpdateableField)
-        sendNewTorrentMailMock.assert_called_once_with(fakeQueryRecord['torrentName'], f"{fakeUpdateableField} {fakeQueryRecord['typeSpecificData']['latestSeason']}", fakeTorrentMagnetLink)
+        mailInterfaceInstanceMock.sendNewTorrentMail.assert_called_once_with(fakeQueryRecord['torrentName'], f"{fakeUpdateableField} {fakeQueryRecord['typeSpecificData']['latestSeason']}", fakeTorrentMagnetLink)
         notifyDownloadStartedMock.assert_called_once_with(fakeQueryRecord["mediaGrabId"], activeMode)
 
 

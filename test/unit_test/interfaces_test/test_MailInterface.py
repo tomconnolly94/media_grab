@@ -5,7 +5,7 @@ from unittest.mock import call, ANY
 import os
 
 # internal dependencies
-from interfaces import MailInterface
+from interfaces.MailInterface import MailInterface
 
 class TestMailInterface(unittest.TestCase):
 
@@ -13,15 +13,14 @@ class TestMailInterface(unittest.TestCase):
     @mock.patch('os.getenv')
     @mock.patch('logging.info')
     def test_sendMailDev(self, loggingInfoDevMock, osGetEnvMock, smtpMock):
-        
-        MailInterface.environment = "dev"
-        
+                
         # config inputs
         fakeHeading = "fake heading"
         fakeMessage = "fake message"
 
         # called testable method
-        MailInterface.sendMail(fakeHeading, fakeMessage)
+        mailInterface = MailInterface(environment="dev")
+        mailInterface.sendMail(fakeHeading, fakeMessage)
 
         # mock asserts
         loggingInfoDevMock.assert_called_with("Program is running in dev mode. No email has been sent.")
@@ -38,17 +37,13 @@ class TestMailInterface(unittest.TestCase):
         fakeMailUsername = "fakeMailUsername"
         fakeMailPassword = "fakeMailPassword"
 
-        # override env values
-        MailInterface.toEmailAddress = fakeToEmailAddress
-        MailInterface.environment = envValue
-        MailInterface.mailUsername = fakeMailUsername
-        MailInterface.mailPassword = fakeMailPassword
-
         fakeHeading = "fake heading"
         fakeMessage = "fake message"
 
         # called testable method
-        MailInterface.sendMail(fakeHeading, fakeMessage)
+        mailInterface = MailInterface(toEmailAddress=fakeToEmailAddress, environment=envValue, mailUsername=fakeMailUsername, mailPassword=fakeMailPassword)
+
+        mailInterface.sendMail(fakeHeading, fakeMessage)
 
         # mock asserts
         calls = [ call("MailInterface:sendMail called.")]
@@ -65,9 +60,9 @@ class TestMailInterface(unittest.TestCase):
         ]
         smtpMock.assert_has_calls(calls)
 
-        self.assertIsNotNone(MailInterface.environment)
-        self.assertIsNotNone(MailInterface.mailUsername)
-        self.assertIsNotNone(MailInterface.mailPassword)
+        self.assertIsNotNone(mailInterface.environment)
+        self.assertIsNotNone(mailInterface.mailUsername)
+        self.assertIsNotNone(mailInterface.mailPassword)
 
 if __name__ == '__main__':
     unittest.main()

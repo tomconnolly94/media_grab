@@ -14,7 +14,7 @@ def onSuccessfulTorrentAdd(mediaInfoRecord, updateableField, torrentMagnet, mode
 
 	# send email notification
 	torrentExtraInfo = f"{updateableField} {mediaInfoRecord['typeSpecificData'][updateableField]}"
-	MailInterface.sendNewTorrentMail(mediaInfoRecord["torrentName"], torrentExtraInfo, torrentMagnet)
+	MailInterface.getInstance().sendNewTorrentMail(mediaInfoRecord["torrentName"], torrentExtraInfo, torrentMagnet)
 
 	# notify DownloadsInProgress file
 	DownloadsInProgressFileInterface.notifyDownloadStarted(mediaInfoRecord["mediaGrabId"], mode)

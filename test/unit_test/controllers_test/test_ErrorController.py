@@ -1,6 +1,7 @@
 # external dependencies
 import unittest
 import mock
+from mock import MagicMock
 import os
 
 # internal dependencies
@@ -9,12 +10,12 @@ from controllers import ErrorController
 
 class TestErrorController(unittest.TestCase):
 
-    @mock.patch("interfaces.MailInterface.sendMail")
+    @mock.patch("interfaces.MailInterface.getInstance")
     @mock.patch("logging.getLoggerClass")
     @mock.patch("logging.error")
     @mock.patch("inspect.getframeinfo")
     @mock.patch("inspect.stack")
-    def test_reportError(self, inspectStackMock, getframeinfoMock, loggingErrorMock, getLoggerClassMock, sendMailMock):
+    def test_reportError(self, inspectStackMock, getframeinfoMock, loggingErrorMock, getLoggerClassMock, mailInterfaceGetInstanceMock):
         
         # config fake values
         fakeErrorMessage = "fakeErrorMessage"
@@ -49,6 +50,12 @@ class TestErrorController(unittest.TestCase):
         getframeinfoMock.return_value = FakeFrameInfo()
         getLoggerClassMock.return_value = FakeLoggerClass()
 
+        # create mock for mailInterface instance
+        mailInterfaceInstanceMock = MagicMock()
+        # assign mocked MailInterface instance to return_vlue for mocked getInstance()
+        mailInterfaceGetInstanceMock.return_value = mailInterfaceInstanceMock
+
+
         # call testable function
         ErrorController.reportError(fakeErrorMessage, exception, True)
 
@@ -56,5 +63,5 @@ class TestErrorController(unittest.TestCase):
         getframeinfoMock.assert_called_with(fakeFrame)
         expectedErrorMessage = f"{fakeFileName}:{fakeFunction}():{fakeLineNo} - {fakeErrorMessage}"
         loggingErrorMock.assert_called_with(expectedErrorMessage, exc_info=True)
-        sendMailMock.assert_called_with("Houston we have a problem", "fakeFilename:fakeFunction():fakeLineNo - fakeErrorMessage\n\n More logs can be found in: fakeBaseFilename")
+        mailInterfaceInstanceMock.sendMail.assert_called_with("Houston we have a problem", "fakeFilename:fakeFunction():fakeLineNo - fakeErrorMessage\n\n More logs can be found in: fakeBaseFilename")
 

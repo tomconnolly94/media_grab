@@ -8,7 +8,7 @@ import logging
 import getopt
 
 # internal dependencies
-from interfaces import TPBInterface, QBittorrentInterface, MailInterface, TheMovieDatabaseInterface
+from interfaces import QBittorrentInterface, TheMovieDatabaseInterface
 from controllers import LoggingController, LogicController, ErrorController
 from data_types.ProgramModeMap import PROGRAM_MODE_MAP
 from data_types.ProgramMode import PROGRAM_MODE
@@ -56,11 +56,11 @@ def main(argv):
 
 	mode = interpretArguments(argv)
 
-	logging.info("Media grab app started.")
+	environment = os.getenv("ENVIRONMENT")
+	logging.info(f"Media grab app started. Environment={environment}")
 
 	# catch all exceptions so they are always reported
 	try:
-		MailInterface.init()
 		TheMovieDatabaseInterface.init()
 		QBittorrentInterface.init() 
 		LogicController.runProgramLogic(mode)		

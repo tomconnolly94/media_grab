@@ -34,4 +34,5 @@ def reportError(message="", exception=None, sendEmail=False):
         else:
             message += f"{moreLogsMessage} console output"
 
-        MailInterface.sendMail("Houston we have a problem", message)
+        mailInterface = MailInterface.getInstance()
+        mailInterface.sendMail("Houston we have a problem", message)
