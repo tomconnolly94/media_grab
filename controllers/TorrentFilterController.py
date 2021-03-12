@@ -10,8 +10,6 @@ def filterEpisodeTorrents(torrents, mediaData):
 
 	if not torrents:
 		return []
-
-	
 		
 	name = mediaData["name"]
 	nameFirstLetter = name[0].lower()
@@ -31,26 +29,3 @@ def filterEpisodeTorrents(torrents, mediaData):
 	filteredTorrents = [ torrent for torrent in torrents if torrent["name"] in filteredTorrentTitles and int(torrent["seeders"]) > 0 ]
 
 	return filteredTorrents
-
-
-# def filterSeasonTorrents(torrentTitles, mediaData):
-
-# 	if not torrentTitles:
-# 		return []
-
-# 	name = mediaData["name"]
-# 	relevantSeason = str(int(mediaData["typeSpecificData"]["latestSeason"]))
-
-# 	seasonRegex = fr''
-
-# 	for word in name.split():
-# 		seasonRegex += word + '.{0,3}'
-	
-# 	seasonRegex += r'(?:season|s).{0,3}\d*'
-# 	seasonRegex += f'(?:{relevantSeason}|{num2words(relevantSeason)})(?!.*episode).*$'
-
-# 	logging.info(f"seasonRegex: {seasonRegex}")
-
-# 	filteredTorrents = [ torrentTitle for torrentTitle in torrentTitles if re.search(seasonRegex, torrentTitle, re.IGNORECASE)]
-
-# 	return filteredTorrents
