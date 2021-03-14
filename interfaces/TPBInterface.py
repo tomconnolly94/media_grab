@@ -1,10 +1,8 @@
 #!/venv/bin/python
 
 # external dependencies
-from random import randint
 import requests
 import logging
-import os
 import json
 from requests.exceptions import ChunkedEncodingError
 from json.decoder import JSONDecodeError
@@ -12,19 +10,11 @@ from json.decoder import JSONDecodeError
 # internal dependencies
 from controllers import TorrentFilterController, ErrorController
 
+
 def sortTorrents(torrents):
     # order torrents by number of seeders
     return sorted(torrents, key=lambda torrent: -1 * int(torrent["seeders"]))
 
-
-def getTPBProxySites():
-    proxyUrl = "https://piratebay-proxylist.se/api/v1/proxies"
-    proxyResponse = dict(requests.get(proxyUrl).json())
-
-    proxies = dict(proxyResponse["proxies"])
-    domains = [ proxyRecord["domain"] for proxyRecord in proxies.values() ]
-    return domains
-    
 
 def getTorrentRecords(queries, mediaInfoRecord):
 
