@@ -12,9 +12,11 @@ writeFile = True
 
 def incrementEpisode(mediaInfoRecords, queryRecord):
 
+	theMovieDatabaseInterface = TheMovieDatabaseInterface.getInstance()
+
 	for mediaRecord in mediaInfoRecords:
 		if mediaRecord["name"] == queryRecord["name"]:
-			maxNumberOfEpisodes = TheMovieDatabaseInterface.getShowEpisodeCount(mediaRecord["name"], mediaRecord["typeSpecificData"]["latestSeason"])
+			maxNumberOfEpisodes = theMovieDatabaseInterface.getShowEpisodeCount(mediaRecord["name"], mediaRecord["typeSpecificData"]["latestSeason"])
 			prevEpisodeValue = mediaRecord["typeSpecificData"]["latestEpisode"]
 			prevSeasonValue = mediaRecord["typeSpecificData"]["latestSeason"]
 

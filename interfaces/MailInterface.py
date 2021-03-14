@@ -5,6 +5,7 @@ import smtplib
 import os
 import logging
 
+global mailInterfaceInstance
 mailInterfaceInstance = None
 
 # implement singleton pattern

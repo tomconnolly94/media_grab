@@ -1,14 +1,15 @@
 # external dependencies
 import unittest
 import mock
+from mock import MagicMock
 
 # internal dependencies
 from interfaces import MediaIndexFileInterface
 
 class TestMediaIndexFileInterface(unittest.TestCase):
 
-    @mock.patch("interfaces.TheMovieDatabaseInterface.getShowEpisodeCount")
-    def test_incrementEpisode(self, getShowEpisodeCountMock):
+    @mock.patch("interfaces.TheMovieDatabaseInterface.getInstance")
+    def test_incrementEpisode(self, theMovieDatabaseInterfaceGetInstanceMock):
 
         # config inputs        
         fakeMediaInfoRecords = [
@@ -27,7 +28,11 @@ class TestMediaIndexFileInterface(unittest.TestCase):
         ]
 
         # config mocks
-        getShowEpisodeCountMock.return_value = 3
+        # create mock for instance
+        theMovieDatabaseInterfaceInstanceMock = MagicMock()
+        # assign mocked instance to return_value for mocked getInstance()
+        theMovieDatabaseInterfaceGetInstanceMock.return_value = theMovieDatabaseInterfaceInstanceMock
+        theMovieDatabaseInterfaceInstanceMock.getShowEpisodeCount.return_value = 3
 
 
         ##### Start test case 1 #####
