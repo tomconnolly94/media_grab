@@ -2,6 +2,7 @@
 import unittest
 import mock
 from unittest.mock import call
+from mock import MagicMock
 
 # internal dependencies 
 from controllers import LogicController
@@ -141,13 +142,13 @@ class TestLogicController(unittest.TestCase):
 
 
     @mock.patch("controllers.NewTorrentController.onSuccessfulTorrentAdd")
-    @mock.patch("interfaces.QBittorrentInterface.initTorrentDownload")
+    @mock.patch("interfaces.QBittorrentInterface.getInstance")
     @mock.patch("controllers.LogicController.getMediaInfoRecordsWithTorrents")
     @mock.patch("controllers.CompletedDownloadsController.auditDumpCompleteDir")
     @mock.patch("interfaces.DownloadsInProgressFileInterface.getDownloadingItems")
     @mock.patch("controllers.QueryGenerationController.generateTVEpisodeQueries")
     @mock.patch("interfaces.MediaIndexFileInterface.loadMediaFile")
-    def test_runProgramLogic(self, loadMediaFileMock, generateTVEpisodeQueriesMock, getDownloadingItemsMock, auditDumpCompleteDirMock, getMediaInfoRecordsWithTorrentsMock, initTorrentDownloadMock, onSuccessfulTorrentAddMock):
+    def test_runProgramLogic(self, loadMediaFileMock, generateTVEpisodeQueriesMock, getDownloadingItemsMock, auditDumpCompleteDirMock, getMediaInfoRecordsWithTorrentsMock, qbittorrentInterfaceGetInstanceMock, onSuccessfulTorrentAddMock):
         
         fakeMediaSearchQueries = {
             "fakeMediaInfoName1": ["fakeMediaInfoName1Query1", "fakeMediaInfoName1Query2", "fakeMediaInfoName1Query3"],
@@ -159,15 +160,18 @@ class TestLogicController(unittest.TestCase):
         fakeMediaInfoRecords = [
             {
                 "name": "fakeMediaInfoName1",
-                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 }
+                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 },
+                "mediaGrabId": "fakeMediaInfoName1--s1e1"
             },
             {
                 "name": "fakeMediaInfoName2",
-                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 }
+                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 },
+                "mediaGrabId": "fakeMediaInfoName2--s1e1"
             },
             {
                 "name": "fakeMediaInfoName3",
-                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 }
+                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 },
+                "mediaGrabId": "fakeMediaInfoName3--s1e1"
             }
         ]
 
@@ -188,11 +192,15 @@ class TestLogicController(unittest.TestCase):
         generateTVEpisodeQueriesMock.return_value = fakeMediaSearchQueries
         getDownloadingItemsMock.return_value = fakeDownloadingItems
         getMediaInfoRecordsWithTorrentsMock.side_effect = [fakeMediaInfoRecordsWithTorrents, []]
-        initTorrentDownloadMock.side_effect = [True, True, True, None]
         loadMediaFileMock.return_value = fakeMediaInfoRecords
-
+        # create mock for mailInterface instance
+        qbittorrentInterfaceInstanceMock = MagicMock()
+        # assign mocked instance to return_value for mocked getInstance()
+        qbittorrentInterfaceGetInstanceMock.return_value = qbittorrentInterfaceInstanceMock        
+        qbittorrentInterfaceInstanceMock.initTorrentDownload.side_effect = [True, True, True, None]
+        
+        # call testable function
         LogicController.runProgramLogic(activeMode)
-
         
         # mock asserts
         generateTVEpisodeQueriesMock.assert_called_with(fakeMediaInfoRecords)
@@ -201,7 +209,7 @@ class TestLogicController(unittest.TestCase):
         getMediaInfoRecordsWithTorrentsMock.assert_called_with(fakeMediaSearchQueries, fakeMediaInfoRecords)
         
         calls = [ call(fakeMediaInfoRecordsWithTorrents[0]), call(fakeMediaInfoRecordsWithTorrents[1]), call(fakeMediaInfoRecordsWithTorrents[2]) ]
-        initTorrentDownloadMock.assert_has_calls(calls)
+        qbittorrentInterfaceInstanceMock.initTorrentDownload.assert_has_calls(calls)
 
         calls = [ 
             call(fakeMediaInfoRecordsWithTorrents[0], "latestEpisode", "fakeMagnetLink", activeMode), 

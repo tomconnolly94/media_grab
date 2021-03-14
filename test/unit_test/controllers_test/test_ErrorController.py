@@ -50,9 +50,9 @@ class TestErrorController(unittest.TestCase):
         getframeinfoMock.return_value = FakeFrameInfo()
         getLoggerClassMock.return_value = FakeLoggerClass()
 
-        # create mock for mailInterface instance
+        # create mock for instance
         mailInterfaceInstanceMock = MagicMock()
-        # assign mocked MailInterface instance to return_vlue for mocked getInstance()
+        # assign mocked instance to return_value for mocked getInstance()
         mailInterfaceGetInstanceMock.return_value = mailInterfaceInstanceMock
 
 

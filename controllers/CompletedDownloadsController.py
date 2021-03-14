@@ -77,6 +77,9 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
     fileSystemItemsFromDirectory = FolderInterface.getDirContents(dumpCompleteDir)
     logging.info(f"Items in dump_complete directory: {[item.name for item in fileSystemItemsFromDirectory] }")
 
+    # access singleton instance
+    qBittorrentInterfaceInstance = QBittorrentInterface.getInstance()
+
     # deal with directories
     for fileSystemItem in fileSystemItemsFromDirectory:
         if fileSystemItem.name in filteredDownloadingItems:            
@@ -91,7 +94,7 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
             fileSystemItemName = fileSystemItem.name
             
             # attempt to pause torrent
-            if QBittorrentInterface.pauseTorrent(fileSystemItem.name):
+            if qBittorrentInterfaceInstance.pauseTorrent(fileSystemItem.name):
                 logging.info(f"Paused torrent activity: ({fileSystemItem.name})")
             else:
                 logging.info(f"Failed to pause torrent activity: ({fileSystemItem.name})")

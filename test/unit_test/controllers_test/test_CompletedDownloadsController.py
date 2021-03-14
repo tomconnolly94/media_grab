@@ -4,6 +4,7 @@ import mock
 import os
 from unittest.mock import call
 import shutil
+from mock import MagicMock
 
 # internal dependencies
 from controllers import CompletedDownloadsController
@@ -74,7 +75,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         self.assertEqual(None, CompletedDownloadsController.extractSeasonNumber(""))
 
 
-    @mock.patch("interfaces.QBittorrentInterface.pauseTorrent")
+    @mock.patch("interfaces.QBittorrentInterface.getInstance")
     @mock.patch("os.rmdir")
     @mock.patch("os.scandir")
     @mock.patch("logging.info")
@@ -90,7 +91,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
     @mock.patch("interfaces.FolderInterface.createDirectory")
     @mock.patch('controllers.CompletedDownloadsController.extractShowName')
     @mock.patch('os.getenv')
-    def test_auditFiles(self, getEnvMock, extractShowNameMock, createDirectoryMock, directoryExistsMock, extractSeasonNumberMock, extractEpisodeNumberMock, extractExtensionMock, getDirContentsMock, fileExistsMock, osRenameMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, loggingInfoMock, osScandirMock, osRmdirMock, pauseTorrentMock):
+    def test_auditFiles(self, getEnvMock, extractShowNameMock, createDirectoryMock, directoryExistsMock, extractSeasonNumberMock, extractEpisodeNumberMock, extractExtensionMock, getDirContentsMock, fileExistsMock, osRenameMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, loggingInfoMock, osScandirMock, osRmdirMock, qBittorrentInterfaceGetInstanceMock):
 
         # config fake data
         fakeEpisodeNumber = 2
@@ -117,6 +118,11 @@ class TestCompletedDownloadsController(unittest.TestCase):
         extractExtensionMock.return_value = ".mp4"
         getDirContentsMock.return_value = fakeFiles
         osScandirMock.return_value = fakeFiles
+        # create mock for instance
+        qBittorrentInterfaceInstanceMock = MagicMock()
+        # assign mocked instance to return_value for mocked getInstance()
+        qBittorrentInterfaceGetInstanceMock.return_value = qBittorrentInterfaceInstanceMock
+        qBittorrentInterfaceInstanceMock.pauseTorrent.return_value = True
 
 
         # Case 1 start ############################################################################
@@ -133,7 +139,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         createDirectoryMock.assert_not_called()
         reportItemAlreadyExistsMock.assert_called_with(expectedProspectiveFile, fakeFiles[0].path)
         osRenameMock.assert_not_called()
-        pauseTorrentMock.assert_called_with(fakeFile1)
+        qBittorrentInterfaceInstanceMock.pauseTorrent.assert_called_with(fakeFile1)
 
         # Case 1 end ############################################################################
 
@@ -148,7 +154,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         directoryExistsMock.side_effect = [ False, True, True ] 
         fileExistsMock.return_value = False
         reportItemAlreadyExistsMock.reset_mock()
-        pauseTorrentMock.reset_mock()
+        qBittorrentInterfaceInstanceMock.qBittorrentInterfaceInstanceMock.pauseTorrent.reset_mock()
 
         # CompletedDownloadsController.auditFiles(fakeFiles, fakeFilteredDownloadingItems, fakeTargetTvDir)
         CompletedDownloadsController.auditFileSystemItemsForEpisodes(fakeMode, fakeFilteredDownloadingItems)
@@ -157,7 +163,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         createDirectoryMock.assert_not_called()
         reportItemAlreadyExistsMock.assert_not_called()
         osRenameMock.assert_called_with(os.path.join(fakeDumpCompleteDir, fakeFile1), expectedProspectiveFile)
-        pauseTorrentMock.assert_called_with(fakeFile1)
+        qBittorrentInterfaceInstanceMock.pauseTorrent.assert_called_with(fakeFile1)
 
         # Case 2 end ############################################################################
 
@@ -173,7 +179,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         fileExistsMock.return_value = False
         reportItemAlreadyExistsMock.reset_mock()
         osRenameMock.reset_mock()
-        pauseTorrentMock.reset_mock()
+        qBittorrentInterfaceInstanceMock.pauseTorrent.reset_mock()
 
         # CompletedDownloadsController.auditFiles(fakeFiles, fakeFilteredDownloadingItems, fakeTargetTvDir)
         CompletedDownloadsController.auditFileSystemItemsForEpisodes(fakeMode, fakeFilteredDownloadingItems)
@@ -186,7 +192,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         createDirectoryMock.assert_has_calls(expectedCreateDirectoryCalls)
         reportItemAlreadyExistsMock.assert_not_called()
         osRenameMock.assert_called_with(os.path.join(fakeDumpCompleteDir, fakeFile1), expectedProspectiveFile)
-        pauseTorrentMock.assert_called_with(fakeFile1)
+        qBittorrentInterfaceInstanceMock.pauseTorrent.assert_called_with(fakeFile1)
 
         # Case 3 end ############################################################################
 
@@ -202,7 +208,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         fileExistsMock.return_value = False
         reportItemAlreadyExistsMock.reset_mock()
         osRenameMock.reset_mock()
-        pauseTorrentMock.reset_mock()
+        qBittorrentInterfaceInstanceMock.pauseTorrent.reset_mock()
 
         # CompletedDownloadsController.auditFiles(fakeFiles, fakeFilteredDownloadingItems, fakeTargetTvDir)
         CompletedDownloadsController.auditFileSystemItemsForEpisodes(fakeMode, fakeFilteredDownloadingItems)
@@ -216,12 +222,12 @@ class TestCompletedDownloadsController(unittest.TestCase):
         createDirectoryMock.assert_has_calls(expectedCreateDirectoryCalls)
         reportItemAlreadyExistsMock.assert_not_called()
         osRenameMock.assert_called_with(os.path.join(fakeDumpCompleteDir, fakeFile1), expectedProspectiveFile)
-        pauseTorrentMock.assert_called_with(fakeFile1)
+        qBittorrentInterfaceInstanceMock.pauseTorrent.assert_called_with(fakeFile1)
 
         # Case 4 end ############################################################################
 
 
-    @mock.patch("interfaces.QBittorrentInterface.pauseTorrent")
+    @mock.patch("interfaces.QBittorrentInterface.getInstance")
     @mock.patch("os.rmdir")
     @mock.patch("os.scandir")
     @mock.patch("shutil.move")
@@ -238,7 +244,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
     @mock.patch("interfaces.FolderInterface.createDirectory")
     @mock.patch('controllers.CompletedDownloadsController.extractShowName')
     @mock.patch('os.getenv')
-    def test_auditDirectories(self, getEnvMock, extractShowNameMock, createDirectoryMock, directoryExistsMock, extractSeasonNumberMock, extractEpisodeNumberMock, getLargestFileInDirMock, extractExtensionMock, getDirContentsMock, fileExistsMock, osRenameMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, shutilMoveMock, osScandirMock, osRmdirMock, pauseTorrentMock):
+    def test_auditDirectories(self, getEnvMock, extractShowNameMock, createDirectoryMock, directoryExistsMock, extractSeasonNumberMock, extractEpisodeNumberMock, getLargestFileInDirMock, extractExtensionMock, getDirContentsMock, fileExistsMock, osRenameMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, shutilMoveMock, osScandirMock, osRmdirMock, qBittorrentInterfaceGetInstanceMock):
 
         class FakeFileSystemItem:
             
@@ -270,6 +276,11 @@ class TestCompletedDownloadsController(unittest.TestCase):
         extractExtensionMock.return_value = ".mp4"
         getDirContentsMock.return_value = fakeDirs
         osScandirMock.return_value = fakeDirs
+        # create mock for instance
+        qBittorrentInterfaceInstanceMock = MagicMock()
+        # assign mocked instance to return_value for mocked getInstance()
+        qBittorrentInterfaceGetInstanceMock.return_value = qBittorrentInterfaceInstanceMock
+        qBittorrentInterfaceInstanceMock.qBittorrentInterfaceInstanceMock.pauseTorrent.return_value = True
 
         # config expected values
         expectedProspectiveFile = os.path.join(fakeTargetTvDir, fakeTVShowName.capitalize(), f"Season {fakeSeasonNumber}", f"{fakeTVShowName.capitalize()} - S0{fakeSeasonNumber}E0{fakeEpisodeNumber}{fakeExtension}")
@@ -288,7 +299,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         osRenameMock.assert_not_called()
         notifyDownloadFinishedMock.assert_not_called()
         shutilMoveMock.assert_not_called()
-        pauseTorrentMock.assert_called_with(fakeDirName)
+        qBittorrentInterfaceInstanceMock.pauseTorrent.assert_called_with(fakeDirName)
 
         # Case 1 end ############################################################################
 
@@ -305,7 +316,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         reportItemAlreadyExistsMock.reset_mock()
         expectedOriginalFileLocation = os.path.join(fakeDumpCompleteDir, fakeDirName, fakeFile1)
         osRenameMock.reset_mock()
-        pauseTorrentMock.reset_mock()
+        qBittorrentInterfaceInstanceMock.pauseTorrent.reset_mock()
 
         CompletedDownloadsController.auditFileSystemItemsForEpisodes(fakeMode, fakeFilteredDownloadingItems)
 
@@ -315,7 +326,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         osRenameMock.assert_called_with(expectedOriginalFileLocation, expectedProspectiveFile)
         notifyDownloadFinishedMock.assert_called_with(fakeDirName, PROGRAM_MODE.TV_EPISODES)
         shutilMoveMock.assert_called_with(os.path.join(fakeDumpCompleteDir, fakeDirName), fakeRecycleBinDir)
-        pauseTorrentMock.assert_called_with(fakeDirName)
+        qBittorrentInterfaceInstanceMock.pauseTorrent.assert_called_with(fakeDirName)
 
         # Case 2 end ############################################################################
 
@@ -330,7 +341,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         fileExistsMock.return_value = False
         reportItemAlreadyExistsMock.reset_mock()
         osRenameMock.reset_mock()
-        pauseTorrentMock.reset_mock()
+        qBittorrentInterfaceInstanceMock.pauseTorrent.reset_mock()
 
         CompletedDownloadsController.auditFileSystemItemsForEpisodes(fakeMode, fakeFilteredDownloadingItems)
 
@@ -346,7 +357,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         osRenameMock.assert_called_with(expectedOriginalFileLocation, expectedProspectiveFile)
         notifyDownloadFinishedMock.assert_called_with(fakeDirName, PROGRAM_MODE.TV_EPISODES)
         shutilMoveMock.assert_called_with(os.path.join(fakeDumpCompleteDir, fakeDirName), fakeRecycleBinDir)
-        pauseTorrentMock.assert_called_with(fakeDirName)
+        qBittorrentInterfaceInstanceMock.pauseTorrent.assert_called_with(fakeDirName)
 
         # Case 3 end ############################################################################
 
@@ -363,7 +374,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         reportItemAlreadyExistsMock.reset_mock()
         osRenameMock.reset_mock()
         osRenameMock.reset_mock()
-        pauseTorrentMock.reset_mock()
+        qBittorrentInterfaceInstanceMock.pauseTorrent.reset_mock()
 
         CompletedDownloadsController.auditFileSystemItemsForEpisodes(fakeMode, fakeFilteredDownloadingItems)
 
@@ -377,17 +388,17 @@ class TestCompletedDownloadsController(unittest.TestCase):
         osRenameMock.assert_called_with(expectedOriginalFileLocation, expectedProspectiveFile)
         notifyDownloadFinishedMock.assert_called_with(fakeDirName, PROGRAM_MODE.TV_EPISODES)
         shutilMoveMock.assert_called_with(os.path.join(fakeDumpCompleteDir, fakeDirName), fakeRecycleBinDir)
-        pauseTorrentMock.assert_called_with(fakeDirName)
+        qBittorrentInterfaceInstanceMock.pauseTorrent.assert_called_with(fakeDirName)
 
         # Case 4 end ############################################################################
 
 
-    @mock.patch("interfaces.QBittorrentInterface.pauseTorrent")
+    @mock.patch("interfaces.QBittorrentInterface.getInstance")
     @mock.patch("logging.info")
     @mock.patch("interfaces.DownloadsInProgressFileInterface.notifyDownloadFinished")
     @mock.patch("controllers.CompletedDownloadsController.reportItemAlreadyExists")
     @mock.patch('os.getenv')
-    def test_auditFilesWithFileSystem(self, getEnvMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, loggingInfoMock, pauseTorrentMock):
+    def test_auditFilesWithFileSystem(self, getEnvMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, loggingInfoMock, qBittorrentInterfaceGetInstanceMock):
 
         # init items
         downloadingItems = [
@@ -410,6 +421,11 @@ class TestCompletedDownloadsController(unittest.TestCase):
         } # this should be the content of the DownloadsInProgressFile 
         expectedTvShowName = "Fake tv show name"
         directoriesToCleanUp = [ fakeTargetTvDir, fakeDumpCompleteDir, fakeRecycleBinDir ]
+        # create mock for instance
+        qBittorrentInterfaceInstanceMock = MagicMock()
+        # assign mocked instance to return_value for mocked getInstance()
+        qBittorrentInterfaceGetInstanceMock.return_value = qBittorrentInterfaceInstanceMock
+        qBittorrentInterfaceInstanceMock.qBittorrentInterfaceInstanceMock.pauseTorrent.return_value = True
 
         # config mocks
         getEnvMock.side_effect = getEnvMockFunc

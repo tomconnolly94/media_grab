@@ -1,35 +1,40 @@
 # external dependencies
 import unittest
+import os
 import mock
+from mock import MagicMock
 
 # internal dependencies
-from interfaces import QBittorrentInterface
+from interfaces.QBittorrentInterface import QBittorrentInterface
 
 class TestQBittorrentInterface(unittest.TestCase):
 
-    def test_torrentDownload(self):
+    @mock.patch("logging.info")
+    def test_torrentDownload(self, loggingInfoMock):
 
-        class qbMock():
-            def __init__(self):
-                pass
-
-            def login(self, username, password):
-                return True
-
-            def download_from_link(self, torrentMagnet, savepath):
-                return "Ok."
-
-
-        QBittorrentInterface.qb = qbMock()
-
+        # config fake values
         torrentMagnet = "/torrent/18003297/Silicon_Valley_Season_4_S04_720p_AMZN_WEBRip_x265_HEVC_Complete"
         torrent = {
             "torrentName": "fakeTorrentName1",
             "magnet": torrentMagnet,
             "mediaGrabId": "fakeTorrentName1--s1e2"
         }
+        fakeDumpCompleteDir = "/fake/dump/complete/dir"
 
-        self.assertTrue(QBittorrentInterface.initTorrentDownload(torrent))
+        # create testable object and override the qb member
+        qBittorrentInterface = QBittorrentInterface(fakeDumpCompleteDir)
+        qBittorrentInterface.qb = MagicMock()
+        qBittorrentInterface.qb.download_from_link.return_value = "Ok."
+
+        # call testable function
+        torrentInitSuccess = qBittorrentInterface.initTorrentDownload(torrent)
+
+        # asserts
+        self.assertTrue(torrentInitSuccess)
+        expectedDownloadPath = os.path.join(fakeDumpCompleteDir, torrent["mediaGrabId"])
+        qBittorrentInterface.qb.download_from_link.assert_called_with(torrent["magnet"], savepath=expectedDownloadPath)
+        loggingInfoMock.assert_called_with(f"Torrent added: {torrent['torrentName']}")
+
 
 
 if __name__ == '__main__':

@@ -80,9 +80,11 @@ def runProgramLogic(mode):
         if not mediaInfoRecordsWithTorrents:
             return
 
+        qbittorrentInterfaceInstance = QBittorrentInterface.getInstance()
+
         for mediaInfoRecord in mediaInfoRecordsWithTorrents:
             # create internal id to be used as a temporary folder when downloading and to keep in the DownloadsInProgress.json file as an identifier
             mediaInfoRecord["mediaGrabId"] = f'{mediaInfoRecord["name"]}--s{mediaInfoRecord["typeSpecificData"]["latestSeason"]}e{mediaInfoRecord["typeSpecificData"]["latestEpisode"]}'
 
-            if QBittorrentInterface.initTorrentDownload(mediaInfoRecord):
+            if qbittorrentInterfaceInstance.initTorrentDownload(mediaInfoRecord):
                 NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, "latestEpisode", mediaInfoRecord["magnet"], mode)

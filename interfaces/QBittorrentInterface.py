@@ -8,35 +8,43 @@ import logging
 # internal dependencies
 from controllers import ErrorController
 
-global qb
+qBittorrentInterfaceInstance = None
 
-def init():
-    # create qbittorrent client on program init
-    global qb
-    qb = Client(os.getenv('QBT_URL'), verify=False)
+# implement singleton pattern
+def getInstance():
+    global qBittorrentInterfaceInstance
+    if not qBittorrentInterfaceInstance:
+        qBittorrentInterfaceInstance = QBittorrentInterface()
+    return qBittorrentInterfaceInstance
 
-def initTorrentDownload(torrent):
-    
-    dumpCompleteDir = os.getenv("DUMP_COMPLETE_DIR")
-    dumpCompleteDir = "/home/shares/public/netShare/download/dump_complete"
-    downloadPath = os.path.join(dumpCompleteDir, torrent["mediaGrabId"])
-    
-    try:
-        qbittorrentResponse = qb.download_from_link(torrent["magnet"], savepath=downloadPath)
-        if qbittorrentResponse == "Ok.":
-            logging.info(f"Torrent added: {torrent['torrentName']}")
-            return True
+
+class QBittorrentInterface():
+
+
+    def __init__(self, dumpCompleteDir=None):
+        self.qb = Client(os.getenv('QBT_URL'), verify=False)        
+        self.dumpCompleteDir = dumpCompleteDir if dumpCompleteDir else os.getenv("DUMP_COMPLETE_DIR")
+
+
+    def initTorrentDownload(self, torrent):
+        downloadPath = os.path.join(self.dumpCompleteDir, torrent["mediaGrabId"])
+        
+        try:
+            qbittorrentResponse = self.qb.download_from_link(torrent["magnet"], savepath=downloadPath)
+            if qbittorrentResponse == "Ok.":
+                logging.info(f"Torrent added: {torrent['torrentName']}")
+                return True
+            return False
+        except Exception as exception:
+            ErrorController.reportError("Exception occurred when submitting torrent magnet to qbittorrent", exception=exception, sendEmail=True)
+            return False
+
+
+    def pauseTorrent(self, torrentName):
+        torrents = self.qb.torrents()
+
+        for torrent in torrents:
+            if torrent["name"] == torrentName:
+                self.qb.pause(torrent["hash"])
+                return True
         return False
-    except Exception as exception:
-        ErrorController.reportError("Exception occurred when submitting torrent magnet to qbittorrent", exception=exception, sendEmail=True)
-        return False
-
-
-def pauseTorrent(torrentName):
-    torrents = qb.torrents()
-
-    for torrent in torrents:
-        if torrent["name"] == torrentName:
-            qb.pause(torrent["hash"])
-            return True
-    return False
