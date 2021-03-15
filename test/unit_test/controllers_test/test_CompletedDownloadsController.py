@@ -8,7 +8,7 @@ from mock import MagicMock
 
 # internal dependencies
 from controllers import CompletedDownloadsController
-from data_types.ProgramMode import PROGRAM_MODE 
+from dataTypes.ProgramMode import PROGRAM_MODE 
 
 # fake directories for use across multiple tests
 fakeTargetTvDir = "test/dummy_directories/tv"

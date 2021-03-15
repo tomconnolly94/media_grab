@@ -6,12 +6,12 @@ import logging
 # internal dependencies
 from interfaces import TPBInterface, DownloadsInProgressFileInterface, QBittorrentInterface,MediaIndexFileInterface
 from controllers import QueryGenerationController, NewTorrentController, CompletedDownloadsController
-from data_types.ProgramMode import PROGRAM_MODE 
+from dataTypes.ProgramMode import PROGRAM_MODE 
 
 
 def findMediaInfoRecord(mediaInfoRecords, mediaInfoName):
 	for record in mediaInfoRecords:
-		if record["name"] == mediaInfoName:
+		if record.getShowName() == mediaInfoName:
 			return record
 
 
@@ -30,7 +30,7 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
         if torrentRecords:
             chosenTorrent = None
 
-            downloadIds = [ torrent["name"] for torrent in torrentRecords ]
+            downloadIds = [ torrent.getName() for torrent in torrentRecords ]
             chosenDownloadId = DownloadsInProgressFileInterface.findNewDownload(downloadIds)
 
             if not chosenDownloadId:
@@ -38,9 +38,9 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
 
 
             for torrent in torrentRecords:
-                if chosenDownloadId == torrent["name"]:
+                if chosenDownloadId == torrent.getName():
                     chosenTorrent = torrent 
-                    logging.info(f"Selected torrent: {chosenTorrent['name']} - seeders: {chosenTorrent['seeders']}")
+                    logging.info(f"Selected torrent: {chosenTorrent.getName()} - seeders: {chosenTorrent.getSeeders()}")
                     break
 
 
@@ -49,8 +49,7 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
                 logging.info("No new torrents found")
                 continue
 
-            mediaInfoRecord["magnet"] = chosenTorrent["magnet"].replace(" ", "+")
-            mediaInfoRecord["torrentName"] = chosenTorrent["name"]
+            mediaInfoRecord.setTorrentRecord(chosenTorrent)
             mediaInfoRecordsWithTorrents.append(mediaInfoRecord)
 
     return mediaInfoRecordsWithTorrents
@@ -83,8 +82,5 @@ def runProgramLogic(mode):
         qbittorrentInterfaceInstance = QBittorrentInterface.getInstance()
 
         for mediaInfoRecord in mediaInfoRecordsWithTorrents:
-            # create internal id to be used as a temporary folder when downloading and to keep in the DownloadsInProgress.json file as an identifier
-            mediaInfoRecord["mediaGrabId"] = f'{mediaInfoRecord["name"]}--s{mediaInfoRecord["typeSpecificData"]["latestSeason"]}e{mediaInfoRecord["typeSpecificData"]["latestEpisode"]}'
-
             if qbittorrentInterfaceInstance.initTorrentDownload(mediaInfoRecord):
-                NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, "latestEpisode", mediaInfoRecord["magnet"], mode)
+                NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, "latestEpisode", mediaInfoRecord.getTorrentRecord().getMagnet(), mode)

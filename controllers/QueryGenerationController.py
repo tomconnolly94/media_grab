@@ -24,7 +24,7 @@ episodeTemplates = [
 def generateTVEpisodeQueries(mediaInfoRecords):
 	queryUrls = {}
 	for record in mediaInfoRecords:
-		queryUrls[record["name"]] = generateTVEpisodeQueryGroup(record["name"], int(record["typeSpecificData"]["latestSeason"]), int(record["typeSpecificData"]["latestEpisode"]))
+		queryUrls[record.getShowName()] = generateTVEpisodeQueryGroup(record.getShowName(), record.getLatestSeasonNumber(), record.getLatestEpisodeNumber())
 	return queryUrls
 
 

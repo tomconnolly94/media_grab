@@ -6,8 +6,8 @@ import json
 
 # internal dependencies
 from interfaces import DownloadsInProgressFileInterface
-from data_types.ProgramMode import PROGRAM_MODE
-from data_types.ProgramModeMap import PROGRAM_MODE_MAP
+from dataTypes.ProgramMode import PROGRAM_MODE
+from dataTypes.ProgramModeMap import PROGRAM_MODE_MAP
 
 # constants
 openReadMockDataEmpty = '{ "tv-seasons": [], "tv-episodes": [] }'

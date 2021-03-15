@@ -9,8 +9,8 @@ import getopt
 
 # internal dependencies
 from controllers import LoggingController, LogicController, ErrorController
-from data_types.ProgramModeMap import PROGRAM_MODE_MAP
-from data_types.ProgramMode import PROGRAM_MODE
+from dataTypes.ProgramModeMap import PROGRAM_MODE_MAP
+from dataTypes.ProgramMode import PROGRAM_MODE
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)

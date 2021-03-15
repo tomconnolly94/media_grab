@@ -5,7 +5,7 @@ from mock import MagicMock
 
 # internal dependencies
 from controllers import NewTorrentController
-from data_types.ProgramMode import PROGRAM_MODE
+from dataTypes.ProgramMode import PROGRAM_MODE
 
 class TestNewTorrentController(unittest.TestCase):
 

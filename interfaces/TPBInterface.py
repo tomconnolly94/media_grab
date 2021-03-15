@@ -9,7 +9,7 @@ from json.decoder import JSONDecodeError
 
 # internal dependencies
 from controllers import TorrentFilterController, ErrorController
-
+from dataTypes.TorrentRecord import TorrentRecord
 
 def sortTorrents(torrents):
     # order torrents by number of seeders
@@ -58,10 +58,13 @@ def queryAPI(queryTerm):
         if len(torrents) == 1 and torrents[0]["id"] == "0":
             return []
 
-        for torrent in torrents:
-            torrent["magnet"] = f"magnet:?xt=urn:btih:{torrent.get('info_hash')}&dn={torrent.get('name')}"
+        torrentRecords = []
+
+        for torrentData in torrents:
+            torrentRecords.append(TorrentRecord(torrentData["name"], torrentData["id"], torrentData["info_hash"], torrentData["seeders"], torrentData["leechers"]))
 
         return torrents
+
     except (JSONDecodeError, ChunkedEncodingError) as exception:
         ErrorController.reportError("Problem with TPB API has occurred.", exception, True)
         return []

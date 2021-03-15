@@ -1,6 +1,13 @@
 import unittest
 from controllers import QueryGenerationController
 
+# external dependencies
+from mock import mock
+
+# internal dependencies
+from dataTypes.MediaInfoRecord import MediaInfoRecord
+
+
 class TestQueryGenerationController(unittest.TestCase):
 
     def test_generateEpisodeQueryGroup(self):
@@ -27,6 +34,36 @@ class TestQueryGenerationController(unittest.TestCase):
         seasonQueryGroup = QueryGenerationController.generateTVEpisodeQueryGroup(name, relevantSeason, relevantEpisode)
 
         self.assertEqual(expectedQueries, seasonQueryGroup)
+
+
+    @mock.patch("controllers.QueryGenerationController.generateTVEpisodeQueryGroup")
+    def test_generateTVEpisodeQueries(self, generateTVEpisodeQueryGroupMock):
+
+        # config fake data
+        fakeMediaInfoRecords = [
+            MediaInfoRecord("fakeMediaInfoShowName1", 1, 2),
+            MediaInfoRecord("fakeMediaInfoShowName2", 3, 4),
+            MediaInfoRecord("fakeMediaInfoShowName3", 5, 6)
+        ]
+        fakeQueries = ["fakeQueryUrl1", "fakeQueryUrl2", "fakeQueryUrl3"]
+
+        # config mocks
+        generateTVEpisodeQueryGroupMock.return_value = fakeQueries
+
+        # run testable function
+        actualQueryUrls = QueryGenerationController.generateTVEpisodeQueries(fakeMediaInfoRecords)
+
+        # expected values
+        expectedQueryUrls = {
+            "fakeMediaInfoShowName1": fakeQueries,
+            "fakeMediaInfoShowName2": fakeQueries,
+            "fakeMediaInfoShowName3": fakeQueries,
+        }
+
+        # asserts
+        self.assertEqual(expectedQueryUrls, actualQueryUrls)
+
+
 
 if __name__ == '__main__':
     unittest.main()

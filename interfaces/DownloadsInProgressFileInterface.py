@@ -6,8 +6,8 @@ import os
 import logging
 
 # internal dependencies
-from data_types.ProgramModeMap import PROGRAM_MODE_MAP
-from data_types.ProgramMode import PROGRAM_MODE
+from dataTypes.ProgramModeMap import PROGRAM_MODE_MAP
+from dataTypes.ProgramMode import PROGRAM_MODE
 from controllers import ErrorController
 
 

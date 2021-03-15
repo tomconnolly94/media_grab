@@ -5,6 +5,7 @@ from mock import MagicMock
 
 # internal dependencies
 from interfaces import MediaIndexFileInterface
+from dataTypes.MediaInfoRecord import MediaInfoRecord
 
 class TestMediaIndexFileInterface(unittest.TestCase):
 
@@ -13,18 +14,9 @@ class TestMediaIndexFileInterface(unittest.TestCase):
 
         # config inputs        
         fakeMediaInfoRecords = [
-            {
-                "name": "fakeMediaInfoName1",
-                "typeSpecificData": { "latestSeason": "1", "latestEpisode": "1" }
-            },
-            {
-                "name": "fakeMediaInfoName2",
-                "typeSpecificData": { "latestSeason": "1", "latestEpisode": "3" }
-            },
-            {
-                "name": "fakeMediaInfoName3",
-                "typeSpecificData": { "latestSeason": "1", "latestEpisode": "1" }
-            }
+            MediaInfoRecord("fakeMediaInfoName1", 1, 1),
+            MediaInfoRecord("fakeMediaInfoName2", 1, 3), 
+            MediaInfoRecord("fakeMediaInfoName3", 1, 1)
         ]
 
         # config mocks
@@ -42,8 +34,8 @@ class TestMediaIndexFileInterface(unittest.TestCase):
         # called testable method
         updatedMedia = MediaIndexFileInterface.incrementEpisode(fakeMediaInfoRecords, queryRecord)
 
-        self.assertEqual("1", updatedMedia[0]["typeSpecificData"]["latestSeason"])
-        self.assertEqual("2", updatedMedia[0]["typeSpecificData"]["latestEpisode"])
+        self.assertEqual(1, updatedMedia[0].getLatestSeasonNumber())
+        self.assertEqual(2, updatedMedia[0].getLatestEpisodeNumber())
 
         ##### End test case 1 #####
 
@@ -53,17 +45,14 @@ class TestMediaIndexFileInterface(unittest.TestCase):
         # called testable method
         updatedMedia = MediaIndexFileInterface.incrementEpisode(fakeMediaInfoRecords, queryRecord)
 
-        self.assertEqual("2", updatedMedia[1]["typeSpecificData"]["latestSeason"])
-        self.assertEqual("1", updatedMedia[1]["typeSpecificData"]["latestEpisode"])
+        self.assertEqual(2, updatedMedia[1].getLatestSeasonNumber())
+        self.assertEqual(1, updatedMedia[1].getLatestEpisodeNumber())
 
         ##### End test case 2 #####
         
         ##### Start test case 3 #####
 
-        nonExistentRecord = {
-            "name": "fakeMediaInfoName4",
-            "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 }
-        }
+        nonExistentRecord = MediaInfoRecord("fakeMediaInfoName4", 1, 1)
 
         # called testable method
         updatedMedia = MediaIndexFileInterface.incrementEpisode(fakeMediaInfoRecords, nonExistentRecord)

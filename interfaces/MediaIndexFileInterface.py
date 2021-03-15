@@ -6,6 +6,8 @@ import json
 from interfaces import TheMovieDatabaseInterface
 import logging
 
+# internal dependencies
+from dataTypes.MediaInfoRecord import MediaInfoRecord
 
 writeFile = True
 
@@ -14,26 +16,26 @@ def incrementEpisode(mediaInfoRecords, queryRecord):
 
 	theMovieDatabaseInterface = TheMovieDatabaseInterface.getInstance()
 
-	for mediaRecord in mediaInfoRecords:
-		if mediaRecord["name"] == queryRecord["name"]:
-			maxNumberOfEpisodes = theMovieDatabaseInterface.getShowEpisodeCount(mediaRecord["name"], mediaRecord["typeSpecificData"]["latestSeason"])
-			prevEpisodeValue = mediaRecord["typeSpecificData"]["latestEpisode"]
-			prevSeasonValue = mediaRecord["typeSpecificData"]["latestSeason"]
+	for mediaInfoRecord in mediaInfoRecords:
+		if mediaInfoRecord.getShowName() == queryRecord.getShowName():
+			maxNumberOfEpisodes = theMovieDatabaseInterface.getShowEpisodeCount(mediaInfoRecord.getShowName(), mediaInfoRecord.getLatestSeasonNumber())
+			prevEpisodeValue = mediaInfoRecord.getLatestEpisodeNumber()
+			prevSeasonValue = mediaInfoRecord.getLatestSeasonNumber()
 
-			if maxNumberOfEpisodes and int(mediaRecord["typeSpecificData"]["latestEpisode"]) + 1 > maxNumberOfEpisodes:
+			if maxNumberOfEpisodes and (mediaInfoRecord.getLatestEpisodeNumber() + 1) > maxNumberOfEpisodes:
 				# set data to next season first episode
-				mediaRecord["typeSpecificData"]["latestSeason"] = str(int(queryRecord["typeSpecificData"]["latestSeason"]) + 1)
-				mediaRecord["typeSpecificData"]["latestEpisode"] = str(1)
+				mediaInfoRecord.setLatestSeasonNumber(queryRecord.getLatestSeasonNumber() + 1)
+				mediaInfoRecord.setLatestEpisodeNumber(1)
 
-				currentLatestEpisodeValue = mediaRecord["typeSpecificData"]["latestEpisode"]
-				currentLatestSeasonValue = mediaRecord["typeSpecificData"]["latestSeason"]
-				logging.info(f"Updated latest episode from {prevEpisodeValue} to {currentLatestEpisodeValue}")
-				logging.info(f"Updated latest season from {prevSeasonValue} to {currentLatestSeasonValue}")
+				currentLatestEpisodeValue = mediaInfoRecord.getLatestEpisodeNumber()
+				currentLatestSeasonValue = mediaInfoRecord.getLatestSeasonNumber()
+				logging.info(f"Updated latest episode number from {prevEpisodeValue} to {currentLatestEpisodeValue}")
+				logging.info(f"Updated latest season number from {prevSeasonValue} to {currentLatestSeasonValue}")
 			else:
-				mediaRecord["typeSpecificData"]["latestEpisode"] = str(int(mediaRecord["typeSpecificData"]["latestEpisode"]) + 1)
+				mediaInfoRecord.setLatestEpisodeNumber(mediaInfoRecord.getLatestEpisodeNumber() + 1)
 
-				currentLatestEpisodeValue = mediaRecord["typeSpecificData"]["latestEpisode"]
-				logging.info(f"Updated latest episode from {prevEpisodeValue} to {currentLatestEpisodeValue}")
+				currentLatestEpisodeValue = mediaInfoRecord.getLatestEpisodeNumber()
+				logging.info(f"Updated latest episode number from {prevEpisodeValue} to {currentLatestEpisodeValue}")
 
 			return mediaInfoRecords
 	return None
@@ -41,16 +43,16 @@ def incrementEpisode(mediaInfoRecords, queryRecord):
 
 def writeMediaFile(queryRecord, updateableField):
 	
-	with open(os.getenv("MEDIA_FILE"), 'r') as mediaFileSrc:
-		media = json.load(mediaFileSrc)["media"]
+	mediaInfoRecords = loadMediaFile()
 	
+	updatedMediaInfoRecords = incrementEpisode(mediaInfoRecords, queryRecord)
 
-	updatedMedia = incrementEpisode(media, queryRecord)
-
-	if not updatedMedia:
+	if not updatedMediaInfoRecords:
 		return
 
-	media = { "media": updatedMedia }
+	updatedMediaInfoRecordsAsDict = [ mediaInfoRecord.toDict() for mediaInfoRecord in mediaInfoRecords ]
+
+	media = { "media": updatedMediaInfoRecordsAsDict }
 
 	if writeFile:
 		with open(os.getenv("MEDIA_FILE"), "w") as mediaFileTarget:
@@ -63,4 +65,12 @@ def loadMediaFile():
 	mediaIndexFileLocation = os.getenv("MEDIA_FILE")
 	logging.info(f"MediaIndex File: {mediaIndexFileLocation}")
 	with open(mediaIndexFileLocation, "r") as mediaIndexfile:
-		return json.loads(mediaIndexfile.read())["media"]
+
+		mediaInfoRecords = []
+		mediaInfoRecordsRaw = json.loads(mediaIndexfile.read())["media"]
+		for mediaInfoRecordRaw in mediaInfoRecordsRaw:
+			mediaInfoRecords.append(MediaInfoRecord(mediaInfoRecordRaw["name"], 
+				mediaInfoRecordRaw["typeSpecificData"]["latestSeason"], 
+				mediaInfoRecordRaw["typeSpecificData"]["latestEpisode"]))
+		
+		return mediaInfoRecords

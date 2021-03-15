@@ -6,41 +6,25 @@ from mock import MagicMock
 
 # internal dependencies 
 from controllers import LogicController
-from data_types.ProgramMode import PROGRAM_MODE
+from dataTypes.ProgramMode import PROGRAM_MODE
+from dataTypes.TorrentRecord import TorrentRecord
+from dataTypes.MediaInfoRecord import MediaInfoRecord
 
 class TestLogicController(unittest.TestCase):
 
     def test_findMediaInfoRecord(self):
 
-        relevantMediaInfoRecord = {
-            "name": "infoRecordFakeName1",
-            "typeSpecificData": {
-                "latestSeason": 1,
-                "latestEpisode": 1
-            }
-        }
+        relevantMediaInfoRecord = MediaInfoRecord("infoRecordFakeName1", 1, 1)
 
         mediaInfoRecords = [
-            {
-                "name": "infoRecordFakeName2",
-                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 }
-            },
-            {
-                "name": "infoRecordFakeName3",
-                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 }
-            },
-            {
-                "name": "infoRecordFakeName4",
-                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 }
-            },
-            {
-                "name": "infoRecordFakeName5",
-                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 }
-            },
+            MediaInfoRecord("infoRecordFakeName2", 1, 1),
+            MediaInfoRecord("infoRecordFakeName3", 1, 1),
+            MediaInfoRecord("infoRecordFakeName4", 1, 1),
+            MediaInfoRecord("infoRecordFakeName5", 1, 1),
             relevantMediaInfoRecord
         ]
 
-        actualMediaInfoRecord = LogicController.findMediaInfoRecord(mediaInfoRecords, relevantMediaInfoRecord["name"])
+        actualMediaInfoRecord = LogicController.findMediaInfoRecord(mediaInfoRecords, relevantMediaInfoRecord.getShowName())
 
         self.assertEqual(relevantMediaInfoRecord, actualMediaInfoRecord)
 
@@ -58,25 +42,16 @@ class TestLogicController(unittest.TestCase):
         }              
 
         fakeTorrentRecords = [
-            { "name": "fakeTorrentTitle1", "magnet": "fakeTorrentMagnetLink1", "seeders": 4 },
-            { "name": "fakeTorrentTitle2", "magnet": "fakeTorrentMagnetLink2", "seeders": 6 },
-            { "name": "fakeTorrentTitle3", "magnet": "fakeTorrentMagnetLink3", "seeders": 8 },
-            { "name": "fakeTorrentTitle4", "magnet": "fakeTorrentMagnetLink4", "seeders": 10 }
+            TorrentRecord("fakeTorrentTitle1", "id1", "fakeInfoHash1", "4", "3"),
+            TorrentRecord("fakeTorrentTitle2", "id2", "fakeInfoHash2", "6", "5"),
+            TorrentRecord("fakeTorrentTitle3", "id3", "fakeInfoHash3", "8", "7"),
+            TorrentRecord("fakeTorrentTitle4", "id4", "fakeInfoHash4", "10", "9")
         ]
 
         fakeMediaInfoRecords = [
-            {
-                "name": "fakeMediaInfoName1",
-                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 }
-            },
-            {
-                "name": "fakeMediaInfoName2",
-                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 }
-            },
-            {
-                "name": "fakeMediaInfoName3",
-                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 }
-            }
+            MediaInfoRecord("fakeMediaInfoName1", 1, 1),
+            MediaInfoRecord("fakeMediaInfoName2", 1, 1),
+            MediaInfoRecord("fakeMediaInfoName3", 1, 1)
         ]
 
         # configure mocks
@@ -85,34 +60,16 @@ class TestLogicController(unittest.TestCase):
         findNewDownloadMock.side_effect = ["fakeTorrentTitle1", None, "fakeTorrentTitle3"]
 
         # expected outputs
-        #fakeMediaInfoRecords[0]["magnet"]
-        expectedOutputMediaInfoRecords = [
-            {
-                'magnet': 'fakeTorrentMagnetLink1', 
-                'name': 'fakeMediaInfoName1', 
-                'torrentName': 'fakeTorrentTitle1',
-                'typeSpecificData': 
-                {
-                    'latestEpisode': 1, 
-                    'latestSeason': 1
-                }
-            },
-            {
-                'magnet': 'fakeTorrentMagnetLink3', 
-                'name': 'fakeMediaInfoName3', 
-                'torrentName': 'fakeTorrentTitle3',
-                'typeSpecificData': 
-                {
-                    'latestEpisode': 1, 
-                    'latestSeason': 1
-                }
-            }
-        ]
+        expectedFakeMediaInfoRecords = []
+        for index, fakeMediaInfoRecord in enumerate(fakeMediaInfoRecords):
+            if index in [0, 2]:
+                fakeMediaInfoRecord.setTorrentRecord(fakeTorrentRecords[index])
+                expectedFakeMediaInfoRecords.append(fakeMediaInfoRecord)
 
         actualOutputMediaInfoRecords = LogicController.getMediaInfoRecordsWithTorrents(fakeMediaSearchQueries, fakeMediaInfoRecords)
 
         # asserts
-        self.assertEqual(expectedOutputMediaInfoRecords, actualOutputMediaInfoRecords)
+        self.assertEqual(expectedFakeMediaInfoRecords, actualOutputMediaInfoRecords)
         findMediaInfoRecordCalls = [
             call(fakeMediaInfoRecords, "fakeMediaInfoName1"),
             call(fakeMediaInfoRecords, "fakeMediaInfoName2"),
@@ -133,7 +90,7 @@ class TestLogicController(unittest.TestCase):
         ]
         loggingInfoMock.has_calls(loggingInfoCalls)
 
-        fakeTorrentRecordsNames = [ torrent["name"] for torrent in fakeTorrentRecords ]        
+        fakeTorrentRecordsNames = [ torrent.getName() for torrent in fakeTorrentRecords ]        
         findNewDownloadCalls = [
             call(fakeTorrentRecordsNames),
             call(fakeTorrentRecordsNames),
@@ -158,35 +115,22 @@ class TestLogicController(unittest.TestCase):
         
         # config fake inputs
         fakeMediaInfoRecords = [
-            {
-                "name": "fakeMediaInfoName1",
-                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 },
-                "mediaGrabId": "fakeMediaInfoName1--s1e1"
-            },
-            {
-                "name": "fakeMediaInfoName2",
-                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 },
-                "mediaGrabId": "fakeMediaInfoName2--s1e1"
-            },
-            {
-                "name": "fakeMediaInfoName3",
-                "typeSpecificData": { "latestSeason": 1, "latestEpisode": 1 },
-                "mediaGrabId": "fakeMediaInfoName3--s1e1"
-            }
+            MediaInfoRecord("fakeMediaInfoName1", 1, 1),
+            MediaInfoRecord("fakeMediaInfoName2", 1, 1),
+            MediaInfoRecord("fakeMediaInfoName3", 1, 1)
+        ]
+        
+        # config fake inputs
+        fakeMediaInfoRecordsWithTorrents = [
+            MediaInfoRecord("fakeMediaInfoName1", 1, 1, TorrentRecord("fakeTorrent1", "id1", "fakeInfoHash", "5")),
+            MediaInfoRecord("fakeMediaInfoName2", 1, 1, TorrentRecord("fakeTorrent2", "id2", "fakeInfoHash", "5")),
+            MediaInfoRecord("fakeMediaInfoName3", 1, 1, TorrentRecord("fakeTorrent3", "id3", "fakeInfoHash", "5"))
         ]
 
         # config fake data
         fakeMediaSearchQueries = ["fakeMediaSearchQuery1", "fakeMediaSearchQuery2", "fakeMediaSearchQuery3"]
-        fakeMediaInfoRecordsWithTorrents = []
         activeMode = PROGRAM_MODE.TV_EPISODES
         fakeDownloadingItems =  ["downloadingItem1", "downloadingItem2"]
-
-        # add fake magnet links
-        for mediaInfoRecord in fakeMediaInfoRecords:
-            mediaInfoRecordWithTorrent = dict(mediaInfoRecord)
-            mediaInfoRecordWithTorrent["magnet"] = "fakeMagnetLink"
-            fakeMediaInfoRecordsWithTorrents.append(mediaInfoRecordWithTorrent)
-
         
         # config mocks
         generateTVEpisodeQueriesMock.return_value = fakeMediaSearchQueries
@@ -197,7 +141,7 @@ class TestLogicController(unittest.TestCase):
         qbittorrentInterfaceInstanceMock = MagicMock()
         # assign mocked instance to return_value for mocked getInstance()
         qbittorrentInterfaceGetInstanceMock.return_value = qbittorrentInterfaceInstanceMock        
-        qbittorrentInterfaceInstanceMock.initTorrentDownload.side_effect = [True, True, True, None]
+        qbittorrentInterfaceInstanceMock.initTorrentDownload.side_effect = [True, False, True]
         
         # call testable function
         LogicController.runProgramLogic(activeMode)
@@ -212,8 +156,8 @@ class TestLogicController(unittest.TestCase):
         qbittorrentInterfaceInstanceMock.initTorrentDownload.assert_has_calls(calls)
 
         calls = [ 
-            call(fakeMediaInfoRecordsWithTorrents[0], "latestEpisode", "fakeMagnetLink", activeMode), 
-            call(fakeMediaInfoRecordsWithTorrents[1],"latestEpisode", "fakeMagnetLink", activeMode) ]
+            call(fakeMediaInfoRecordsWithTorrents[0], "latestEpisode", "magnet:?xt=urn:btih:fakeInfoHash&dn=fakeTorrent1", activeMode), 
+            call(fakeMediaInfoRecordsWithTorrents[2],"latestEpisode", "magnet:?xt=urn:btih:fakeInfoHash&dn=fakeTorrent3", activeMode) ]
         onSuccessfulTorrentAddMock.assert_has_calls(calls)
 
 

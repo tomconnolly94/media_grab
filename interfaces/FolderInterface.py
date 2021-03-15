@@ -6,7 +6,7 @@ import logging
 import re
 
 #internal dependencies
-from data_types.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
+from dataTypes.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
 from controllers import ErrorController
 
 def createDirectory(newDirectoryName):

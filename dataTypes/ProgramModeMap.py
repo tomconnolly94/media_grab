@@ -1,7 +1,7 @@
 #!/venv/bin/python
 
 # internal dependencies
-from data_types.ProgramMode import PROGRAM_MODE 
+from dataTypes.ProgramMode import PROGRAM_MODE 
 
 
 class TwoWayMap(dict):
