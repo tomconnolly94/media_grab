@@ -41,7 +41,7 @@ def incrementEpisode(mediaInfoRecords, queryRecord):
 	return None
 
 
-def writeMediaFile(queryRecord, updateableField):
+def writeMediaFile(queryRecord):
 	
 	mediaInfoRecords = loadMediaFile()
 	

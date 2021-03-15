@@ -156,8 +156,8 @@ class TestLogicController(unittest.TestCase):
         qbittorrentInterfaceInstanceMock.initTorrentDownload.assert_has_calls(calls)
 
         calls = [ 
-            call(fakeMediaInfoRecordsWithTorrents[0], "latestEpisode", "magnet:?xt=urn:btih:fakeInfoHash&dn=fakeTorrent1", activeMode), 
-            call(fakeMediaInfoRecordsWithTorrents[2],"latestEpisode", "magnet:?xt=urn:btih:fakeInfoHash&dn=fakeTorrent3", activeMode) ]
+            call(fakeMediaInfoRecordsWithTorrents[0], activeMode), 
+            call(fakeMediaInfoRecordsWithTorrents[2], activeMode) ]
         onSuccessfulTorrentAddMock.assert_has_calls(calls)
 
 

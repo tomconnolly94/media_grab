@@ -1,3 +1,5 @@
+#!/venv/bin/python
+
 # external dependencies
 import unittest
 import mock
@@ -6,6 +8,9 @@ import json
 
 # internal dependencies
 from interfaces import TPBInterface
+from dataTypes.MediaInfoRecord import MediaInfoRecord
+from dataTypes.TorrentRecord import TorrentRecord
+
 
 class TestTPBInterface(unittest.TestCase):
 
@@ -15,9 +20,16 @@ class TestTPBInterface(unittest.TestCase):
     def test_getTorrentRecords(self, queryMock, loggingInfoMock, filterEpisodeTorrentsMock):
         
         # config fake data
-        fakeTPBQueryResponses = [[], [{"name": "torrent1", "seeders": "5"}, {"name": "torrent2", "seeders": "10"}, {"name": "torrent3", "seeders": "0"}]]
+        fakeTPBQueryResponses = [
+            [], 
+            [
+                TorrentRecord("torrent1", "id1", "fakeInfoHash", "5"),
+                TorrentRecord("torrent2", "id1", "fakeInfoHash", "10"),
+                TorrentRecord("torrent3", "id1", "fakeInfoHash", "0")
+            ]
+        ]
         queries = ["fakeQueryString1", "fakeQueryString2", "fakeQueryString3"]
-        fakeMediaInfoRecord = "fakeMediaInfoRecord"
+        fakeMediaInfoRecord = MediaInfoRecord("fakeShowName", 1, 2)
         fakeFilteredTorrents = fakeTPBQueryResponses[1][:2]
 
         # config mocks
@@ -28,7 +40,7 @@ class TestTPBInterface(unittest.TestCase):
         torrentRecords = TPBInterface.getTorrentRecords(queries, fakeMediaInfoRecord)
 
         # asserts
-        expectedTorrentRecords = [ fakeFilteredTorrents[1], fakeFilteredTorrents[0] ]
+        expectedTorrentRecords = fakeFilteredTorrents
         self.assertEqual(expectedTorrentRecords, torrentRecords)
         queryAPI = [
             call(queries[0]),

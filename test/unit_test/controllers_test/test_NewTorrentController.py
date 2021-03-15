@@ -6,6 +6,8 @@ from mock import MagicMock
 # internal dependencies
 from controllers import NewTorrentController
 from dataTypes.ProgramMode import PROGRAM_MODE
+from dataTypes.MediaInfoRecord import MediaInfoRecord
+from dataTypes.TorrentRecord import TorrentRecord
 
 class TestNewTorrentController(unittest.TestCase):
 
@@ -15,18 +17,10 @@ class TestNewTorrentController(unittest.TestCase):
     def test_onSuccessfulTorrentAdd(self, writeMediaFileMock, mailInterfaceGetInstanceMock, notifyDownloadStartedMock):
 
         # config fake values
-        fakeQueryRecord = {
-            "name": "RecordName",
-            "typeSpecificData": {
-                "latestSeason": 1,
-                "latestEpisode": 1
-            },
-            "torrentName": "fakeTorrentName",
-            "mediaGrabId": "fakeTorrentName--s1e1"
-        }
-        fakeUpdateableField = "latestSeason"
-        fakeTorrentMagnetLink = "fakeTorrentMagnet"
-        activeMode = PROGRAM_MODE.TV_SEASONS
+        fakeTorrent = TorrentRecord("fakeTorrentName", "fakeId", "fakeInfoHash", "5")
+        fakeMediaInfoRecord = MediaInfoRecord("fakeRecordName", 1, 1, fakeTorrent)
+        expectedMediaGrabId = "fakeRecordName--s1e1"
+        activeMode = PROGRAM_MODE.TV_EPISODES
 
         # config mocks
         # create mock for mailInterface instance
@@ -34,12 +28,12 @@ class TestNewTorrentController(unittest.TestCase):
         # assign mocked MailInterface instance to return_vlue for mocked getInstance()
         mailInterfaceGetInstanceMock.return_value = mailInterfaceInstanceMock
 
-        NewTorrentController.onSuccessfulTorrentAdd(fakeQueryRecord, fakeUpdateableField, fakeTorrentMagnetLink, activeMode)
+        NewTorrentController.onSuccessfulTorrentAdd(fakeMediaInfoRecord, activeMode)
         
         # mock function asserts
-        writeMediaFileMock.assert_called_once_with(fakeQueryRecord, fakeUpdateableField)
-        mailInterfaceInstanceMock.sendNewTorrentMail.assert_called_once_with(fakeQueryRecord['torrentName'], f"{fakeUpdateableField} {fakeQueryRecord['typeSpecificData']['latestSeason']}", fakeTorrentMagnetLink)
-        notifyDownloadStartedMock.assert_called_once_with(fakeQueryRecord["mediaGrabId"], activeMode)
+        writeMediaFileMock.assert_called_once_with(fakeMediaInfoRecord)
+        mailInterfaceInstanceMock.sendNewTorrentMail.assert_called_once_with(fakeTorrent.getName(),  f"Latest episode: {fakeMediaInfoRecord.getLatestEpisodeNumber()}", fakeTorrent.getMagnet())
+        notifyDownloadStartedMock.assert_called_once_with(expectedMediaGrabId, activeMode)
 
 
 if __name__ == '__main__':

@@ -83,4 +83,4 @@ def runProgramLogic(mode):
 
         for mediaInfoRecord in mediaInfoRecordsWithTorrents:
             if qbittorrentInterfaceInstance.initTorrentDownload(mediaInfoRecord):
-                NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, "latestEpisode", mediaInfoRecord.getTorrentRecord().getMagnet(), mode)
+                NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, mode)

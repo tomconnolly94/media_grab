@@ -1,36 +1,50 @@
+#!/venv/bin/python
+
+# external dependencies
 import unittest
 import json
+
+# internal dependencies
 from controllers import TorrentFilterController
+from dataTypes.MediaInfoRecord import MediaInfoRecord
+from dataTypes.TorrentRecord import TorrentRecord
 
 class TestTorrentFilterController(unittest.TestCase):
 
-
     def test_filterEpisodeTorrentPageUrls(self):
 
-        #`latestSeason` must be 2 to match the test data in 'test/unit_test/unit_test_resources/fakeTorrentData.json'
-        mediaData = {
-            "name": "Rick and morty",
-            "typeSpecificData": {
-                "latestSeason": "3",
-                "latestEpisode": "2"
-            }
-        }
+        mediaData = MediaInfoRecord("Rick and morty", 3, 2)
 
-        torrentData = []
-        
-        with open('test/unit_test/unit_test_resources/fakeTorrentData.json', 'r') as file:
-            jsonData = json.load(file) 
-            torrentData = jsonData["episodeTorrentData"]
+        torrentRecordsFailFilter = [
+            TorrentRecord("Rick.and.morty", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord("Rick.and.Morty.Season.1", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord("Rick.and.Morty.episode.1", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord("Rick.and.Morty.Season.3", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord("Rick..and.Morty.Season.3", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord("Rick.and.Morty.S04E02.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord("Rick.and.Morty.S03E03.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2)
 
+            #TODO: These should fail but I can't figure out a torrentFilter configuration that achieves that yet
+            #TorrentRecord("Rick.and.Morty.the.movie.S03E02.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2),
+            #TorrentRecord("Rick.and.Morty.fun day at the zoo.S03E02.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2)
+        ]
 
-        filteredTorrents = TorrentFilterController.filterEpisodeTorrents(torrentData, mediaData)
+        torrentRecordsPassFilter = [
+            TorrentRecord("Rick.and.Morty.S03E02.HDTV.x264-BATV", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord("Rick.and.Morty.S03E02.720p.HDTV.x264-BATV[ettv]", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord("Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord(" Rick and Morty S03E02 1080p PT-BR Subs Tocatoon ", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord("Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon ", "fakeId", "fakeInfoHash", 2),
+        ]
 
-        expectedFilteredTorrents = [ torrent for torrent in torrentData if torrent["passesFilter"] ]
+        filteredFailedTorrents = TorrentFilterController.filterEpisodeTorrents(torrentRecordsFailFilter, mediaData)
+        filteredPassedTorrents = TorrentFilterController.filterEpisodeTorrents(torrentRecordsPassFilter, mediaData)
 
         # assert the right number of torrents were kept from the data input
-        self.assertEqual(len(expectedFilteredTorrents), len(filteredTorrents))
+        self.assertEqual(0, len(filteredFailedTorrents))
+        self.assertEqual(len(torrentRecordsPassFilter), len(filteredPassedTorrents))
         # assert that the right number of torrents in the input have the "passesFilter" field set to true
-        self.assertEqual(expectedFilteredTorrents, filteredTorrents)
+        self.assertEqual(torrentRecordsPassFilter, filteredPassedTorrents)
 
 
 if __name__ == '__main__':

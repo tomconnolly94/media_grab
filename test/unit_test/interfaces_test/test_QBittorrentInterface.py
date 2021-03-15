@@ -6,6 +6,8 @@ from mock import MagicMock
 
 # internal dependencies
 from interfaces.QBittorrentInterface import QBittorrentInterface
+from dataTypes.TorrentRecord import TorrentRecord
+from dataTypes.MediaInfoRecord import MediaInfoRecord
 
 class TestQBittorrentInterface(unittest.TestCase):
 
@@ -13,12 +15,8 @@ class TestQBittorrentInterface(unittest.TestCase):
     def test_torrentDownload(self, loggingInfoMock):
 
         # config fake values
-        torrentMagnet = "/torrent/18003297/Silicon_Valley_Season_4_S04_720p_AMZN_WEBRip_x265_HEVC_Complete"
-        torrent = {
-            "torrentName": "fakeTorrentName1",
-            "magnet": torrentMagnet,
-            "mediaGrabId": "fakeTorrentName1--s1e2"
-        }
+        fakeTorrent = TorrentRecord("fakeTorrentName1", "id", "fakeInfoHash", 2)
+        fakeMediaInfoRecord = MediaInfoRecord("fakeShowName", 1, 2, fakeTorrent)
         fakeDumpCompleteDir = "/fake/dump/complete/dir"
 
         # create testable object and override the qb member
@@ -27,13 +25,13 @@ class TestQBittorrentInterface(unittest.TestCase):
         qBittorrentInterface.qb.download_from_link.return_value = "Ok."
 
         # call testable function
-        torrentInitSuccess = qBittorrentInterface.initTorrentDownload(torrent)
+        torrentInitSuccess = qBittorrentInterface.initTorrentDownload(fakeMediaInfoRecord)
 
         # asserts
         self.assertTrue(torrentInitSuccess)
-        expectedDownloadPath = os.path.join(fakeDumpCompleteDir, torrent["mediaGrabId"])
-        qBittorrentInterface.qb.download_from_link.assert_called_with(torrent["magnet"], savepath=expectedDownloadPath)
-        loggingInfoMock.assert_called_with(f"Torrent added: {torrent['torrentName']}")
+        expectedDownloadPath = os.path.join(fakeDumpCompleteDir, fakeMediaInfoRecord.getMediaGrabId())
+        qBittorrentInterface.qb.download_from_link.assert_called_with(fakeTorrent.getMagnet(), savepath=expectedDownloadPath)
+        loggingInfoMock.assert_called_with(f"Torrent added: {fakeTorrent.getName()}")
 
 
 

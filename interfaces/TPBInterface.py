@@ -13,7 +13,7 @@ from dataTypes.TorrentRecord import TorrentRecord
 
 def sortTorrents(torrents):
     # order torrents by number of seeders
-    return sorted(torrents, key=lambda torrent: -1 * int(torrent["seeders"]))
+    return sorted(torrents, key=lambda torrent: -1 * torrent.getSeeders())
 
 
 def getTorrentRecords(queries, mediaInfoRecord):
@@ -63,7 +63,7 @@ def queryAPI(queryTerm):
         for torrentData in torrents:
             torrentRecords.append(TorrentRecord(torrentData["name"], torrentData["id"], torrentData["info_hash"], torrentData["seeders"], torrentData["leechers"]))
 
-        return torrents
+        return torrentRecords
 
     except (JSONDecodeError, ChunkedEncodingError) as exception:
         ErrorController.reportError("Problem with TPB API has occurred.", exception, True)

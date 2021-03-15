@@ -26,3 +26,7 @@ class TorrentRecord():
 
     def getSeeders(self):
         return self.__seeders
+
+
+    def getInfoHash(self):
+        return self.__infoHash

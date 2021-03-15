@@ -12,17 +12,11 @@ class TestQueryGenerationController(unittest.TestCase):
 
     def test_generateEpisodeQueryGroup(self):
 
-        mediaInfo = {
-            "name": "rick and morty",
-            "typeSpecificData": {
-                "latestSeason": 1,
-                "latestEpisode": 1
-            }
-        }
+        mediaInfoRecord = MediaInfoRecord("rick and morty", 1, 1)
 
-        name = mediaInfo["name"]
-        relevantSeason = int(mediaInfo["typeSpecificData"]["latestSeason"]) 
-        relevantEpisode= int(mediaInfo["typeSpecificData"]["latestEpisode"]) + 1
+        name = mediaInfoRecord.getShowName()
+        relevantSeason = mediaInfoRecord.getLatestSeasonNumber() 
+        relevantEpisode= mediaInfoRecord.getLatestEpisodeNumber() + 1
 
         expectedQueries = [
             "\"rick and morty\" s01e02",

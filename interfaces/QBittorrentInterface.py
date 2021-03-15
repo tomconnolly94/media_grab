@@ -26,13 +26,14 @@ class QBittorrentInterface():
         self.dumpCompleteDir = dumpCompleteDir if dumpCompleteDir else os.getenv("DUMP_COMPLETE_DIR")
 
 
-    def initTorrentDownload(self, torrent):
-        downloadPath = os.path.join(self.dumpCompleteDir, torrent["mediaGrabId"])
+    def initTorrentDownload(self, mediaInfoRecord):
+        downloadPath = os.path.join(self.dumpCompleteDir, mediaInfoRecord.getMediaGrabId())
+        torrentRecord = mediaInfoRecord.getTorrentRecord()
         
         try:
-            qbittorrentResponse = self.qb.download_from_link(torrent["magnet"], savepath=downloadPath)
+            qbittorrentResponse = self.qb.download_from_link(torrentRecord.getMagnet(), savepath=downloadPath)
             if qbittorrentResponse == "Ok.":
-                logging.info(f"Torrent added: {torrent['torrentName']}")
+                logging.info(f"Torrent added: {torrentRecord.getName()}")
                 return True
             return False
         except Exception as exception:
