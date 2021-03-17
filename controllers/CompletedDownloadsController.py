@@ -39,13 +39,13 @@ def extractSeasonNumber(mediaGrabId):
     """
     try:
         regexRaw = r"--s(\d+)"        
-        matches = re.search(regexRaw, mediaGrabId, re.IGNORECASE | re.MULTILINE)        
-        seasonNumber = int(matches.groups()[0])
-        
-        if seasonNumber:
-            return seasonNumber
-        else:
-            return None
+        matches = re.search(regexRaw, mediaGrabId, re.IGNORECASE | re.MULTILINE)
+        if matches and matches.groups() and matches.groups()[0]:
+            seasonNumber = int(matches.groups()[0])
+            
+            if seasonNumber:
+                return seasonNumber
+        return None
     except Exception as exception:
         ErrorController.reportError("Exception occurred when extracting season number with regex", exception=exception, sendEmail=True)
         return None
@@ -169,7 +169,7 @@ def getTargetFile(fileSystemItem):
 
     :param fileSystemItem: the file system item, it could be a directory or a file
     :return: the file system item if it is a file or if it is a directory then the largest file in that directory
-    """    
+    """
     if FolderInterface.directoryExists(fileSystemItem.path): # check if the fileSystemItem is a directory or a file
         targetFile = getLargestItemInDir(fileSystemItem.path) # we assume that the target file is the largest file
 
@@ -182,18 +182,16 @@ def getTargetFile(fileSystemItem):
     return fileSystemItem
 
 
-def recycleDir(fileSystemItem):    
-    # attempt to move the rest of the files to the recycle_bin folder so if the program made an error, the downloaded content still might be recoverable
-    try:
-        recycle_bin_dir = os.getenv("RECYCLE_BIN_DIR")
-        shutil.move(fileSystemItem.path, recycle_bin_dir)
-        logging.info(f"Stored '{fileSystemItem.path}' in '{recycle_bin_dir}', in case it is needed. Please remember to delete items from here.")
-    except OSError as exception:
-        ErrorController.reportError("Exception occurred when moving residual files to the recycle bin dir", exception=exception, sendEmail=True)
-
-
 def getProspectiveFilePath(mediaGrabId, fileSystemItem, mode, extension):
-    
+    """
+    getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could
+        be the directory that the target file is in
+
+    :testedWith: testCompletedDownloadsController:test_getTargetFile
+
+    :param fileSystemItem: the file system item, it could be a directory or a file
+    :return: the file system item if it is a file or if it is a directory then the largest file in that directory
+    """
     # extract required data
     targetDir = os.getenv(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
     showName = extractShowName(mediaGrabId).capitalize() # name of the tv show
@@ -254,7 +252,7 @@ def auditFileSystemItemForEpisode(fileSystemItem, mode):
 
     # if fileSystemItem is a directory, then clean up the directory and the rest of the contents
     if targetFile != fileSystemItem: 
-        recycleDir(fileSystemItem)
+        FolderInterface.recycleOrDeleteDir(fileSystemItem.path)
     
     # handle deletion of the container directory created by qbittorrent
     containerDir = os.path.dirname(fileSystemItem.path)
@@ -263,6 +261,10 @@ def auditFileSystemItemForEpisode(fileSystemItem, mode):
 
 def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
     
+    # auditing is not necessary if the optional env "TV_TARGET_DIR" is not provided
+    if "TV_TARGET_DIR" in os.environ:
+        return
+
     logging.info("File auditing started.")
     dumpCompleteDir = os.getenv("DUMP_COMPLETE_DIR")
     fileSystemItemsFromDirectory = FolderInterface.getDirContents(dumpCompleteDir)
