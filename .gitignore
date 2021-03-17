@@ -1,5 +1,5 @@
 # python build files
-venv
+venv*
 *.pyc
 .env
 logs/*
