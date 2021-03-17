@@ -24,13 +24,13 @@ def extractShowName(mediaGrabId):
 def extractSeasonNumber(fileName):
     try:
         regexRaw = r"--s(\d+)"        
-        matches = re.search(regexRaw, fileName, re.IGNORECASE | re.MULTILINE)        
-        seasonNumber = int(matches.groups()[0])
-        
-        if seasonNumber:
-            return seasonNumber
-        else:
-            return None
+        matches = re.search(regexRaw, fileName, re.IGNORECASE | re.MULTILINE)
+        if matches and matches.groups():
+            seasonNumber = int(matches.groups()[0])
+
+            if seasonNumber:
+                return seasonNumber
+        return None
     except Exception as exception:
         ErrorController.reportError("Exception occurred when extracting season number with regex", exception=exception, sendEmail=True)
         return None

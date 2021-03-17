@@ -22,7 +22,10 @@ class QBittorrentInterface():
 
 
     def __init__(self, dumpCompleteDir=None):
-        self.qb = Client(os.getenv('QBT_URL'), verify=False)        
+        qbtUrl = os.getenv('QBT_URL')
+
+        if qbtUrl:
+            self.qb = Client(os.getenv('QBT_URL'), verify=False)        
         self.dumpCompleteDir = dumpCompleteDir if dumpCompleteDir else os.getenv("DUMP_COMPLETE_DIR")
 
 
