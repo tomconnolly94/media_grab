@@ -9,6 +9,7 @@ from mock import MagicMock
 # internal dependencies
 from controllers import CompletedDownloadsController
 from dataTypes.ProgramMode import PROGRAM_MODE 
+from dataTypes.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
 
 # fake directories for use across multiple tests
 fakeTargetTvDir = "test/dummy_directories/tv"
@@ -312,6 +313,114 @@ class TestCompletedDownloadsController(unittest.TestCase):
         loggingInfoMock.assert_not_called()
         reportErrorMock.assert_called_with(f"The fileSystemItem: {fakeFileSystemItem.name} is a directory but a targetFile could not be extracted. Skipping...")
         self.assertEqual(None, actualTargetFile)
+
+
+    @mock.patch("controllers.CompletedDownloadsController.ensureDirStructureExists")
+    @mock.patch("controllers.CompletedDownloadsController.extractEpisodeNumber")
+    @mock.patch("controllers.CompletedDownloadsController.extractSeasonNumber")
+    @mock.patch("controllers.CompletedDownloadsController.extractShowName")
+    @mock.patch("os.getenv")
+    def test_getProspectiveFilepPath(self, osGetentMock, extractShowNameMock, extractSeasonNumberMock, extractEpisodeNumberMock, ensureDirStructureExistsMock):
+
+        # config fake data
+        fakeTargetTvDir = "fakeTargetTvDir"
+        fakeShowName = "Fakeshowname"
+        fakeSeasonNumber = 2
+        fakeEpisodeNumber = 2
+        fakeMediaGrabId = f"{fakeShowName}--s{fakeSeasonNumber}e{fakeEpisodeNumber}"
+        mode = PROGRAM_MODE.TV_EPISODES
+        fakeExtension = ".mp4"
+        fakeSeasonDir = f"Season {fakeSeasonNumber}"
+
+        # expected values
+        expectedProspectiveFilePath = os.path.join(fakeTargetTvDir, fakeShowName, fakeSeasonDir, f"{fakeShowName} - S0{fakeSeasonNumber}E0{fakeEpisodeNumber}{fakeExtension}")
+        expectedTvShowDir = os.path.join(fakeTargetTvDir, fakeShowName)
+        expectedSeasonDir = os.path.join(expectedTvShowDir, fakeSeasonDir)
+
+        # config mocks
+        osGetentMock.return_value = fakeTargetTvDir
+        extractShowNameMock.return_value = fakeShowName
+        extractSeasonNumberMock.return_value = fakeSeasonNumber
+        extractEpisodeNumberMock.return_value = fakeEpisodeNumber
+
+        # run testable function
+        actualProspectiveFilePath = CompletedDownloadsController.getProspectiveFilePath(fakeMediaGrabId, mode, fakeExtension)
+
+        # asserts
+        self.assertEqual(expectedProspectiveFilePath, actualProspectiveFilePath)
+        osGetentMock.assert_called_with(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
+        extractShowNameMock.assert_called_with(fakeMediaGrabId)
+        extractSeasonNumberMock.assert_called_with(fakeMediaGrabId)
+        extractEpisodeNumberMock.assert_called_with(fakeMediaGrabId)
+        ensureDirStructureExistsMock.assert_called_with(expectedTvShowDir, expectedSeasonDir)
+
+    @mock.patch("logging.info")
+    @mock.patch("os.scandir")
+    def test_unWrapQBittorentWrapperDir(self, osScandirMock, loggingInfoMock):
+
+        # config fake values
+        fakeFileSystemItem = FakeFileSystemItem("fakeDirPath", "fakeDirName")
+        fakeFileSystemSubItems = [
+            FakeFileSystemItem("fakeSubDir1Path", "fakeSubDir1Name")
+        ]
+
+        # config mocks
+        osScandirMock.return_value = fakeFileSystemSubItems
+
+        # call testable function - run 1
+        actualSubItem = CompletedDownloadsController.unWrapQBittorentWrapperDir(fakeFileSystemItem)
+
+        # asserts
+        self.assertEqual(fakeFileSystemSubItems[0], actualSubItem)
+
+        # reconfig mocks
+        osScandirMock.return_value = []
+
+        # call testable function - run 1
+        actualSubItem = CompletedDownloadsController.unWrapQBittorentWrapperDir(
+            fakeFileSystemItem)
+
+        # asserts
+        loggingInfoMock.assert_called_with(
+            f"Tried to browse past the directory created by qbittorrent ({fakeFileSystemItem.path}) but nothing was found inside.")
+
+    @mock.patch("controllers.CompletedDownloadsController.getProspectiveFilePath")
+    @mock.patch("controllers.CompletedDownloadsController.extractExtension")
+    @mock.patch("controllers.CompletedDownloadsController.getTargetFile")
+    @mock.patch("logging.info")
+    @mock.patch("controllers.CompletedDownloadsController.requestTorrentPause")
+    @mock.patch("controllers.CompletedDownloadsController.unWrapQBittorrentWrapperDir")
+    def test_auditFileSystemItemForEpisode(self, unWrapQBittorrentWrapperDirMock, requestTorrentPauseMock, loggingInfoMock, getTargetFileMock, extractExtensionMock, getProspectiveFilePathMock):
+
+        # config fake values
+        fakeFileSystemItemWrapper = FakeFileSystemItem("fakeWrapperDir1Name", "fakeWrapperPath1Name")
+        fakeFileSystemItem = FakeFileSystemItem("fakeDir1Name", "fakePath1Name")
+        mode = PROGRAM_MODE.TV_EPISODES
+        fakeTargetFile = FakeFileSystemItem(
+            "fakeTargetFileDir1Name", "fakeTargetFilePath1Name")
+        fakeExtension = ".mp4"
+        fakeProspectiveFile = "fakeProspectiveFile"
+
+
+        # config mocks
+        unWrapQBittorrentWrapperDirMock.return_value = fakeFileSystemItem
+        getTargetFileMock.return_value = fakeTargetFile
+        extractExtensionMock.return_value = fakeExtension
+        getProspectiveFilePathMock.return_value = fakeProspectiveFile
+
+        # run testable function - run 1: successful run
+        CompletedDownloadsController.auditFileSystemItemForEpisode(
+            fakeFileSystemItemWrapper, mode)
+
+        # asserts
+        unWrapQBittorrentWrapperDirMock.assert_called_with(fakeFileSystemItemWrapper)
+        requestTorrentPauseMock.assert_called_with(fakeFileSystemItem.name)
+        loggingInfoMock.assert_called_with(
+            f"{fileSystemItem.name} has finished downloading and will be moved.")
+        getTargetFileMock.assert_called_with(fakeFileSystemItem)
+        extractExtensionMock.assert_called_with(fakeTargetFile.name)
+        getProspectiveFilePathMock.assert_called_with(
+            fakeFileSystemItemWrapper.name, mode, fakeExtension)
 
 
     @mock.patch("interfaces.QBittorrentInterface.getInstance")

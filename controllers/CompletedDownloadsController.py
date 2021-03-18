@@ -162,8 +162,7 @@ def ensureDirStructureExists(tvShowDirPath, seasonDirPath):
 
 def getTargetFile(fileSystemItem):
     """
-    getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could
-        be the directory that the target file is in
+    getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could be the directory that the target file is in
 
     :testedWith: testCompletedDownloadsController:test_getTargetFile
 
@@ -182,17 +181,17 @@ def getTargetFile(fileSystemItem):
     return fileSystemItem
 
 
-def getProspectiveFilePath(mediaGrabId, fileSystemItem, mode, extension):
+def getProspectiveFilePath(mediaGrabId, mode, extension):
     """
-    getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could
-        be the directory that the target file is in
+    getProspectiveFilePath create the prospective file path by extracting the necessary info like the tv show name and season/episode numbers
 
-    :testedWith: testCompletedDownloadsController:test_getTargetFile
+    :testedWith: testCompletedDownloadsController:test_getProspectiveFilepPath
 
-    :param fileSystemItem: the file system item, it could be a directory or a file
-    :return: the file system item if it is a file or if it is a directory then the largest file in that directory
+    :param mediaGrabId: the mediaGrabId for the downloaded item
+    :param mode: the mode of the program run
+    :param extension: the extension of the downloaded file
+    :return: the path of the file after it has been moved to its prospective location
     """
-    # extract required data
     targetDir = os.getenv(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
     showName = extractShowName(mediaGrabId).capitalize() # name of the tv show
     tvShowDir = os.path.join(targetDir, showName) # target path of the tv show directory
@@ -204,7 +203,16 @@ def getProspectiveFilePath(mediaGrabId, fileSystemItem, mode, extension):
     prospectiveFile = os.path.join(seasonDir, f"{showName} - S0{seasonNumber}E0{episodeNumber}{extension}")
     return prospectiveFile
 
+
 def unWrapQBittorentWrapperDir(fileSystemItem):
+    """
+    unWrapQBittorentWrapperDir browses past the identifiable directory provided by qbittorrent to access the downloaded item  
+
+    :testedWith: testCompletedDownloadsController:test_unWrapQBittorentWrapperDir
+
+    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the mediaGrabId
+    :return: the file system item, could be a file or directory which is the only contents of the input dir
+    """
     fileSystemSubItems = list(os.scandir(fileSystemItem.path))
 
     # Assert that there is only one item inside the qBittorrent wrapper dir
@@ -215,6 +223,15 @@ def unWrapQBittorentWrapperDir(fileSystemItem):
     return fileSystemSubItems[0]
 
 def auditFileSystemItemForEpisode(fileSystemItem, mode):
+    """
+    auditFileSystemItemForEpisode collates all the operations necessary to deal with a finished 
+        download, move it to an organised file system location, and notifies the user
+
+    :testedWith: testCompletedDownloadsController:test_auditFileSystemItemForEpisode
+
+    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the mediaGrabId
+    :param mode: the mode of the program run
+    """
 
     # capture the parent directory as the item's mediaGrabId
     mediaGrabId = fileSystemItem.name
@@ -235,7 +252,7 @@ def auditFileSystemItemForEpisode(fileSystemItem, mode):
     extension = extractExtension(targetFile.name)
     
     # generate the prosepctive file path, ensuring all parent directories exist
-    prospectiveFile = getProspectiveFilePath(mediaGrabId, fileSystemItem, mode, extension)
+    prospectiveFile = getProspectiveFilePath(mediaGrabId, mode, extension)
 
     # check if the prospective target file already exists
     if FolderInterface.fileExists(prospectiveFile):
