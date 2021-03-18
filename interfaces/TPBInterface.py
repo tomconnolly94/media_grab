@@ -66,5 +66,6 @@ def queryAPI(queryTerm):
         return torrentRecords
 
     except (JSONDecodeError, ChunkedEncodingError) as exception:
-        ErrorController.reportError("Problem with TPB API has occurred.", exception, True)
+        responsePrintout = response.content if response.content else response
+        ErrorController.reportError(f"Problem with TPB API has occurred. Recevied: {response.content}", exception, True)
         return []
