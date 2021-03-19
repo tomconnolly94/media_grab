@@ -204,11 +204,11 @@ def getProspectiveFilePath(mediaGrabId, mode, extension):
     return prospectiveFile
 
 
-def unWrapQBittorentWrapperDir(fileSystemItem):
+def unWrapQBittorrentWrapperDir(fileSystemItem):
     """
-    unWrapQBittorentWrapperDir browses past the identifiable directory provided by qbittorrent to access the downloaded item  
+    unWrapQBittorrentWrapperDir browses past the identifiable directory provided by qbittorrent to access the downloaded item  
 
-    :testedWith: testCompletedDownloadsController:test_unWrapQBittorentWrapperDir
+    :testedWith: testCompletedDownloadsController:test_unWrapQBittorrentWrapperDir
 
     :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the mediaGrabId
     :return: the file system item, could be a file or directory which is the only contents of the input dir
@@ -235,7 +235,8 @@ def auditFileSystemItemForEpisode(fileSystemItem, mode):
 
     # capture the parent directory as the item's mediaGrabId
     mediaGrabId = fileSystemItem.name
-    fileSystemItem = unWrapQBittorentWrapperDir(fileSystemItem)
+    containerDir = fileSystemItem.path
+    fileSystemItem = unWrapQBittorrentWrapperDir(fileSystemItem)
     
     if not fileSystemItem:
         return
@@ -272,7 +273,6 @@ def auditFileSystemItemForEpisode(fileSystemItem, mode):
         FolderInterface.recycleOrDeleteDir(fileSystemItem.path)
     
     # handle deletion of the container directory created by qbittorrent
-    containerDir = os.path.dirname(fileSystemItem.path)
     os.rmdir(containerDir)
 
 

@@ -384,13 +384,18 @@ class TestCompletedDownloadsController(unittest.TestCase):
         loggingInfoMock.assert_called_with(
             f"Tried to browse past the directory created by qbittorrent ({fakeFileSystemItem.path}) but nothing was found inside.")
 
+    @mock.patch("interfaces.FolderInterface.recycleOrDeleteDir")
+    @mock.patch("os.rmdir")
+    @mock.patch("interfaces.DownloadsInProgressFileInterface.notifyDownloadFinished")
+    @mock.patch("os.rename")
+    @mock.patch("interfaces.FolderInterface.fileExists")
     @mock.patch("controllers.CompletedDownloadsController.getProspectiveFilePath")
     @mock.patch("controllers.CompletedDownloadsController.extractExtension")
     @mock.patch("controllers.CompletedDownloadsController.getTargetFile")
     @mock.patch("logging.info")
     @mock.patch("controllers.CompletedDownloadsController.requestTorrentPause")
     @mock.patch("controllers.CompletedDownloadsController.unWrapQBittorrentWrapperDir")
-    def test_auditFileSystemItemForEpisode(self, unWrapQBittorrentWrapperDirMock, requestTorrentPauseMock, loggingInfoMock, getTargetFileMock, extractExtensionMock, getProspectiveFilePathMock):
+    def test_auditFileSystemItemForEpisode(self, unWrapQBittorrentWrapperDirMock, requestTorrentPauseMock, loggingInfoMock, getTargetFileMock, extractExtensionMock, getProspectiveFilePathMock, fileExistsMock, osRenameMock, notifyDownloadFinishedMock, osRmdirMock, recycleOrDeleteDirMock):
 
         # config fake values
         fakeFileSystemItemWrapper = FakeFileSystemItem("fakeWrapperDir1Name", "fakeWrapperPath1Name")
@@ -401,12 +406,12 @@ class TestCompletedDownloadsController(unittest.TestCase):
         fakeExtension = ".mp4"
         fakeProspectiveFile = "fakeProspectiveFile"
 
-
         # config mocks
         unWrapQBittorrentWrapperDirMock.return_value = fakeFileSystemItem
         getTargetFileMock.return_value = fakeTargetFile
         extractExtensionMock.return_value = fakeExtension
         getProspectiveFilePathMock.return_value = fakeProspectiveFile
+        fileExistsMock.return_value = False
 
         # run testable function - run 1: successful run
         CompletedDownloadsController.auditFileSystemItemForEpisode(
@@ -415,12 +420,22 @@ class TestCompletedDownloadsController(unittest.TestCase):
         # asserts
         unWrapQBittorrentWrapperDirMock.assert_called_with(fakeFileSystemItemWrapper)
         requestTorrentPauseMock.assert_called_with(fakeFileSystemItem.name)
-        loggingInfoMock.assert_called_with(
-            f"{fileSystemItem.name} has finished downloading and will be moved.")
+        loggingCalls = [
+            call(
+                f"{fakeFileSystemItem.name} has finished downloading and will be moved."),
+            call(f"Moved '{fakeTargetFile.path}' to '{fakeProspectiveFile}'")
+        ]
+        loggingInfoMock.assert_has_calls(loggingCalls)
         getTargetFileMock.assert_called_with(fakeFileSystemItem)
         extractExtensionMock.assert_called_with(fakeTargetFile.name)
         getProspectiveFilePathMock.assert_called_with(
             fakeFileSystemItemWrapper.name, mode, fakeExtension)
+        fileExistsMock.assert_called_with(fakeProspectiveFile)
+        osRenameMock.assert_called_with(fakeTargetFile.path, fakeProspectiveFile)
+        notifyDownloadFinishedMock.assert_called_with(
+            fakeFileSystemItemWrapper.name, PROGRAM_MODE.TV_EPISODES)
+        recycleOrDeleteDirMock.assert_called_with(fakeFileSystemItem.path)
+        osRmdirMock.assert_called_with(fakeFileSystemItemWrapper.path)
 
 
     @mock.patch("interfaces.QBittorrentInterface.getInstance")
