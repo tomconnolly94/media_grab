@@ -356,7 +356,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
 
     @mock.patch("logging.info")
     @mock.patch("os.scandir")
-    def test_unWrapQBittorentWrapperDir(self, osScandirMock, loggingInfoMock):
+    def test_unWrapQBittorrentWrapperDir(self, osScandirMock, loggingInfoMock):
 
         # config fake values
         fakeFileSystemItem = FakeFileSystemItem("fakeDirPath", "fakeDirName")
@@ -368,7 +368,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         osScandirMock.return_value = fakeFileSystemSubItems
 
         # call testable function - run 1
-        actualSubItem = CompletedDownloadsController.unWrapQBittorentWrapperDir(fakeFileSystemItem)
+        actualSubItem = CompletedDownloadsController.unWrapQBittorrentWrapperDir(fakeFileSystemItem)
 
         # asserts
         self.assertEqual(fakeFileSystemSubItems[0], actualSubItem)
@@ -377,7 +377,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         osScandirMock.return_value = []
 
         # call testable function - run 1
-        actualSubItem = CompletedDownloadsController.unWrapQBittorentWrapperDir(
+        actualSubItem = CompletedDownloadsController.unWrapQBittorrentWrapperDir(
             fakeFileSystemItem)
 
         # asserts
