@@ -437,6 +437,37 @@ class TestCompletedDownloadsController(unittest.TestCase):
         recycleOrDeleteDirMock.assert_called_with(fakeFileSystemItem.path)
         osRmdirMock.assert_called_with(fakeFileSystemItemWrapper.path)
 
+    @mock.patch("controllers.CompletedDownloadsController.auditFileSystemItemForEpisode")
+    @mock.patch("interfaces.FolderInterface.getDirContents")
+    @mock.patch("logging.info")
+    def test_auditFileSystemItemsForEpisodes(self, loggingInfoMock, getDirContentsMock, auditFileSystemItemForEpisodeMock):
+
+        # config fake data
+        fakeDirName = "fakeDirName1"
+        fakeFileSystemItems = [
+            FakeFileSystemItem(fakeDirName, "fakeName1")
+        ]
+        mode = PROGRAM_MODE.TV_EPISODES
+        fakeDownloadingItems = [fakeDirName, "fakeDirName2"]
+
+        # config mocks
+        getDirContentsMock.return_value = fakeFileSystemItems
+
+        CompletedDownloadsController.auditFileSystemItemsForEpisodes(
+            mode, fakeDownloadingItems)
+
+        # asserts
+        loggingInfoCalls = [
+            call("File auditing started."),
+            call(f"Items in dump_complete directory: {[fakeDirName]}")
+        ]
+        loggingInfoMock.assert_has_calls(loggingInfoCalls)
+        getDirContentsMock.assert_called_with(fakeDumpCompleteDir)
+        auditFileSystemItemForEpisodeMock.assert_called_with(
+            fakeFileSystemItems[0], mode)
+
+
+
     @mock.patch("interfaces.QBittorrentInterface.getInstance")
     @mock.patch("logging.info")
     @mock.patch("interfaces.DownloadsInProgressFileInterface.notifyDownloadFinished")

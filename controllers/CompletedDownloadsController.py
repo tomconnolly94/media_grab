@@ -232,7 +232,6 @@ def auditFileSystemItemForEpisode(fileSystemItem, mode):
     :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the mediaGrabId
     :param mode: the mode of the program run
     """
-
     # capture the parent directory as the item's mediaGrabId
     mediaGrabId = fileSystemItem.name
     containerDir = fileSystemItem.path
@@ -277,7 +276,15 @@ def auditFileSystemItemForEpisode(fileSystemItem, mode):
 
 
 def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
-    
+    """
+    auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete
+        directory
+
+    :testedWith: testCompletedDownloadsController:test_auditFileSystemItemsForEpisodes
+
+    :param mode: the mode of the program run
+    :param filteredDownloadingItems: items which are still downloaded and were started with media_grab (extracted from the DownloadsInProgress file)
+    """
     # auditing is not necessary if the optional env "TV_TARGET_DIR" is not provided
     if "TV_TARGET_DIR" not in os.environ:
         return
