@@ -279,7 +279,7 @@ def auditFileSystemItemForEpisode(fileSystemItem, mode):
 def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
     
     # auditing is not necessary if the optional env "TV_TARGET_DIR" is not provided
-    if "TV_TARGET_DIR" in os.environ:
+    if "TV_TARGET_DIR" not in os.environ:
         return
 
     logging.info("File auditing started.")
