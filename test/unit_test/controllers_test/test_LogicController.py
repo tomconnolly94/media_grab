@@ -3,6 +3,7 @@ import unittest
 import mock
 from unittest.mock import call
 from mock import MagicMock
+import copy
 
 # internal dependencies 
 from controllers import LogicController
@@ -33,13 +34,7 @@ class TestLogicController(unittest.TestCase):
     @mock.patch("logging.info")
     @mock.patch("interfaces.TPBInterface.getTorrentRecords")
     @mock.patch("controllers.LogicController.findMediaInfoRecord")
-    def test_getMediaInfoRecordsWithTorrents(self, findMediaInfoRecordMock, getTorrentRecordsMock, loggingInfoMock, findNewDownloadMock):
-        
-        fakeMediaSearchQueries = {
-            "fakeMediaInfoName1": ["fakeMediaInfoName1Query1", "fakeMediaInfoName1Query2", "fakeMediaInfoName1Query3"],
-            "fakeMediaInfoName2": ["fakeMediaInfoName2Query1", "fakeMediaInfoName2Query2", "fakeMediaInfoName2Query3"],
-            "fakeMediaInfoName3": ["fakeMediaInfoName3Query1", "fakeMediaInfoName3Query2", "fakeMediaInfoName3Query3"]
-        }              
+    def test_getMediaInfoRecordsWithTorrents(self, findMediaInfoRecordMock, getTorrentRecordsMock, loggingInfoMock, findNewDownloadMock):      
 
         fakeTorrentRecords = [
             TorrentRecord("fakeTorrentTitle1", "id1", "fakeInfoHash1", "4", "3"),
@@ -66,7 +61,8 @@ class TestLogicController(unittest.TestCase):
                 fakeMediaInfoRecord.setTorrentRecord(fakeTorrentRecords[index])
                 expectedFakeMediaInfoRecords.append(fakeMediaInfoRecord)
 
-        actualOutputMediaInfoRecords = LogicController.getMediaInfoRecordsWithTorrents(fakeMediaSearchQueries, fakeMediaInfoRecords)
+        # run testable function
+        actualOutputMediaInfoRecords = LogicController.getMediaInfoRecordsWithTorrents(fakeMediaInfoRecords)
 
         # asserts
         self.assertEqual(expectedFakeMediaInfoRecords, actualOutputMediaInfoRecords)
@@ -78,9 +74,9 @@ class TestLogicController(unittest.TestCase):
         findMediaInfoRecordMock.has_calls(findMediaInfoRecordCalls)
 
         getTorrentRecordsCalls = [
-            call(fakeMediaSearchQueries["fakeMediaInfoName1"], fakeMediaInfoRecords[0]),
-            call(fakeMediaSearchQueries["fakeMediaInfoName2"], fakeMediaInfoRecords[1]),
-            call(fakeMediaSearchQueries["fakeMediaInfoName3"], fakeMediaInfoRecords[2])
+            call(fakeMediaInfoRecords[0]),
+            call(fakeMediaInfoRecords[1]),
+            call(fakeMediaInfoRecords[2])
         ]
         getTorrentRecordsMock.has_calls(getTorrentRecordsCalls)
 
@@ -103,62 +99,75 @@ class TestLogicController(unittest.TestCase):
     @mock.patch("controllers.LogicController.getMediaInfoRecordsWithTorrents")
     @mock.patch("controllers.CompletedDownloadsController.auditDumpCompleteDir")
     @mock.patch("interfaces.DownloadsInProgressFileInterface.getDownloadingItems")
-    @mock.patch("controllers.QueryGenerationController.generateTVEpisodeQueries")
+    @mock.patch("controllers.QueryGenerationController.addTVEpisodeQueriesToMediaInfoRecords")
     @mock.patch("interfaces.MediaIndexFileInterface.loadMediaFile")
-    def test_runProgramLogic(self, loadMediaFileMock, generateTVEpisodeQueriesMock, getDownloadingItemsMock, auditDumpCompleteDirMock, getMediaInfoRecordsWithTorrentsMock, qbittorrentInterfaceGetInstanceMock, onSuccessfulTorrentAddMock):
+    def test_runProgramLogic(self, loadMediaFileMock, addTVEpisodeQueriesToMediaInfoRecordsMock, getDownloadingItemsMock, auditDumpCompleteDirMock, getMediaInfoRecordsWithTorrentsMock, qbittorrentInterfaceGetInstanceMock, onSuccessfulTorrentAddMock):
         
-        fakeMediaSearchQueries = {
-            "fakeMediaInfoName1": ["fakeMediaInfoName1Query1", "fakeMediaInfoName1Query2", "fakeMediaInfoName1Query3"],
-            "fakeMediaInfoName2": ["fakeMediaInfoName2Query1", "fakeMediaInfoName2Query2", "fakeMediaInfoName2Query3"],
-            "fakeMediaInfoName3": ["fakeMediaInfoName3Query1", "fakeMediaInfoName3Query2", "fakeMediaInfoName3Query3"]
-        }
+        fakeMediaInfoRecord1 = MediaInfoRecord("fakeMediaInfoName1", 1, 1)
+        fakeMediaInfoRecord2 = MediaInfoRecord("fakeMediaInfoName2", 1, 1)
+        fakeMediaInfoRecord3 = MediaInfoRecord("fakeMediaInfoName3", 1, 1)
         
         # config fake inputs
-        fakeMediaInfoRecords = [
-            MediaInfoRecord("fakeMediaInfoName1", 1, 1),
-            MediaInfoRecord("fakeMediaInfoName2", 1, 1),
-            MediaInfoRecord("fakeMediaInfoName3", 1, 1)
-        ]
-        
-        # config fake inputs
-        fakeMediaInfoRecordsWithTorrents = [
-            MediaInfoRecord("fakeMediaInfoName1", 1, 1, TorrentRecord("fakeTorrent1", "id1", "fakeInfoHash", "5")),
-            MediaInfoRecord("fakeMediaInfoName2", 1, 1, TorrentRecord("fakeTorrent2", "id2", "fakeInfoHash", "5")),
-            MediaInfoRecord("fakeMediaInfoName3", 1, 1, TorrentRecord("fakeTorrent3", "id3", "fakeInfoHash", "5"))
+        fakeMediaInfoRecordsOriginalFull = [
+            fakeMediaInfoRecord1,
+            fakeMediaInfoRecord2,
+            fakeMediaInfoRecord3
         ]
 
+        # mocked from getMediaInfoRecordsWithTorrents (first run)
+        fakeMediaInfoRecord1Copy = copy.deepcopy(fakeMediaInfoRecord1)
+        fakeMediaInfoRecord1Copy.setTorrentRecord(TorrentRecord(
+            f"{fakeMediaInfoRecord1.getShowName()}-torrentName", "fakeTorrentId", "fakeInfoHash", 10))
+        fakeMediaInfoRecord2Copy = copy.deepcopy(fakeMediaInfoRecord2)
+        fakeMediaInfoRecord2Copy.setTorrentRecord(TorrentRecord(
+            f"{fakeMediaInfoRecord2.getShowName()}-torrentName", "fakeTorrentId", "fakeInfoHash", 10))
+        fakeMediaInfoRecordsWithTorrentsFiltered = [
+            fakeMediaInfoRecord1Copy, fakeMediaInfoRecord2Copy]
+
         # config fake data
-        fakeMediaSearchQueries = ["fakeMediaSearchQuery1", "fakeMediaSearchQuery2", "fakeMediaSearchQuery3"]
         activeMode = PROGRAM_MODE.TV_EPISODES
         fakeDownloadingItems =  ["downloadingItem1", "downloadingItem2"]
         
         # config mocks
-        generateTVEpisodeQueriesMock.return_value = fakeMediaSearchQueries
         getDownloadingItemsMock.return_value = fakeDownloadingItems
-        getMediaInfoRecordsWithTorrentsMock.side_effect = [fakeMediaInfoRecordsWithTorrents, []]
-        loadMediaFileMock.return_value = fakeMediaInfoRecords
+        getMediaInfoRecordsWithTorrentsMock.side_effect = [
+            fakeMediaInfoRecordsWithTorrentsFiltered,
+            []
+        ]
+        loadMediaFileMock.return_value = fakeMediaInfoRecordsOriginalFull
         # create mock for mailInterface instance
         qbittorrentInterfaceInstanceMock = MagicMock()
         # assign mocked instance to return_value for mocked getInstance()
         qbittorrentInterfaceGetInstanceMock.return_value = qbittorrentInterfaceInstanceMock        
-        qbittorrentInterfaceInstanceMock.initTorrentDownload.side_effect = [True, False, True]
+        qbittorrentInterfaceInstanceMock.initTorrentDownload.side_effect = [True, False]
         
-        # call testable function
+        # run testable function
         LogicController.runProgramLogic(activeMode)
         
         # mock asserts
-        generateTVEpisodeQueriesMock.assert_called_with(fakeMediaInfoRecords)
+
+        addTVEpisodeQueriesToMediaInfoRecordsMockCalls = [
+            call(fakeMediaInfoRecordsOriginalFull),
+            call(fakeMediaInfoRecordsOriginalFull),
+        ]
+        addTVEpisodeQueriesToMediaInfoRecordsMock.assert_has_calls(addTVEpisodeQueriesToMediaInfoRecordsMockCalls)
         getDownloadingItemsMock.assert_called_with(activeMode)
         auditDumpCompleteDirMock.assert_called_with(activeMode, fakeDownloadingItems)
-        getMediaInfoRecordsWithTorrentsMock.assert_called_with(fakeMediaSearchQueries, fakeMediaInfoRecords)
-        
-        calls = [ call(fakeMediaInfoRecordsWithTorrents[0]), call(fakeMediaInfoRecordsWithTorrents[1]), call(fakeMediaInfoRecordsWithTorrents[2]) ]
-        qbittorrentInterfaceInstanceMock.initTorrentDownload.assert_has_calls(calls)
 
-        calls = [ 
-            call(fakeMediaInfoRecordsWithTorrents[0], activeMode), 
-            call(fakeMediaInfoRecordsWithTorrents[2], activeMode) ]
-        onSuccessfulTorrentAddMock.assert_has_calls(calls)
+        getMediaInfoRecordsWithTorrentsMockCalls = [
+            call(fakeMediaInfoRecordsOriginalFull),
+            call([ fakeMediaInfoRecord1, fakeMediaInfoRecord1 ])
+        ]
+        
+        initTorrentDownloadCalls = [
+            call(fakeMediaInfoRecordsWithTorrentsFiltered[0]),
+            call(fakeMediaInfoRecordsWithTorrentsFiltered[1])
+        ]
+        qbittorrentInterfaceInstanceMock.initTorrentDownload.assert_has_calls(
+            initTorrentDownloadCalls)
+
+        onSuccessfulTorrentAddMock.assert_called_with(
+            fakeMediaInfoRecordsWithTorrentsFiltered[0], activeMode)
 
 
 if __name__ == '__main__':
