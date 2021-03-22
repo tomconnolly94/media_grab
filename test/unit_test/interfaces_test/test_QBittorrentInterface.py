@@ -34,7 +34,6 @@ class TestQBittorrentInterface(unittest.TestCase):
         loggingInfoMock.assert_called_with(f"Torrent added: {fakeTorrent.getName()}")
 
 
-
 if __name__ == '__main__':
     unittest.main()
 

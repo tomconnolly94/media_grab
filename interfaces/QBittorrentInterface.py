@@ -25,7 +25,8 @@ class QBittorrentInterface():
         qbtUrl = os.getenv('QBT_URL')
 
         if qbtUrl:
-            self.qb = Client(os.getenv('QBT_URL'), verify=False)        
+            self.qb = Client(qbtUrl, verify=False)
+            
         self.dumpCompleteDir = dumpCompleteDir if dumpCompleteDir else os.getenv("DUMP_COMPLETE_DIR")
 
 

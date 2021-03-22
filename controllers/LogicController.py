@@ -15,15 +15,12 @@ def findMediaInfoRecord(mediaInfoRecords, mediaInfoName):
 			return record
 
 
-def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
+def getMediaInfoRecordsWithTorrents(mediaInfoRecords):
     mediaInfoRecordsWithTorrents = []
 
-    for mediaInfoName, queries in mediaSearchQueries.items():
-        
-        # filter torrentRecords by applying regex to torrent titles
-        mediaInfoRecord = findMediaInfoRecord(mediaInfoRecords, mediaInfoName)
-        
-        torrentRecords = TPBInterface.getTorrentRecords(queries, mediaInfoRecord)
+    for mediaInfoRecord in mediaInfoRecords:
+
+        torrentRecords = TPBInterface.getTorrentRecords(mediaInfoRecord)
         if not torrentRecords:
             continue
 
@@ -57,27 +54,35 @@ def getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords):
 
 def runProgramLogic(mode):
 
+    #analyse folder to look for completed downloads
+    CompletedDownloadsController.auditDumpCompleteDir(
+    	mode, DownloadsInProgressFileInterface.getDownloadingItems(mode))
+
+    mutatingFilter = []
+
     while True:
         # load information about the requested media
         mediaInfoRecords = MediaIndexFileInterface.loadMediaFile()
 
         # ascertain mode of program
-        if mode == PROGRAM_MODE.TV_SEASONS:
-            # mediaSearchQueries = QueryGenerationController.generateTVSeasonQueries(mediaInfoRecords)
-            raise ValueError(f"mode: {mode} has no handler statement") 
-        elif mode == PROGRAM_MODE.TV_EPISODES:
-            mediaSearchQueries = QueryGenerationController.generateTVEpisodeQueries(mediaInfoRecords)
+        if mode == PROGRAM_MODE.TV_EPISODES:
+	        # add torrent queries to mediaInfoRecords
+            QueryGenerationController.addTVEpisodeQueriesToMediaInfoRecords(mediaInfoRecords)
         else:
             raise ValueError(f"mode: {mode} has no handler statement") 
 
-        #analyse folder to look for completed downloads
-        CompletedDownloadsController.auditDumpCompleteDir(mode, DownloadsInProgressFileInterface.getDownloadingItems(mode))
+        if len(mutatingFilter) != 0:
+            # apply filter, select record if filter is empty (first run) or if the mediaInfoRecord produced new torrent downloads on the previous run
+            mediaInfoRecords = [ mediaInfoRecord for mediaInfoRecord in mediaInfoRecords if mediaInfoRecord.getShowName() in mutatingFilter ]
         
-        #add torrent magnet links to mediaInfoRecords
-        mediaInfoRecordsWithTorrents = getMediaInfoRecordsWithTorrents(mediaSearchQueries, mediaInfoRecords)
+        # add torrent magnet links to mediaInfoRecords
+        mediaInfoRecordsWithTorrents = getMediaInfoRecordsWithTorrents(mediaInfoRecords)
 
         if not mediaInfoRecordsWithTorrents:
             return
+            
+        # update filter
+        mutatingFilter = [ mediaInfoRecord.getShowName() for mediaInfoRecord in mediaInfoRecordsWithTorrents ]
 
         qbittorrentInterfaceInstance = QBittorrentInterface.getInstance()
 

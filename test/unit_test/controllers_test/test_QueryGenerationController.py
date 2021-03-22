@@ -45,13 +45,17 @@ class TestQueryGenerationController(unittest.TestCase):
         generateTVEpisodeQueryGroupMock.return_value = fakeQueries
 
         # run testable function
-        actualQueryUrls = QueryGenerationController.generateTVEpisodeQueries(fakeMediaInfoRecords)
+        QueryGenerationController.addTVEpisodeQueriesToMediaInfoRecords(fakeMediaInfoRecords)
 
         # expected values
         expectedQueryUrls = {
             "fakeMediaInfoShowName1": fakeQueries,
             "fakeMediaInfoShowName2": fakeQueries,
             "fakeMediaInfoShowName3": fakeQueries,
+        }
+
+        actualQueryUrls = {
+            fakeMediaInfoRecord.getShowName(): fakeMediaInfoRecord.getMediaSearchQueries() for fakeMediaInfoRecord in fakeMediaInfoRecords
         }
 
         # asserts

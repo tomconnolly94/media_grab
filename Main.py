@@ -51,10 +51,28 @@ def interpretArguments(argv):
 	return mode
 
 
+def assertVitalEnvValuesExist():
+	essentialEnvs = set([
+		"QBT_URL", # necessary to submit torrents
+		"MEDIA_FILE", # necessary to query torrents
+		"DOWNLOADS_IN_PROGRESS_FILE", # necessary to track downloading torrents
+		"ENVIRONMENT", # necessary to determine the mode of the program
+		"DUMP_COMPLETE_DIR", # necessary to determine where to deposit (and find) downloaded items
+		"THE_MOVIE_DATABASE_API_KEY" # necessary to get information about the requested media
+	])
+
+	if essentialEnvs.issubset(os.environ):
+		return True
+	exceptionText = "Some of the required env entries are not present, please review your .env file. Program exited"
+	exception = Exception(exceptionText)
+	ErrorController.reportError(exceptionText, exception=exception, sendEmail=True)
+	raise exception
+	
+
 def main(argv):
 
 	mode = interpretArguments(argv)
-
+	assertVitalEnvValuesExist()
 	environment = os.getenv("ENVIRONMENT")
 	logging.info(f"Media grab app started. Environment={environment}")
 

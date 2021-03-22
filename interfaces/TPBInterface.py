@@ -16,10 +16,10 @@ def sortTorrents(torrents):
     return sorted(torrents, key=lambda torrent: -1 * torrent.getSeeders())
 
 
-def getTorrentRecords(queries, mediaInfoRecord):
+def getTorrentRecords(mediaInfoRecord):
 
     # make query for the mediaInfoRecord, if none are found, try the next query format
-    for queryStr in queries:
+    for queryStr in mediaInfoRecord.getMediaSearchQueries():
         torrentRecords = queryAPI(queryStr)
         
         #logging
