@@ -54,6 +54,10 @@ def getMediaInfoRecordsWithTorrents(mediaInfoRecords):
 
 def runProgramLogic(mode):
 
+    #analyse folder to look for completed downloads
+    CompletedDownloadsController.auditDumpCompleteDir(
+    	mode, DownloadsInProgressFileInterface.getDownloadingItems(mode))
+
     mutatingFilter = []
 
     while True:
@@ -66,9 +70,6 @@ def runProgramLogic(mode):
             QueryGenerationController.addTVEpisodeQueriesToMediaInfoRecords(mediaInfoRecords)
         else:
             raise ValueError(f"mode: {mode} has no handler statement") 
-
-        #analyse folder to look for completed downloads
-        CompletedDownloadsController.auditDumpCompleteDir(mode, DownloadsInProgressFileInterface.getDownloadingItems(mode))
 
         if len(mutatingFilter) != 0:
             # apply filter, select record if filter is empty (first run) or if the mediaInfoRecord produced new torrent downloads on the previous run
