@@ -55,8 +55,7 @@ def getMediaInfoRecordsWithTorrents(mediaInfoRecords):
 def runProgramLogic(mode):
 
     #analyse folder to look for completed downloads
-    CompletedDownloadsController.auditDumpCompleteDir(
-    	mode, DownloadsInProgressFileInterface.getDownloadingItems(mode))
+    CompletedDownloadsController.auditDumpCompleteDir(DownloadsInProgressFileInterface.getDownloadingItems(mode))
 
     mutatingFilter = []
 

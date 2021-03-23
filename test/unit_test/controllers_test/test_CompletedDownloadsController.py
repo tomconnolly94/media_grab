@@ -410,6 +410,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         loggingInfoMock.assert_called_with(
             f"Tried to browse past the directory created by qbittorrent ({fakeFileSystemItem.path}) but nothing was found inside.")
 
+    @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
     @mock.patch("interfaces.FolderInterface.recycleOrDeleteDir")
     @mock.patch("os.rmdir")
     @mock.patch("interfaces.DownloadsInProgressFileInterface.notifyDownloadFinished")
@@ -421,12 +422,11 @@ class TestCompletedDownloadsController(unittest.TestCase):
     @mock.patch("logging.info")
     @mock.patch("controllers.CompletedDownloadsController.requestTorrentPause")
     @mock.patch("controllers.CompletedDownloadsController.unWrapQBittorrentWrapperDir")
-    def test_auditFileSystemItemForEpisode(self, unWrapQBittorrentWrapperDirMock, requestTorrentPauseMock, loggingInfoMock, getTargetFileMock, extractExtensionMock, getProspectiveFilePathMock, fileExistsMock, osRenameMock, notifyDownloadFinishedMock, osRmdirMock, recycleOrDeleteDirMock):
+    def test_auditFileSystemItemForEpisode(self, unWrapQBittorrentWrapperDirMock, requestTorrentPauseMock, loggingInfoMock, getTargetFileMock, extractExtensionMock, getProspectiveFilePathMock, fileExistsMock, osRenameMock, notifyDownloadFinishedMock, osRmdirMock, recycleOrDeleteDirMock, downloadWasInitiatedByMediaGrabMock):
 
         # config fake values
         fakeFileSystemItemWrapper = FakeFileSystemItem("fakeWrapperDir1Name", "fakeWrapperPath1Name")
         fakeFileSystemItem = FakeFileSystemItem("fakeDir1Name", "fakePath1Name")
-        mode = PROGRAM_MODE.TV_EPISODES
         fakeTargetFile = FakeFileSystemItem(
             "fakeTargetFileDir1Name", "fakeTargetFilePath1Name")
         fakeExtension = ".mp4"
@@ -438,10 +438,11 @@ class TestCompletedDownloadsController(unittest.TestCase):
         extractExtensionMock.return_value = fakeExtension
         getProspectiveFilePathMock.return_value = fakeProspectiveFile
         fileExistsMock.return_value = False
+        downloadWasInitiatedByMediaGrabMock.return_value = True
 
         # run testable function - run 1: successful run
         CompletedDownloadsController.auditFileSystemItemForEpisode(
-            fakeFileSystemItemWrapper, mode)
+            fakeFileSystemItemWrapper)
 
         # asserts
         unWrapQBittorrentWrapperDirMock.assert_called_with(fakeFileSystemItemWrapper)
@@ -455,7 +456,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         getTargetFileMock.assert_called_with(fakeFileSystemItem)
         extractExtensionMock.assert_called_with(fakeTargetFile.name)
         getProspectiveFilePathMock.assert_called_with(
-            fakeFileSystemItemWrapper.name, mode, fakeExtension)
+            fakeFileSystemItemWrapper.name, PROGRAM_MODE.TV_EPISODES, fakeExtension)
         fileExistsMock.assert_called_with(fakeProspectiveFile)
         osRenameMock.assert_called_with(fakeTargetFile.path, fakeProspectiveFile)
         notifyDownloadFinishedMock.assert_called_with(
@@ -474,15 +475,13 @@ class TestCompletedDownloadsController(unittest.TestCase):
         fakeFileSystemItems = [
             FakeFileSystemItem(fakeDirName, "fakeName1")
         ]
-        mode = PROGRAM_MODE.TV_EPISODES
         fakeDownloadingItems = [fakeDirName, "fakeDirName2"]
 
         # config mocks
         getDirContentsMock.return_value = fakeFileSystemItems
         downloadWasInitiatedByMediaGrabMock.return_value = True
 
-        CompletedDownloadsController.auditFileSystemItemsForEpisodes(
-            mode, fakeDownloadingItems)
+        CompletedDownloadsController.auditFileSystemItemsForEpisodes(fakeDownloadingItems)
 
         # asserts
         loggingInfoCalls = [
@@ -492,7 +491,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         loggingInfoMock.assert_has_calls(loggingInfoCalls)
         getDirContentsMock.assert_called_with(fakeDumpCompleteDir)
         auditFileSystemItemForEpisodeMock.assert_called_with(
-            fakeFileSystemItems[0], mode)
+            fakeFileSystemItems[0])
 
     @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
     @mock.patch("interfaces.QBittorrentInterface.getInstance")
@@ -567,7 +566,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
             self.assertTrue(len(list(os.scandir(fakeRecycleBinDir))) == 0)
 
             # run auditDumpCompleteDir
-            CompletedDownloadsController.auditDumpCompleteDir(mode, fakeFilteredDownloadingItems["tv-episodes"])
+            CompletedDownloadsController.auditDumpCompleteDir(fakeFilteredDownloadingItems["tv-episodes"])
 
             expectedNumItems = len(downloadingItems) - 1
             # assert that the contents of downloadingItems has been moved from the `dummy_directories/dump_complete` directory to the `dummy_directories/tv` directory

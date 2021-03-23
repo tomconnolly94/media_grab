@@ -152,7 +152,7 @@ class TestLogicController(unittest.TestCase):
         ]
         addTVEpisodeQueriesToMediaInfoRecordsMock.assert_has_calls(addTVEpisodeQueriesToMediaInfoRecordsMockCalls)
         getDownloadingItemsMock.assert_called_with(activeMode)
-        auditDumpCompleteDirMock.assert_called_with(activeMode, fakeDownloadingItems)
+        auditDumpCompleteDirMock.assert_called_with(fakeDownloadingItems)
 
         getMediaInfoRecordsWithTorrentsMockCalls = [
             call(fakeMediaInfoRecordsOriginalFull),
