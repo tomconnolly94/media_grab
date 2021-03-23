@@ -13,6 +13,29 @@ from interfaces import FolderInterface, DownloadsInProgressFileInterface, QBitto
 from controllers import ErrorController
 
 
+def downloadWasInitiatedByMediaGrab(downloadId):
+    """
+    downloadWasInitiatedByMediaGrab checks if a download was initiated by mediaGrab using a regex
+
+    :testedWith: testCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab
+
+    :param mediaGrabId: the mediaGrabId of the download
+    :return: the tv show name or `None` if one cannot be found
+    """
+
+    try:
+        regexRaw = r"\w+--s\de\d"
+        match = re.search(regexRaw, downloadId,
+                            re.IGNORECASE | re.MULTILINE)
+        if match:
+            return True
+        return False
+    except Exception as exception:
+        ErrorController.reportError(
+            "Exception occurred when checking if a download was initiated by mediaGrab using a regex", exception=exception, sendEmail=True)
+        return False
+
+
 def extractShowName(mediaGrabId):
     """
     extractShowName extracts the show name from the mediaGrabId
@@ -294,10 +317,18 @@ def auditFileSystemItemsForEpisodes(mode, filteredDownloadingItems):
     fileSystemItemsFromDirectory = FolderInterface.getDirContents(dumpCompleteDir)
     logging.info(f"Items in dump_complete directory: {[item.name for item in fileSystemItemsFromDirectory] }")
 
+    mediaGrabInitiatedDownloads = []
+    manuallyInitiatedDownloads = []
+
     # deal with directories
     for fileSystemItem in fileSystemItemsFromDirectory:
-        if fileSystemItem.name in filteredDownloadingItems:
-            auditFileSystemItemForEpisode(fileSystemItem, mode)
+        if downloadWasInitiatedByMediaGrab(fileSystemItem):
+            mediaGrabInitiatedDownloads.append(fileSystemItem)
+        else:
+            manuallyInitiatedDownloads.append(fileSystemItem)
+
+    for download in mediaGrabInitiatedDownloads:
+        auditFileSystemItemForEpisode(download, mode)
 
 
 def auditDumpCompleteDir(mode, filteredDownloadingItems):
