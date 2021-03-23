@@ -19,7 +19,7 @@ def downloadWasInitiatedByMediaGrab(downloadId):
 
     :testedWith: testCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab
 
-    :param mediaGrabId: the mediaGrabId of the download
+    :param downloadId: the downloadId of the download
     :return: the tv show name or `None` if one cannot be found
     """
 
@@ -36,33 +36,58 @@ def downloadWasInitiatedByMediaGrab(downloadId):
         return False
 
 
-def extractShowName(mediaGrabId):
+def extractShowName(downloadId):
     """
-    extractShowName extracts the show name from the mediaGrabId
+    extractShowName extracts the show name from the downloadId, using a different method depending on whether the download was initiated by mediaGrab or not
 
     :testedWith: testCompletedDownloadsController:test_extractShowName
 
-    :param mediaGrabId: the mediaGrabId of the download
+    :param downloadId: the downloadId of the download
     :return: the tv show name or `None` if one cannot be found
     """
-    splitId = mediaGrabId.split("--")
-    if splitId and splitId[0]:
-        return splitId[0]
-    return None
+
+    if downloadWasInitiatedByMediaGrab(downloadId):
+        splitId = downloadId.split("--")
+        if splitId and splitId[0]:
+            return splitId[0]
+        return None
+    else:
+        try:
+            # extract show name using regex capturing group
+            showNameMatch = re.match(
+                r"(.+?)(?:[^a-zA-Z]*(?:season|s|episode|e)+.\d+.*)*?\s*$", downloadId, re.IGNORECASE)
+            showName = showNameMatch.groups()[0]
+            showName = re.sub(r"[^\w\s]", " ", showName)  # replace all punctuation
+            showName = showName.strip()  # remove whitespace on left or right
+            showName = " ".join(showName.split())  # remove any double spaces
+            showName = showName.lower()  # convert uppercase letters to lowercase
+            if showName:
+                return showName
+            else:
+                return None
+        except Exception as exception:
+            ErrorController.reportError(
+                "Exception occurred when extracting season number with regex", exception=exception, sendEmail=True)
+            return None
 
 
-def extractSeasonNumber(mediaGrabId):
+def extractSeasonNumber(downloadId):
     """
-    extractSeasonNumber extracts the season number from the mediaGrabId
+    extractSeasonNumber extracts the season number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not
 
     :testedWith: testCompletedDownloadsController:test_extractSeasonNumber
 
-    :param mediaGrabId: the mediaGrabId of the download
+    :param downloadId: the downloadId of the download
     :return: the season number or `None` if one cannot be found
     """
     try:
-        regexRaw = r"--s(\d+)"        
-        matches = re.search(regexRaw, mediaGrabId, re.IGNORECASE | re.MULTILINE)
+        regexRaw = ""
+        if downloadWasInitiatedByMediaGrab(downloadId):
+            regexRaw = r"--s(\d+)"
+        else:
+            regexRaw = r"(?:S|Season)(\d{1,2})"
+
+        matches = re.search(regexRaw, downloadId, re.IGNORECASE | re.MULTILINE)
         if matches and matches.groups() and matches.groups()[0]:
             seasonNumber = int(matches.groups()[0])
             
@@ -74,24 +99,30 @@ def extractSeasonNumber(mediaGrabId):
         return None
 
 
-def extractEpisodeNumber(mediaGrabId):
+def extractEpisodeNumber(downloadId):
     """
-    extractEpisodeNumber extracts the episode number from the mediaGrabId
+    extractEpisodeNumber extracts the episode number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not
 
     :testedWith: testCompletedDownloadsController:test_extractEpisodeNumber
 
-    :param mediaGrabId: the mediaGrabId of the download
+    :param downloadId: the downloadId of the download
     :return: the episode number or `None` if one cannot be found
     """
     try:
-        regexRaw = r"--s\d+e(\d+)"        
-        matches = re.search(regexRaw, mediaGrabId, re.IGNORECASE | re.MULTILINE)        
-        episodeNumber = int(matches.groups()[0])        
-
-        if episodeNumber:
-            return episodeNumber
+        regexRaw = ""
+        if downloadWasInitiatedByMediaGrab(downloadId):
+            regexRaw = r"--s\d+e(\d+)"
         else:
-            return None
+            regexRaw = r"(?:E|Episode)(\d{1,2})"
+
+        matches = re.search(regexRaw, downloadId, re.IGNORECASE | re.MULTILINE)
+
+        if matches and matches.groups() and matches.groups()[0]:
+            episodeNumber = int(matches.groups()[0])        
+
+            if episodeNumber:
+                return episodeNumber
+        return None
     except Exception as exception:
         ErrorController.reportError("Exception occurred when extracting episode number with regex", exception=exception, sendEmail=True)
         return None
@@ -204,22 +235,22 @@ def getTargetFile(fileSystemItem):
     return fileSystemItem
 
 
-def getProspectiveFilePath(mediaGrabId, mode, extension):
+def getProspectiveFilePath(downloadId, mode, extension):
     """
     getProspectiveFilePath create the prospective file path by extracting the necessary info like the tv show name and season/episode numbers
 
     :testedWith: testCompletedDownloadsController:test_getProspectiveFilepPath
 
-    :param mediaGrabId: the mediaGrabId for the downloaded item
+    :param downloadId: the downloadId for the downloaded item
     :param mode: the mode of the program run
     :param extension: the extension of the downloaded file
     :return: the path of the file after it has been moved to its prospective location
     """
     targetDir = os.getenv(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
-    showName = extractShowName(mediaGrabId).capitalize() # name of the tv show
+    showName = extractShowName(downloadId).capitalize() # name of the tv show
     tvShowDir = os.path.join(targetDir, showName) # target path of the tv show directory
-    seasonNumber = extractSeasonNumber(mediaGrabId) # extract season number
-    episodeNumber = extractEpisodeNumber(mediaGrabId) # extract episode number
+    seasonNumber = extractSeasonNumber(downloadId) # extract season number
+    episodeNumber = extractEpisodeNumber(downloadId) # extract episode number
     seasonDir = os.path.join(tvShowDir, f"Season {seasonNumber}") # target path for the relevant season directory of the tv show
 
     ensureDirStructureExists(tvShowDir, seasonDir)
@@ -233,7 +264,7 @@ def unWrapQBittorrentWrapperDir(fileSystemItem):
 
     :testedWith: testCompletedDownloadsController:test_unWrapQBittorrentWrapperDir
 
-    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the mediaGrabId
+    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId
     :return: the file system item, could be a file or directory which is the only contents of the input dir
     """
     fileSystemSubItems = list(os.scandir(fileSystemItem.path))
@@ -253,12 +284,12 @@ def auditFileSystemItemForEpisode(fileSystemItem):
 
     :testedWith: testCompletedDownloadsController:test_auditMediaGrabItemForEpisode
 
-    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the mediaGrabId
+    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId
     """
-    # capture the parent directory as the item's mediaGrabId
-    mediaGrabId = fileSystemItem.name
+    # capture the parent directory as the item's downloadId
+    downloadId = fileSystemItem.name
     containerDir = fileSystemItem.path
-    if downloadWasInitiatedByMediaGrab(mediaGrabId):
+    if downloadWasInitiatedByMediaGrab(downloadId):
         fileSystemItem = unWrapQBittorrentWrapperDir(fileSystemItem)
     
     if not fileSystemItem:
@@ -277,7 +308,7 @@ def auditFileSystemItemForEpisode(fileSystemItem):
     
     # generate the prosepctive file path, ensuring all parent directories exist
     prospectiveFile = getProspectiveFilePath(
-        mediaGrabId, PROGRAM_MODE.TV_EPISODES, extension)
+        downloadId, PROGRAM_MODE.TV_EPISODES, extension)
 
     # check if the prospective target file already exists
     if FolderInterface.fileExists(prospectiveFile):
@@ -290,13 +321,13 @@ def auditFileSystemItemForEpisode(fileSystemItem):
     logging.info(f"Moved '{targetFile.path}' to '{prospectiveFile}'")
 
     # notify the the downloadsInProgress file that the download has concluded 
-    DownloadsInProgressFileInterface.notifyDownloadFinished(mediaGrabId, PROGRAM_MODE.TV_EPISODES)
+    DownloadsInProgressFileInterface.notifyDownloadFinished(downloadId, PROGRAM_MODE.TV_EPISODES)
 
     # if fileSystemItem is a directory, then clean up the directory and the rest of the contents
     if targetFile != fileSystemItem: 
         FolderInterface.recycleOrDeleteDir(fileSystemItem.path)
 
-    if downloadWasInitiatedByMediaGrab(mediaGrabId):
+    if downloadWasInitiatedByMediaGrab(downloadId):
         # handle deletion of the container directory created by qbittorrent
         os.rmdir(containerDir)
 
