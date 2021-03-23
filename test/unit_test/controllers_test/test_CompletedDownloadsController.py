@@ -49,6 +49,32 @@ def cleanUpDirs(directories, downloadingItems):
 class TestCompletedDownloadsController(unittest.TestCase):
 
 
+    def test_downloadWasInitiatedByMediaGrab(self):
+
+        passingValues = [ 
+            "showName--s1e1",
+            "showName-s1e2--s1e2",
+        ]
+
+        failingValues = [
+            "showName--s1er",
+            "showName-s1e2",
+            "s1e2",
+            "--s1e2",
+            ".--s1e2",
+            "showName2--s1s2"
+            "showName-s1e2--s2e"
+        ]
+
+        for value in passingValues:
+            self.assertTrue(
+                CompletedDownloadsController.downloadWasInitiatedByMediaGrab(value))
+
+        for value in failingValues:
+            self.assertFalse(
+                CompletedDownloadsController.downloadWasInitiatedByMediaGrab(value))
+
+
     def test_extractShowName(self):
         expectedFakeShowName = "fake show"
         fakeShowName = "fake show--s1e1"
@@ -437,10 +463,11 @@ class TestCompletedDownloadsController(unittest.TestCase):
         recycleOrDeleteDirMock.assert_called_with(fakeFileSystemItem.path)
         osRmdirMock.assert_called_with(fakeFileSystemItemWrapper.path)
 
+    @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
     @mock.patch("controllers.CompletedDownloadsController.auditFileSystemItemForEpisode")
     @mock.patch("interfaces.FolderInterface.getDirContents")
     @mock.patch("logging.info")
-    def test_auditFileSystemItemsForEpisodes(self, loggingInfoMock, getDirContentsMock, auditFileSystemItemForEpisodeMock):
+    def test_auditFileSystemItemsForEpisodes(self, loggingInfoMock, getDirContentsMock, auditFileSystemItemForEpisodeMock, downloadWasInitiatedByMediaGrabMock):
 
         # config fake data
         fakeDirName = "fakeDirName1"
@@ -452,6 +479,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
 
         # config mocks
         getDirContentsMock.return_value = fakeFileSystemItems
+        downloadWasInitiatedByMediaGrabMock.return_value = True
 
         CompletedDownloadsController.auditFileSystemItemsForEpisodes(
             mode, fakeDownloadingItems)
@@ -466,14 +494,13 @@ class TestCompletedDownloadsController(unittest.TestCase):
         auditFileSystemItemForEpisodeMock.assert_called_with(
             fakeFileSystemItems[0], mode)
 
-
-
+    @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
     @mock.patch("interfaces.QBittorrentInterface.getInstance")
     @mock.patch("logging.info")
     @mock.patch("interfaces.DownloadsInProgressFileInterface.notifyDownloadFinished")
     @mock.patch("controllers.CompletedDownloadsController.reportItemAlreadyExists")
     @mock.patch('os.getenv')
-    def test_auditFilesWithFileSystem(self, getEnvMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, loggingInfoMock, qBittorrentInterfaceGetInstanceMock):
+    def test_auditFilesWithFileSystem(self, getEnvMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, loggingInfoMock, qBittorrentInterfaceGetInstanceMock, downloadWasInitiatedByMediaGrabMock):
 
         # init items
         downloadingItems = [
@@ -501,6 +528,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         # assign mocked instance to return_value for mocked getInstance()
         qBittorrentInterfaceGetInstanceMock.return_value = qBittorrentInterfaceInstanceMock
         qBittorrentInterfaceInstanceMock.qBittorrentInterfaceInstanceMock.pauseTorrent.return_value = True
+        downloadWasInitiatedByMediaGrabMock.return_value = True
 
         # config mocks
         getEnvMock.side_effect = getEnvMockFunc
