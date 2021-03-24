@@ -49,6 +49,9 @@
                                 <a class="function" href="#MediaInfoRecord.getLatestEpisodeNumber">getLatestEpisodeNumber</a>
                         </li>
                         <li>
+                                <a class="function" href="#MediaInfoRecord.getMediaSearchQueries">getMediaSearchQueries</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#MediaInfoRecord.setTorrentRecord">setTorrentRecord</a>
                         </li>
                         <li>
@@ -56,6 +59,9 @@
                         </li>
                         <li>
                                 <a class="function" href="#MediaInfoRecord.setLatestEpisodeNumber">setLatestEpisodeNumber</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#MediaInfoRecord.setMediaSearchQueries">setMediaSearchQueries</a>
                         </li>
                         <li>
                                 <a class="function" href="#MediaInfoRecord.toDict">toDict</a>
@@ -86,12 +92,12 @@
 
 <span class="k">class</span> <span class="nc">MediaInfoRecord</span><span class="p">():</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showName</span><span class="p">,</span> <span class="n">latestSeasonNumber</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">,</span> <span class="n">torrentRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showName</span><span class="p">,</span> <span class="n">latestSeasonNumber</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">,</span> <span class="n">torrentRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mediaSearchQueries</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__showName</span> <span class="o">=</span> <span class="n">showName</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestSeasonNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">latestSeasonNumber</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">latestEpisodeNumber</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__torrentRecord</span> <span class="o">=</span> <span class="n">torrentRecord</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span> <span class="o">=</span> <span class="n">mediaSearchQueries</span>
 
     <span class="c1">########## accessor functions start ##########</span>
 
@@ -114,6 +120,10 @@
     <span class="k">def</span> <span class="nf">getLatestEpisodeNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span>
 
+    
+    <span class="k">def</span> <span class="nf">getMediaSearchQueries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span>
+
     <span class="c1">########## accessor functions end ##########</span>
 
     <span class="c1">########## mutator functions start ##########</span>
@@ -128,6 +138,11 @@
 
     <span class="k">def</span> <span class="nf">setLatestEpisodeNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span> <span class="o">=</span> <span class="n">latestEpisodeNumber</span>
+
+
+    <span class="k">def</span> <span class="nf">setMediaSearchQueries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span> <span class="o">=</span> <span class="n">queries</span>
+
 
     <span class="c1">########## mutator functions end ##########</span>
 
@@ -157,12 +172,12 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MediaInfoRecord</span><span class="p">():</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showName</span><span class="p">,</span> <span class="n">latestSeasonNumber</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">,</span> <span class="n">torrentRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showName</span><span class="p">,</span> <span class="n">latestSeasonNumber</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">,</span> <span class="n">torrentRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mediaSearchQueries</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__showName</span> <span class="o">=</span> <span class="n">showName</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestSeasonNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">latestSeasonNumber</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">latestEpisodeNumber</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__torrentRecord</span> <span class="o">=</span> <span class="n">torrentRecord</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span> <span class="o">=</span> <span class="n">mediaSearchQueries</span>
 
     <span class="c1">########## accessor functions start ##########</span>
 
@@ -185,6 +200,10 @@
     <span class="k">def</span> <span class="nf">getLatestEpisodeNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span>
 
+    
+    <span class="k">def</span> <span class="nf">getMediaSearchQueries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span>
+
     <span class="c1">########## accessor functions end ##########</span>
 
     <span class="c1">########## mutator functions start ##########</span>
@@ -199,6 +218,11 @@
 
     <span class="k">def</span> <span class="nf">setLatestEpisodeNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span> <span class="o">=</span> <span class="n">latestEpisodeNumber</span>
+
+
+    <span class="k">def</span> <span class="nf">setMediaSearchQueries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span> <span class="o">=</span> <span class="n">queries</span>
+
 
     <span class="c1">########## mutator functions end ##########</span>
 
@@ -225,16 +249,18 @@
     showName,
     latestSeasonNumber,
     latestEpisodeNumber,
-    torrentRecord=None
+    torrentRecord=None,
+    mediaSearchQueries=None
 )</span>    </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showName</span><span class="p">,</span> <span class="n">latestSeasonNumber</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">,</span> <span class="n">torrentRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showName</span><span class="p">,</span> <span class="n">latestSeasonNumber</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">,</span> <span class="n">torrentRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mediaSearchQueries</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__showName</span> <span class="o">=</span> <span class="n">showName</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestSeasonNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">latestSeasonNumber</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">latestEpisodeNumber</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__torrentRecord</span> <span class="o">=</span> <span class="n">torrentRecord</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span> <span class="o">=</span> <span class="n">mediaSearchQueries</span>
 </pre></div>
 
         </details>
@@ -337,6 +363,25 @@
     
 
                             </div>
+                            <div id="MediaInfoRecord.getMediaSearchQueries" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MediaInfoRecord.getMediaSearchQueries">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">getMediaSearchQueries</span><span class="signature">(self)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">getMediaSearchQueries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
                             <div id="MediaInfoRecord.setTorrentRecord" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#MediaInfoRecord.setTorrentRecord">#&nbsp;&nbsp</a>
 
@@ -387,6 +432,25 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">setLatestEpisodeNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span> <span class="o">=</span> <span class="n">latestEpisodeNumber</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="MediaInfoRecord.setMediaSearchQueries" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MediaInfoRecord.setMediaSearchQueries">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">setMediaSearchQueries</span><span class="signature">(self, queries)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">setMediaSearchQueries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span> <span class="o">=</span> <span class="n">queries</span>
 </pre></div>
 
         </details>

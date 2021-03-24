@@ -60,7 +60,7 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="c1"># internal dependencies</span>
-<span class="kn">from</span> <span class="nn">interfaces</span> <span class="kn">import</span> <span class="n">TPBInterface</span><span class="p">,</span> <span class="n">DownloadsInProgressFileInterface</span><span class="p">,</span> <span class="n">QBittorrentInterface</span><span class="p">,</span><span class="n">MediaIndexFileInterface</span>
+<span class="kn">from</span> <span class="nn">interfaces</span> <span class="kn">import</span> <span class="n">TPBInterface</span><span class="p">,</span> <span class="n">QBittorrentInterface</span><span class="p">,</span><span class="n">MediaIndexFileInterface</span>
 <span class="kn">from</span> <span class="nn">controllers</span> <span class="kn">import</span> <span class="n">QueryGenerationController</span><span class="p">,</span> <span class="n">NewTorrentController</span><span class="p">,</span> <span class="n">CompletedDownloadsController</span>
 <span class="kn">from</span> <span class="nn">dataTypes.ProgramMode</span> <span class="kn">import</span> <span class="n">PROGRAM_MODE</span> 
 
@@ -71,15 +71,12 @@
 			<span class="k">return</span> <span class="n">record</span>
 
 
-<span class="k">def</span> <span class="nf">getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="n">mediaSearchQueries</span><span class="p">,</span> <span class="n">mediaInfoRecords</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">):</span>
     <span class="n">mediaInfoRecordsWithTorrents</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">mediaInfoName</span><span class="p">,</span> <span class="n">queries</span> <span class="ow">in</span> <span class="n">mediaSearchQueries</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        
-        <span class="c1"># filter torrentRecords by applying regex to torrent titles</span>
-        <span class="n">mediaInfoRecord</span> <span class="o">=</span> <span class="n">findMediaInfoRecord</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">mediaInfoName</span><span class="p">)</span>
-        
-        <span class="n">torrentRecords</span> <span class="o">=</span> <span class="n">TPBInterface</span><span class="o">.</span><span class="n">getTorrentRecords</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">mediaInfoRecord</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span><span class="p">:</span>
+
+        <span class="n">torrentRecords</span> <span class="o">=</span> <span class="n">TPBInterface</span><span class="o">.</span><span class="n">getTorrentRecords</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">torrentRecords</span><span class="p">:</span>
             <span class="k">continue</span>
 
@@ -87,7 +84,7 @@
             <span class="n">chosenTorrent</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="n">downloadIds</span> <span class="o">=</span> <span class="p">[</span> <span class="n">torrent</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="k">for</span> <span class="n">torrent</span> <span class="ow">in</span> <span class="n">torrentRecords</span> <span class="p">]</span>
-            <span class="n">chosenDownloadId</span> <span class="o">=</span> <span class="n">DownloadsInProgressFileInterface</span><span class="o">.</span><span class="n">findNewDownload</span><span class="p">(</span><span class="n">downloadIds</span><span class="p">)</span>
+            <span class="n">chosenDownloadId</span> <span class="o">=</span> <span class="n">downloadIds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">chosenDownloadId</span><span class="p">:</span>
                 <span class="k">continue</span>
@@ -113,27 +110,34 @@
 
 <span class="k">def</span> <span class="nf">runProgramLogic</span><span class="p">(</span><span class="n">mode</span><span class="p">):</span>
 
+    <span class="c1">#analyse folder to look for completed downloads</span>
+    <span class="n">CompletedDownloadsController</span><span class="o">.</span><span class="n">auditDumpCompleteDir</span><span class="p">()</span>
+
+    <span class="n">mutatingFilter</span> <span class="o">=</span> <span class="p">[]</span>
+
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
         <span class="c1"># load information about the requested media</span>
         <span class="n">mediaInfoRecords</span> <span class="o">=</span> <span class="n">MediaIndexFileInterface</span><span class="o">.</span><span class="n">loadMediaFile</span><span class="p">()</span>
 
         <span class="c1"># ascertain mode of program</span>
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">PROGRAM_MODE</span><span class="o">.</span><span class="n">TV_SEASONS</span><span class="p">:</span>
-            <span class="c1"># mediaSearchQueries = QueryGenerationController.generateTVSeasonQueries(mediaInfoRecords)</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mode: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2"> has no handler statement&quot;</span><span class="p">)</span> 
-        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">PROGRAM_MODE</span><span class="o">.</span><span class="n">TV_EPISODES</span><span class="p">:</span>
-            <span class="n">mediaSearchQueries</span> <span class="o">=</span> <span class="n">QueryGenerationController</span><span class="o">.</span><span class="n">generateTVEpisodeQueries</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">PROGRAM_MODE</span><span class="o">.</span><span class="n">TV_EPISODES</span><span class="p">:</span>
+	        <span class="c1"># add torrent queries to mediaInfoRecords</span>
+            <span class="n">QueryGenerationController</span><span class="o">.</span><span class="n">addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mode: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2"> has no handler statement&quot;</span><span class="p">)</span> 
 
-        <span class="c1">#analyse folder to look for completed downloads</span>
-        <span class="n">CompletedDownloadsController</span><span class="o">.</span><span class="n">auditDumpCompleteDir</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">DownloadsInProgressFileInterface</span><span class="o">.</span><span class="n">getDownloadingItems</span><span class="p">(</span><span class="n">mode</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mutatingFilter</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># apply filter, select record if filter is empty (first run) or if the mediaInfoRecord produced new torrent downloads on the previous run</span>
+            <span class="n">mediaInfoRecords</span> <span class="o">=</span> <span class="p">[</span> <span class="n">mediaInfoRecord</span> <span class="k">for</span> <span class="n">mediaInfoRecord</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span> <span class="k">if</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span> <span class="ow">in</span> <span class="n">mutatingFilter</span> <span class="p">]</span>
         
-        <span class="c1">#add torrent magnet links to mediaInfoRecords</span>
-        <span class="n">mediaInfoRecordsWithTorrents</span> <span class="o">=</span> <span class="n">getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="n">mediaSearchQueries</span><span class="p">,</span> <span class="n">mediaInfoRecords</span><span class="p">)</span>
+        <span class="c1"># add torrent magnet links to mediaInfoRecords</span>
+        <span class="n">mediaInfoRecordsWithTorrents</span> <span class="o">=</span> <span class="n">getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">mediaInfoRecordsWithTorrents</span><span class="p">:</span>
             <span class="k">return</span>
+            
+        <span class="c1"># update filter</span>
+        <span class="n">mutatingFilter</span> <span class="o">=</span> <span class="p">[</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span> <span class="k">for</span> <span class="n">mediaInfoRecord</span> <span class="ow">in</span> <span class="n">mediaInfoRecordsWithTorrents</span> <span class="p">]</span>
 
         <span class="n">qbittorrentInterfaceInstance</span> <span class="o">=</span> <span class="n">QBittorrentInterface</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span>
 
@@ -171,20 +175,17 @@
 
         
             <span class="def">def</span>
-            <span class="name">getMediaInfoRecordsWithTorrents</span><span class="signature">(mediaSearchQueries, mediaInfoRecords)</span>:
+            <span class="name">getMediaInfoRecordsWithTorrents</span><span class="signature">(mediaInfoRecords)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="n">mediaSearchQueries</span><span class="p">,</span> <span class="n">mediaInfoRecords</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">):</span>
     <span class="n">mediaInfoRecordsWithTorrents</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">mediaInfoName</span><span class="p">,</span> <span class="n">queries</span> <span class="ow">in</span> <span class="n">mediaSearchQueries</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        
-        <span class="c1"># filter torrentRecords by applying regex to torrent titles</span>
-        <span class="n">mediaInfoRecord</span> <span class="o">=</span> <span class="n">findMediaInfoRecord</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">mediaInfoName</span><span class="p">)</span>
-        
-        <span class="n">torrentRecords</span> <span class="o">=</span> <span class="n">TPBInterface</span><span class="o">.</span><span class="n">getTorrentRecords</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">mediaInfoRecord</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span><span class="p">:</span>
+
+        <span class="n">torrentRecords</span> <span class="o">=</span> <span class="n">TPBInterface</span><span class="o">.</span><span class="n">getTorrentRecords</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">torrentRecords</span><span class="p">:</span>
             <span class="k">continue</span>
 
@@ -192,7 +193,7 @@
             <span class="n">chosenTorrent</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="n">downloadIds</span> <span class="o">=</span> <span class="p">[</span> <span class="n">torrent</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="k">for</span> <span class="n">torrent</span> <span class="ow">in</span> <span class="n">torrentRecords</span> <span class="p">]</span>
-            <span class="n">chosenDownloadId</span> <span class="o">=</span> <span class="n">DownloadsInProgressFileInterface</span><span class="o">.</span><span class="n">findNewDownload</span><span class="p">(</span><span class="n">downloadIds</span><span class="p">)</span>
+            <span class="n">chosenDownloadId</span> <span class="o">=</span> <span class="n">downloadIds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">chosenDownloadId</span><span class="p">:</span>
                 <span class="k">continue</span>
@@ -233,27 +234,34 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">runProgramLogic</span><span class="p">(</span><span class="n">mode</span><span class="p">):</span>
 
+    <span class="c1">#analyse folder to look for completed downloads</span>
+    <span class="n">CompletedDownloadsController</span><span class="o">.</span><span class="n">auditDumpCompleteDir</span><span class="p">()</span>
+
+    <span class="n">mutatingFilter</span> <span class="o">=</span> <span class="p">[]</span>
+
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
         <span class="c1"># load information about the requested media</span>
         <span class="n">mediaInfoRecords</span> <span class="o">=</span> <span class="n">MediaIndexFileInterface</span><span class="o">.</span><span class="n">loadMediaFile</span><span class="p">()</span>
 
         <span class="c1"># ascertain mode of program</span>
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">PROGRAM_MODE</span><span class="o">.</span><span class="n">TV_SEASONS</span><span class="p">:</span>
-            <span class="c1"># mediaSearchQueries = QueryGenerationController.generateTVSeasonQueries(mediaInfoRecords)</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mode: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2"> has no handler statement&quot;</span><span class="p">)</span> 
-        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">PROGRAM_MODE</span><span class="o">.</span><span class="n">TV_EPISODES</span><span class="p">:</span>
-            <span class="n">mediaSearchQueries</span> <span class="o">=</span> <span class="n">QueryGenerationController</span><span class="o">.</span><span class="n">generateTVEpisodeQueries</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">PROGRAM_MODE</span><span class="o">.</span><span class="n">TV_EPISODES</span><span class="p">:</span>
+	        <span class="c1"># add torrent queries to mediaInfoRecords</span>
+            <span class="n">QueryGenerationController</span><span class="o">.</span><span class="n">addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mode: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2"> has no handler statement&quot;</span><span class="p">)</span> 
 
-        <span class="c1">#analyse folder to look for completed downloads</span>
-        <span class="n">CompletedDownloadsController</span><span class="o">.</span><span class="n">auditDumpCompleteDir</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">DownloadsInProgressFileInterface</span><span class="o">.</span><span class="n">getDownloadingItems</span><span class="p">(</span><span class="n">mode</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mutatingFilter</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># apply filter, select record if filter is empty (first run) or if the mediaInfoRecord produced new torrent downloads on the previous run</span>
+            <span class="n">mediaInfoRecords</span> <span class="o">=</span> <span class="p">[</span> <span class="n">mediaInfoRecord</span> <span class="k">for</span> <span class="n">mediaInfoRecord</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span> <span class="k">if</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span> <span class="ow">in</span> <span class="n">mutatingFilter</span> <span class="p">]</span>
         
-        <span class="c1">#add torrent magnet links to mediaInfoRecords</span>
-        <span class="n">mediaInfoRecordsWithTorrents</span> <span class="o">=</span> <span class="n">getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="n">mediaSearchQueries</span><span class="p">,</span> <span class="n">mediaInfoRecords</span><span class="p">)</span>
+        <span class="c1"># add torrent magnet links to mediaInfoRecords</span>
+        <span class="n">mediaInfoRecordsWithTorrents</span> <span class="o">=</span> <span class="n">getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">mediaInfoRecordsWithTorrents</span><span class="p">:</span>
             <span class="k">return</span>
+            
+        <span class="c1"># update filter</span>
+        <span class="n">mutatingFilter</span> <span class="o">=</span> <span class="p">[</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span> <span class="k">for</span> <span class="n">mediaInfoRecord</span> <span class="ow">in</span> <span class="n">mediaInfoRecordsWithTorrents</span> <span class="p">]</span>
 
         <span class="n">qbittorrentInterfaceInstance</span> <span class="o">=</span> <span class="n">QBittorrentInterface</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span>
 

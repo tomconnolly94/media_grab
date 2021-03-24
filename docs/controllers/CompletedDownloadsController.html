@@ -28,6 +28,9 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
+                    <a class="function" href="#downloadWasInitiatedByMediaGrab">downloadWasInitiatedByMediaGrab</a>
+            </li>
+            <li>
                     <a class="function" href="#extractShowName">extractShowName</a>
             </li>
             <li>
@@ -55,13 +58,10 @@
                     <a class="function" href="#getTargetFile">getTargetFile</a>
             </li>
             <li>
-                    <a class="function" href="#recycleDir">recycleDir</a>
-            </li>
-            <li>
                     <a class="function" href="#getProspectiveFilePath">getProspectiveFilePath</a>
             </li>
             <li>
-                    <a class="function" href="#unWrapQBittorentWrapperDir">unWrapQBittorentWrapperDir</a>
+                    <a class="function" href="#unWrapQBittorrentWrapperDir">unWrapQBittorrentWrapperDir</a>
             </li>
             <li>
                     <a class="function" href="#auditFileSystemItemForEpisode">auditFileSystemItemForEpisode</a>
@@ -101,66 +101,121 @@
 <span class="c1"># internal dependencies</span>
 <span class="kn">from</span> <span class="nn">dataTypes.ProgramModeMap</span> <span class="kn">import</span> <span class="n">PROGRAM_MODE_DIRECTORY_KEY_MAP</span><span class="p">,</span> <span class="n">PROGRAM_MODE_MAP</span>
 <span class="kn">from</span> <span class="nn">dataTypes.ProgramMode</span> <span class="kn">import</span> <span class="n">PROGRAM_MODE</span>
-<span class="kn">from</span> <span class="nn">interfaces</span> <span class="kn">import</span> <span class="n">FolderInterface</span><span class="p">,</span> <span class="n">DownloadsInProgressFileInterface</span><span class="p">,</span> <span class="n">QBittorrentInterface</span>
+<span class="kn">from</span> <span class="nn">interfaces</span> <span class="kn">import</span> <span class="n">FolderInterface</span><span class="p">,</span> <span class="n">QBittorrentInterface</span>
 <span class="kn">from</span> <span class="nn">controllers</span> <span class="kn">import</span> <span class="n">ErrorController</span>
 
 
-<span class="k">def</span> <span class="nf">extractShowName</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    extractShowName extracts the show name from the mediaGrabId</span>
+<span class="sd">    downloadWasInitiatedByMediaGrab checks if a download was initiated by mediaGrab using a regex</span>
+
+<span class="sd">    :testedWith: testCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab</span>
+
+<span class="sd">    :param downloadId: the downloadId of the download</span>
+<span class="sd">    :return: the tv show name or `None` if one cannot be found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;[ \w]+--s\d+e\d+&quot;</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regexRaw</span><span class="p">,</span> <span class="n">downloadId</span><span class="p">,</span>
+                            <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span>
+            <span class="s2">&quot;Exception occurred when checking if a download was initiated by mediaGrab using a regex&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span> <span class="nf">extractShowName</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    extractShowName extracts the show name from the downloadId, using a different method depending on whether the download was initiated by mediaGrab or not</span>
 
 <span class="sd">    :testedWith: testCompletedDownloadsController:test_extractShowName</span>
 
-<span class="sd">    :param mediaGrabId: the mediaGrabId of the download</span>
+<span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the tv show name or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">splitId</span> <span class="o">=</span> <span class="n">mediaGrabId</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">splitId</span> <span class="ow">and</span> <span class="n">splitId</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="n">splitId</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
+        <span class="n">splitId</span> <span class="o">=</span> <span class="n">downloadId</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">splitId</span> <span class="ow">and</span> <span class="n">splitId</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">splitId</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># extract show name using regex capturing group</span>
+            <span class="n">showNameMatch</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+                <span class="sa">r</span><span class="s2">&quot;(.+?)(?:[^a-zA-Z]*(?:season|s|episode|e)+.\d+.*)*?\s*$&quot;</span><span class="p">,</span> <span class="n">downloadId</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+            <span class="n">showName</span> <span class="o">=</span> <span class="n">showNameMatch</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">showName</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^\w\s]&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">showName</span><span class="p">)</span>  <span class="c1"># replace all punctuation</span>
+            <span class="n">showName</span> <span class="o">=</span> <span class="n">showName</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># remove whitespace on left or right</span>
+            <span class="n">showName</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">showName</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>  <span class="c1"># remove any double spaces</span>
+            <span class="n">showName</span> <span class="o">=</span> <span class="n">showName</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>  <span class="c1"># convert uppercase letters to lowercase</span>
+            <span class="k">if</span> <span class="n">showName</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">showName</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+            <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span>
+                <span class="s2">&quot;Exception occurred when extracting season number with regex&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
 
-<span class="k">def</span> <span class="nf">extractSeasonNumber</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">extractSeasonNumber</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    extractSeasonNumber extracts the season number from the mediaGrabId</span>
+<span class="sd">    extractSeasonNumber extracts the season number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not</span>
 
 <span class="sd">    :testedWith: testCompletedDownloadsController:test_extractSeasonNumber</span>
 
-<span class="sd">    :param mediaGrabId: the mediaGrabId of the download</span>
+<span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the season number or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;--s(\d+)&quot;</span>        
-        <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regexRaw</span><span class="p">,</span> <span class="n">mediaGrabId</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>        
-        <span class="n">seasonNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
-        
-        <span class="k">if</span> <span class="n">seasonNumber</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">seasonNumber</span>
+        <span class="n">regexRaw</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
+            <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;--s(\d+)&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;(?:S|Season)(\d{1,2})&quot;</span>
+
+        <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regexRaw</span><span class="p">,</span> <span class="n">downloadId</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">matches</span> <span class="ow">and</span> <span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span> <span class="ow">and</span> <span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">seasonNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+            
+            <span class="k">if</span> <span class="n">seasonNumber</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">seasonNumber</span>
+        <span class="k">return</span> <span class="kc">None</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
         <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="s2">&quot;Exception occurred when extracting season number with regex&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
 
-<span class="k">def</span> <span class="nf">extractEpisodeNumber</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">extractEpisodeNumber</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    extractEpisodeNumber extracts the episode number from the mediaGrabId</span>
+<span class="sd">    extractEpisodeNumber extracts the episode number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not</span>
 
 <span class="sd">    :testedWith: testCompletedDownloadsController:test_extractEpisodeNumber</span>
 
-<span class="sd">    :param mediaGrabId: the mediaGrabId of the download</span>
+<span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the episode number or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;--s\d+e(\d+)&quot;</span>        
-        <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regexRaw</span><span class="p">,</span> <span class="n">mediaGrabId</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>        
-        <span class="n">episodeNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>        
-
-        <span class="k">if</span> <span class="n">episodeNumber</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">episodeNumber</span>
+        <span class="n">regexRaw</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
+            <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;--s\d+e(\d+)&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;(?:E|Episode)(\d{1,2})&quot;</span>
+
+        <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regexRaw</span><span class="p">,</span> <span class="n">downloadId</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">matches</span> <span class="ow">and</span> <span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span> <span class="ow">and</span> <span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">episodeNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>        
+
+            <span class="k">if</span> <span class="n">episodeNumber</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">episodeNumber</span>
+        <span class="k">return</span> <span class="kc">None</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
         <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="s2">&quot;Exception occurred when extracting episode number with regex&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -254,14 +309,13 @@
 
 <span class="k">def</span> <span class="nf">getTargetFile</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could</span>
-<span class="sd">        be the directory that the target file is in.</span>
+<span class="sd">    getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could be the directory that the target file is in</span>
 
 <span class="sd">    :testedWith: testCompletedDownloadsController:test_getTargetFile</span>
 
 <span class="sd">    :param fileSystemItem: the file system item, it could be a directory or a file</span>
-<span class="sd">    :return: the file system item if it is a file or i it is a directory then the largest file in that directory</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">    :return: the file system item if it is a file or if it is a directory then the largest file in that directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">FolderInterface</span><span class="o">.</span><span class="n">directoryExists</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="p">):</span> <span class="c1"># check if the fileSystemItem is a directory or a file</span>
         <span class="n">targetFile</span> <span class="o">=</span> <span class="n">getLargestItemInDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="c1"># we assume that the target file is the largest file</span>
 
@@ -274,31 +328,41 @@
     <span class="k">return</span> <span class="n">fileSystemItem</span>
 
 
-<span class="k">def</span> <span class="nf">recycleDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>    
-    <span class="c1"># attempt to move the rest of the files to the recycle_bin folder so if the program made an error, the downloaded content still might be recoverable</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">recycle_bin_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;RECYCLE_BIN_DIR&quot;</span><span class="p">)</span>
-        <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">recycle_bin_dir</span><span class="p">)</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stored &#39;</span><span class="si">{</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; in &#39;</span><span class="si">{</span><span class="n">recycle_bin_dir</span><span class="si">}</span><span class="s2">&#39;, in case it is needed. Please remember to delete items from here.&quot;</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
-        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="s2">&quot;Exception occurred when moving residual files to the recycle bin dir&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">getProspectiveFilePath</span><span class="p">(</span><span class="n">downloadId</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">extension</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    getProspectiveFilePath create the prospective file path by extracting the necessary info like the tv show name and season/episode numbers</span>
 
+<span class="sd">    :testedWith: testCompletedDownloadsController:test_getProspectiveFilepPath</span>
 
-<span class="k">def</span> <span class="nf">getProspectiveFilePath</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">,</span> <span class="n">fileSystemItem</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">extension</span><span class="p">):</span>
-    
-    <span class="c1"># extract required data</span>
+<span class="sd">    :param downloadId: the downloadId for the downloaded item</span>
+<span class="sd">    :param mode: the mode of the program run</span>
+<span class="sd">    :param extension: the extension of the downloaded file</span>
+<span class="sd">    :return: the path of the file after it has been moved to its prospective location</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">targetDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="n">PROGRAM_MODE_DIRECTORY_KEY_MAP</span><span class="p">[</span><span class="n">mode</span><span class="p">])</span>
-    <span class="n">showName</span> <span class="o">=</span> <span class="n">extractShowName</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="c1"># name of the tv show</span>
+    <span class="n">showName</span> <span class="o">=</span> <span class="n">extractShowName</span><span class="p">(</span><span class="n">downloadId</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="c1"># name of the tv show</span>
     <span class="n">tvShowDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">targetDir</span><span class="p">,</span> <span class="n">showName</span><span class="p">)</span> <span class="c1"># target path of the tv show directory</span>
-    <span class="n">seasonNumber</span> <span class="o">=</span> <span class="n">extractSeasonNumber</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">)</span> <span class="c1"># extract season number</span>
-    <span class="n">episodeNumber</span> <span class="o">=</span> <span class="n">extractEpisodeNumber</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">)</span> <span class="c1"># extract episode number</span>
+    <span class="n">seasonNumber</span> <span class="o">=</span> <span class="n">extractSeasonNumber</span><span class="p">(</span><span class="n">downloadId</span><span class="p">)</span> <span class="c1"># extract season number</span>
+    <span class="n">episodeNumber</span> <span class="o">=</span> <span class="n">extractEpisodeNumber</span><span class="p">(</span><span class="n">downloadId</span><span class="p">)</span> <span class="c1"># extract episode number</span>
     <span class="n">seasonDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tvShowDir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Season </span><span class="si">{</span><span class="n">seasonNumber</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1"># target path for the relevant season directory of the tv show</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">showName</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">seasonNumber</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">episodeNumber</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">ensureDirStructureExists</span><span class="p">(</span><span class="n">tvShowDir</span><span class="p">,</span> <span class="n">seasonDir</span><span class="p">)</span>
     <span class="n">prospectiveFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">seasonDir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">showName</span><span class="si">}</span><span class="s2"> - S0</span><span class="si">{</span><span class="n">seasonNumber</span><span class="si">}</span><span class="s2">E0</span><span class="si">{</span><span class="n">episodeNumber</span><span class="si">}{</span><span class="n">extension</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">prospectiveFile</span>
 
-<span class="k">def</span> <span class="nf">unWrapQBittorentWrapperDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
+
+<span class="k">def</span> <span class="nf">unWrapQBittorrentWrapperDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    unWrapQBittorrentWrapperDir browses past the identifiable directory provided by qbittorrent to access the downloaded item  </span>
+
+<span class="sd">    :testedWith: testCompletedDownloadsController:test_unWrapQBittorrentWrapperDir</span>
+
+<span class="sd">    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId</span>
+<span class="sd">    :return: the file system item, could be a file or directory which is the only contents of the input dir</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">fileSystemSubItems</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
 
     <span class="c1"># Assert that there is only one item inside the qBittorrent wrapper dir</span>
@@ -308,28 +372,45 @@
     
     <span class="k">return</span> <span class="n">fileSystemSubItems</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-<span class="k">def</span> <span class="nf">auditFileSystemItemForEpisode</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
 
-    <span class="c1"># capture the parent directory as the item&#39;s mediaGrabId</span>
-    <span class="n">mediaGrabId</span> <span class="o">=</span> <span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span>
-    <span class="n">fileSystemItem</span> <span class="o">=</span> <span class="n">unWrapQBittorentWrapperDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">auditFileSystemItemForEpisode</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    auditMediaGrabItemForEpisode collates all the operations necessary to deal with a finished </span>
+<span class="sd">        download (that was initiated by mediaGrab), move it to an organised file system location, and notifies the user</span>
+
+<span class="sd">    :testedWith: testCompletedDownloadsController:test_auditMediaGrabItemForEpisode</span>
+
+<span class="sd">    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># capture the parent directory as the item&#39;s downloadId</span>
+    <span class="n">downloadId</span> <span class="o">=</span> <span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">containerDir</span> <span class="o">=</span> <span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span>
+    <span class="k">if</span> <span class="n">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
+        <span class="n">fileSystemItem</span> <span class="o">=</span> <span class="n">unWrapQBittorrentWrapperDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="ow">not</span> <span class="n">fileSystemItem</span><span class="p">:</span>
         <span class="k">return</span>
-    
-    <span class="n">requestTorrentPause</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="c1"># pause torrent to prevent unneccessary seeding</span>
-
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has finished downloading and will be moved.&quot;</span><span class="p">)</span>
     
     <span class="n">targetFile</span> <span class="o">=</span> <span class="n">getTargetFile</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">)</span>
 
     <span class="c1"># if target file could not be extracted, skip this fileSystemItem</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">targetFile</span><span class="p">:</span>
         <span class="k">return</span>
+
     <span class="n">extension</span> <span class="o">=</span> <span class="n">extractExtension</span><span class="p">(</span><span class="n">targetFile</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     
     <span class="c1"># generate the prosepctive file path, ensuring all parent directories exist</span>
-    <span class="n">prospectiveFile</span> <span class="o">=</span> <span class="n">getProspectiveFilePath</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">,</span> <span class="n">fileSystemItem</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">extension</span><span class="p">)</span>
+    <span class="n">prospectiveFile</span> <span class="o">=</span> <span class="n">getProspectiveFilePath</span><span class="p">(</span>
+        <span class="n">downloadId</span><span class="p">,</span> <span class="n">PROGRAM_MODE</span><span class="o">.</span><span class="n">TV_EPISODES</span><span class="p">,</span> <span class="n">extension</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">prospectiveFile</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="c1"># pause torrent to prevent unneccessary seeding</span>
+    <span class="n">requestTorrentPause</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has finished downloading and will be moved.&quot;</span><span class="p">)</span>
 
     <span class="c1"># check if the prospective target file already exists</span>
     <span class="k">if</span> <span class="n">FolderInterface</span><span class="o">.</span><span class="n">fileExists</span><span class="p">(</span><span class="n">prospectiveFile</span><span class="p">):</span>
@@ -341,71 +422,146 @@
     <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">targetFile</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">prospectiveFile</span><span class="p">)</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Moved &#39;</span><span class="si">{</span><span class="n">targetFile</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; to &#39;</span><span class="si">{</span><span class="n">prospectiveFile</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 
-    <span class="c1"># notify the the downloadsInProgress file that the download has concluded </span>
-    <span class="n">DownloadsInProgressFileInterface</span><span class="o">.</span><span class="n">notifyDownloadFinished</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">,</span> <span class="n">PROGRAM_MODE</span><span class="o">.</span><span class="n">TV_EPISODES</span><span class="p">)</span>
-
     <span class="c1"># if fileSystemItem is a directory, then clean up the directory and the rest of the contents</span>
     <span class="k">if</span> <span class="n">targetFile</span> <span class="o">!=</span> <span class="n">fileSystemItem</span><span class="p">:</span> 
-        <span class="n">recycleDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">)</span>
-    
-    <span class="c1"># handle deletion of the container directory created by qbittorrent</span>
-    <span class="n">containerDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">containerDir</span><span class="p">)</span>
+        <span class="n">FolderInterface</span><span class="o">.</span><span class="n">recycleOrDeleteDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
+        <span class="c1"># handle deletion of the container directory created by qbittorrent</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">containerDir</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">auditFileSystemItemsForEpisodes</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">filteredDownloadingItems</span><span class="p">):</span>
-    
+<span class="k">def</span> <span class="nf">auditFileSystemItemsForEpisodes</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete</span>
+<span class="sd">        directory</span>
+
+<span class="sd">    :testedWith: testCompletedDownloadsController:test_auditFileSystemItemsForEpisodes</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># auditing is not necessary if the optional env &quot;TV_TARGET_DIR&quot; is not provided</span>
+    <span class="k">if</span> <span class="s2">&quot;TV_TARGET_DIR&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="k">return</span>
+
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;File auditing started.&quot;</span><span class="p">)</span>
     <span class="n">dumpCompleteDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DUMP_COMPLETE_DIR&quot;</span><span class="p">)</span>
     <span class="n">fileSystemItemsFromDirectory</span> <span class="o">=</span> <span class="n">FolderInterface</span><span class="o">.</span><span class="n">getDirContents</span><span class="p">(</span><span class="n">dumpCompleteDir</span><span class="p">)</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Items in dump_complete directory: </span><span class="si">{</span><span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">fileSystemItemsFromDirectory</span><span class="p">]</span> <span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="c1"># deal with directories</span>
+    <span class="n">mediaGrabInitiatedDownloads</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">manuallyInitiatedDownloads</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># divide the directories into two lists, those initiated by mediaGrab and those initiated manually</span>
     <span class="k">for</span> <span class="n">fileSystemItem</span> <span class="ow">in</span> <span class="n">fileSystemItemsFromDirectory</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">filteredDownloadingItems</span><span class="p">:</span>
-            <span class="n">auditFileSystemItemForEpisode</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="n">auditFileSystemItemForEpisode</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">auditDumpCompleteDir</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">filteredDownloadingItems</span><span class="p">):</span>
+
+<span class="k">def</span> <span class="nf">auditDumpCompleteDir</span><span class="p">():</span>
     <span class="c1"># look for episodes</span>
-    <span class="n">auditFileSystemItemsForEpisodes</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">filteredDownloadingItems</span><span class="p">)</span>
+    <span class="n">auditFileSystemItemsForEpisodes</span><span class="p">()</span>
 </pre></div>
 
         </details>
 
             </section>
+                <section id="downloadWasInitiatedByMediaGrab">
+                            <div class="attr function"><a class="headerlink" href="#downloadWasInitiatedByMediaGrab">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">downloadWasInitiatedByMediaGrab</span><span class="signature">(downloadId)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    downloadWasInitiatedByMediaGrab checks if a download was initiated by mediaGrab using a regex</span>
+
+<span class="sd">    :testedWith: testCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab</span>
+
+<span class="sd">    :param downloadId: the downloadId of the download</span>
+<span class="sd">    :return: the tv show name or `None` if one cannot be found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;[ \w]+--s\d+e\d+&quot;</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regexRaw</span><span class="p">,</span> <span class="n">downloadId</span><span class="p">,</span>
+                            <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span>
+            <span class="s2">&quot;Exception occurred when checking if a download was initiated by mediaGrab using a regex&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>downloadWasInitiatedByMediaGrab checks if a download was initiated by mediaGrab using a regex</p>
+
+<p>:testedWith: testCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab</p>
+
+<p>:param downloadId: the downloadId of the download
+:return: the tv show name or <code>None</code> if one cannot be found</p>
+</div>
+
+
+                </section>
                 <section id="extractShowName">
                             <div class="attr function"><a class="headerlink" href="#extractShowName">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">extractShowName</span><span class="signature">(mediaGrabId)</span>:
+            <span class="name">extractShowName</span><span class="signature">(downloadId)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extractShowName</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extractShowName</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    extractShowName extracts the show name from the mediaGrabId</span>
+<span class="sd">    extractShowName extracts the show name from the downloadId, using a different method depending on whether the download was initiated by mediaGrab or not</span>
 
 <span class="sd">    :testedWith: testCompletedDownloadsController:test_extractShowName</span>
 
-<span class="sd">    :param mediaGrabId: the mediaGrabId of the download</span>
+<span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the tv show name or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">splitId</span> <span class="o">=</span> <span class="n">mediaGrabId</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">splitId</span> <span class="ow">and</span> <span class="n">splitId</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="n">splitId</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
+        <span class="n">splitId</span> <span class="o">=</span> <span class="n">downloadId</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">splitId</span> <span class="ow">and</span> <span class="n">splitId</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">splitId</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># extract show name using regex capturing group</span>
+            <span class="n">showNameMatch</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+                <span class="sa">r</span><span class="s2">&quot;(.+?)(?:[^a-zA-Z]*(?:season|s|episode|e)+.\d+.*)*?\s*$&quot;</span><span class="p">,</span> <span class="n">downloadId</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+            <span class="n">showName</span> <span class="o">=</span> <span class="n">showNameMatch</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">showName</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^\w\s]&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">showName</span><span class="p">)</span>  <span class="c1"># replace all punctuation</span>
+            <span class="n">showName</span> <span class="o">=</span> <span class="n">showName</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># remove whitespace on left or right</span>
+            <span class="n">showName</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">showName</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>  <span class="c1"># remove any double spaces</span>
+            <span class="n">showName</span> <span class="o">=</span> <span class="n">showName</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>  <span class="c1"># convert uppercase letters to lowercase</span>
+            <span class="k">if</span> <span class="n">showName</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">showName</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+            <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span>
+                <span class="s2">&quot;Exception occurred when extracting season number with regex&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>extractShowName extracts the show name from the mediaGrabId</p>
+            <div class="docstring"><p>extractShowName extracts the show name from the downloadId, using a different method depending on whether the download was initiated by mediaGrab or not</p>
 
 <p>:testedWith: testCompletedDownloadsController:test_extractShowName</p>
 
-<p>:param mediaGrabId: the mediaGrabId of the download
+<p>:param downloadId: the downloadId of the download
 :return: the tv show name or <code>None</code> if one cannot be found</p>
 </div>
 
@@ -416,29 +572,35 @@
 
         
             <span class="def">def</span>
-            <span class="name">extractSeasonNumber</span><span class="signature">(mediaGrabId)</span>:
+            <span class="name">extractSeasonNumber</span><span class="signature">(downloadId)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extractSeasonNumber</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extractSeasonNumber</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    extractSeasonNumber extracts the season number from the mediaGrabId</span>
+<span class="sd">    extractSeasonNumber extracts the season number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not</span>
 
 <span class="sd">    :testedWith: testCompletedDownloadsController:test_extractSeasonNumber</span>
 
-<span class="sd">    :param mediaGrabId: the mediaGrabId of the download</span>
+<span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the season number or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;--s(\d+)&quot;</span>        
-        <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regexRaw</span><span class="p">,</span> <span class="n">mediaGrabId</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>        
-        <span class="n">seasonNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
-        
-        <span class="k">if</span> <span class="n">seasonNumber</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">seasonNumber</span>
+        <span class="n">regexRaw</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
+            <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;--s(\d+)&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;(?:S|Season)(\d{1,2})&quot;</span>
+
+        <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regexRaw</span><span class="p">,</span> <span class="n">downloadId</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">matches</span> <span class="ow">and</span> <span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span> <span class="ow">and</span> <span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">seasonNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+            
+            <span class="k">if</span> <span class="n">seasonNumber</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">seasonNumber</span>
+        <span class="k">return</span> <span class="kc">None</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
         <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="s2">&quot;Exception occurred when extracting season number with regex&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -446,11 +608,11 @@
 
         </details>
 
-            <div class="docstring"><p>extractSeasonNumber extracts the season number from the mediaGrabId</p>
+            <div class="docstring"><p>extractSeasonNumber extracts the season number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not</p>
 
 <p>:testedWith: testCompletedDownloadsController:test_extractSeasonNumber</p>
 
-<p>:param mediaGrabId: the mediaGrabId of the download
+<p>:param downloadId: the downloadId of the download
 :return: the season number or <code>None</code> if one cannot be found</p>
 </div>
 
@@ -461,29 +623,35 @@
 
         
             <span class="def">def</span>
-            <span class="name">extractEpisodeNumber</span><span class="signature">(mediaGrabId)</span>:
+            <span class="name">extractEpisodeNumber</span><span class="signature">(downloadId)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extractEpisodeNumber</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extractEpisodeNumber</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    extractEpisodeNumber extracts the episode number from the mediaGrabId</span>
+<span class="sd">    extractEpisodeNumber extracts the episode number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not</span>
 
 <span class="sd">    :testedWith: testCompletedDownloadsController:test_extractEpisodeNumber</span>
 
-<span class="sd">    :param mediaGrabId: the mediaGrabId of the download</span>
+<span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the episode number or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;--s\d+e(\d+)&quot;</span>        
-        <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regexRaw</span><span class="p">,</span> <span class="n">mediaGrabId</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>        
-        <span class="n">episodeNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>        
-
-        <span class="k">if</span> <span class="n">episodeNumber</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">episodeNumber</span>
+        <span class="n">regexRaw</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
+            <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;--s\d+e(\d+)&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;(?:E|Episode)(\d{1,2})&quot;</span>
+
+        <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regexRaw</span><span class="p">,</span> <span class="n">downloadId</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">matches</span> <span class="ow">and</span> <span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span> <span class="ow">and</span> <span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">episodeNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>        
+
+            <span class="k">if</span> <span class="n">episodeNumber</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">episodeNumber</span>
+        <span class="k">return</span> <span class="kc">None</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
         <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="s2">&quot;Exception occurred when extracting episode number with regex&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -491,11 +659,11 @@
 
         </details>
 
-            <div class="docstring"><p>extractEpisodeNumber extracts the episode number from the mediaGrabId</p>
+            <div class="docstring"><p>extractEpisodeNumber extracts the episode number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not</p>
 
 <p>:testedWith: testCompletedDownloadsController:test_extractEpisodeNumber</p>
 
-<p>:param mediaGrabId: the mediaGrabId of the download
+<p>:param downloadId: the downloadId of the download
 :return: the episode number or <code>None</code> if one cannot be found</p>
 </div>
 
@@ -710,14 +878,13 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getTargetFile</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could</span>
-<span class="sd">        be the directory that the target file is in.</span>
+<span class="sd">    getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could be the directory that the target file is in</span>
 
 <span class="sd">    :testedWith: testCompletedDownloadsController:test_getTargetFile</span>
 
 <span class="sd">    :param fileSystemItem: the file system item, it could be a directory or a file</span>
-<span class="sd">    :return: the file system item if it is a file or i it is a directory then the largest file in that directory</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">    :return: the file system item if it is a file or if it is a directory then the largest file in that directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">FolderInterface</span><span class="o">.</span><span class="n">directoryExists</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="p">):</span> <span class="c1"># check if the fileSystemItem is a directory or a file</span>
         <span class="n">targetFile</span> <span class="o">=</span> <span class="n">getLargestItemInDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="c1"># we assume that the target file is the largest file</span>
 
@@ -732,40 +899,14 @@
 
         </details>
 
-            <div class="docstring"><p>getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could
-    be the directory that the target file is in.</p>
+            <div class="docstring"><p>getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could be the directory that the target file is in</p>
 
 <p>:testedWith: testCompletedDownloadsController:test_getTargetFile</p>
 
 <p>:param fileSystemItem: the file system item, it could be a directory or a file
-:return: the file system item if it is a file or i it is a directory then the largest file in that directory</p>
+:return: the file system item if it is a file or if it is a directory then the largest file in that directory</p>
 </div>
 
-
-                </section>
-                <section id="recycleDir">
-                            <div class="attr function"><a class="headerlink" href="#recycleDir">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">recycleDir</span><span class="signature">(fileSystemItem)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">recycleDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>    
-    <span class="c1"># attempt to move the rest of the files to the recycle_bin folder so if the program made an error, the downloaded content still might be recoverable</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">recycle_bin_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;RECYCLE_BIN_DIR&quot;</span><span class="p">)</span>
-        <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">recycle_bin_dir</span><span class="p">)</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stored &#39;</span><span class="si">{</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; in &#39;</span><span class="si">{</span><span class="n">recycle_bin_dir</span><span class="si">}</span><span class="s2">&#39;, in case it is needed. Please remember to delete items from here.&quot;</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
-        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="s2">&quot;Exception occurred when moving residual files to the recycle bin dir&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-    
 
                 </section>
                 <section id="getProspectiveFilePath">
@@ -773,20 +914,31 @@
 
         
             <span class="def">def</span>
-            <span class="name">getProspectiveFilePath</span><span class="signature">(mediaGrabId, fileSystemItem, mode, extension)</span>:
+            <span class="name">getProspectiveFilePath</span><span class="signature">(downloadId, mode, extension)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getProspectiveFilePath</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">,</span> <span class="n">fileSystemItem</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">extension</span><span class="p">):</span>
-    
-    <span class="c1"># extract required data</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getProspectiveFilePath</span><span class="p">(</span><span class="n">downloadId</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">extension</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    getProspectiveFilePath create the prospective file path by extracting the necessary info like the tv show name and season/episode numbers</span>
+
+<span class="sd">    :testedWith: testCompletedDownloadsController:test_getProspectiveFilepPath</span>
+
+<span class="sd">    :param downloadId: the downloadId for the downloaded item</span>
+<span class="sd">    :param mode: the mode of the program run</span>
+<span class="sd">    :param extension: the extension of the downloaded file</span>
+<span class="sd">    :return: the path of the file after it has been moved to its prospective location</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">targetDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="n">PROGRAM_MODE_DIRECTORY_KEY_MAP</span><span class="p">[</span><span class="n">mode</span><span class="p">])</span>
-    <span class="n">showName</span> <span class="o">=</span> <span class="n">extractShowName</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="c1"># name of the tv show</span>
+    <span class="n">showName</span> <span class="o">=</span> <span class="n">extractShowName</span><span class="p">(</span><span class="n">downloadId</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="c1"># name of the tv show</span>
     <span class="n">tvShowDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">targetDir</span><span class="p">,</span> <span class="n">showName</span><span class="p">)</span> <span class="c1"># target path of the tv show directory</span>
-    <span class="n">seasonNumber</span> <span class="o">=</span> <span class="n">extractSeasonNumber</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">)</span> <span class="c1"># extract season number</span>
-    <span class="n">episodeNumber</span> <span class="o">=</span> <span class="n">extractEpisodeNumber</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">)</span> <span class="c1"># extract episode number</span>
+    <span class="n">seasonNumber</span> <span class="o">=</span> <span class="n">extractSeasonNumber</span><span class="p">(</span><span class="n">downloadId</span><span class="p">)</span> <span class="c1"># extract season number</span>
+    <span class="n">episodeNumber</span> <span class="o">=</span> <span class="n">extractEpisodeNumber</span><span class="p">(</span><span class="n">downloadId</span><span class="p">)</span> <span class="c1"># extract episode number</span>
     <span class="n">seasonDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tvShowDir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Season </span><span class="si">{</span><span class="n">seasonNumber</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1"># target path for the relevant season directory of the tv show</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">showName</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">seasonNumber</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">episodeNumber</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">ensureDirStructureExists</span><span class="p">(</span><span class="n">tvShowDir</span><span class="p">,</span> <span class="n">seasonDir</span><span class="p">)</span>
     <span class="n">prospectiveFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">seasonDir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">showName</span><span class="si">}</span><span class="s2"> - S0</span><span class="si">{</span><span class="n">seasonNumber</span><span class="si">}</span><span class="s2">E0</span><span class="si">{</span><span class="n">episodeNumber</span><span class="si">}{</span><span class="n">extension</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -795,20 +947,37 @@
 
         </details>
 
-    
+            <div class="docstring"><p>getProspectiveFilePath create the prospective file path by extracting the necessary info like the tv show name and season/episode numbers</p>
+
+<p>:testedWith: testCompletedDownloadsController:test_getProspectiveFilepPath</p>
+
+<p>:param downloadId: the downloadId for the downloaded item
+:param mode: the mode of the program run
+:param extension: the extension of the downloaded file
+:return: the path of the file after it has been moved to its prospective location</p>
+</div>
+
 
                 </section>
-                <section id="unWrapQBittorentWrapperDir">
-                            <div class="attr function"><a class="headerlink" href="#unWrapQBittorentWrapperDir">#&nbsp;&nbsp</a>
+                <section id="unWrapQBittorrentWrapperDir">
+                            <div class="attr function"><a class="headerlink" href="#unWrapQBittorrentWrapperDir">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">unWrapQBittorentWrapperDir</span><span class="signature">(fileSystemItem)</span>:
+            <span class="name">unWrapQBittorrentWrapperDir</span><span class="signature">(fileSystemItem)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">unWrapQBittorentWrapperDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">unWrapQBittorrentWrapperDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    unWrapQBittorrentWrapperDir browses past the identifiable directory provided by qbittorrent to access the downloaded item  </span>
+
+<span class="sd">    :testedWith: testCompletedDownloadsController:test_unWrapQBittorrentWrapperDir</span>
+
+<span class="sd">    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId</span>
+<span class="sd">    :return: the file system item, could be a file or directory which is the only contents of the input dir</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">fileSystemSubItems</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
 
     <span class="c1"># Assert that there is only one item inside the qBittorrent wrapper dir</span>
@@ -821,7 +990,14 @@
 
         </details>
 
-    
+            <div class="docstring"><p>unWrapQBittorrentWrapperDir browses past the identifiable directory provided by qbittorrent to access the downloaded item  </p>
+
+<p>:testedWith: testCompletedDownloadsController:test_unWrapQBittorrentWrapperDir</p>
+
+<p>:param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId
+:return: the file system item, could be a file or directory which is the only contents of the input dir</p>
+</div>
+
 
                 </section>
                 <section id="auditFileSystemItemForEpisode">
@@ -829,33 +1005,49 @@
 
         
             <span class="def">def</span>
-            <span class="name">auditFileSystemItemForEpisode</span><span class="signature">(fileSystemItem, mode)</span>:
+            <span class="name">auditFileSystemItemForEpisode</span><span class="signature">(fileSystemItem)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">auditFileSystemItemForEpisode</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">auditFileSystemItemForEpisode</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    auditMediaGrabItemForEpisode collates all the operations necessary to deal with a finished </span>
+<span class="sd">        download (that was initiated by mediaGrab), move it to an organised file system location, and notifies the user</span>
 
-    <span class="c1"># capture the parent directory as the item&#39;s mediaGrabId</span>
-    <span class="n">mediaGrabId</span> <span class="o">=</span> <span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span>
-    <span class="n">fileSystemItem</span> <span class="o">=</span> <span class="n">unWrapQBittorentWrapperDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">)</span>
+<span class="sd">    :testedWith: testCompletedDownloadsController:test_auditMediaGrabItemForEpisode</span>
+
+<span class="sd">    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># capture the parent directory as the item&#39;s downloadId</span>
+    <span class="n">downloadId</span> <span class="o">=</span> <span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">containerDir</span> <span class="o">=</span> <span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span>
+    <span class="k">if</span> <span class="n">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
+        <span class="n">fileSystemItem</span> <span class="o">=</span> <span class="n">unWrapQBittorrentWrapperDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="ow">not</span> <span class="n">fileSystemItem</span><span class="p">:</span>
         <span class="k">return</span>
-    
-    <span class="n">requestTorrentPause</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="c1"># pause torrent to prevent unneccessary seeding</span>
-
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has finished downloading and will be moved.&quot;</span><span class="p">)</span>
     
     <span class="n">targetFile</span> <span class="o">=</span> <span class="n">getTargetFile</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">)</span>
 
     <span class="c1"># if target file could not be extracted, skip this fileSystemItem</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">targetFile</span><span class="p">:</span>
         <span class="k">return</span>
+
     <span class="n">extension</span> <span class="o">=</span> <span class="n">extractExtension</span><span class="p">(</span><span class="n">targetFile</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     
     <span class="c1"># generate the prosepctive file path, ensuring all parent directories exist</span>
-    <span class="n">prospectiveFile</span> <span class="o">=</span> <span class="n">getProspectiveFilePath</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">,</span> <span class="n">fileSystemItem</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">extension</span><span class="p">)</span>
+    <span class="n">prospectiveFile</span> <span class="o">=</span> <span class="n">getProspectiveFilePath</span><span class="p">(</span>
+        <span class="n">downloadId</span><span class="p">,</span> <span class="n">PROGRAM_MODE</span><span class="o">.</span><span class="n">TV_EPISODES</span><span class="p">,</span> <span class="n">extension</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">prospectiveFile</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="c1"># pause torrent to prevent unneccessary seeding</span>
+    <span class="n">requestTorrentPause</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has finished downloading and will be moved.&quot;</span><span class="p">)</span>
 
     <span class="c1"># check if the prospective target file already exists</span>
     <span class="k">if</span> <span class="n">FolderInterface</span><span class="o">.</span><span class="n">fileExists</span><span class="p">(</span><span class="n">prospectiveFile</span><span class="p">):</span>
@@ -867,21 +1059,25 @@
     <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">targetFile</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">prospectiveFile</span><span class="p">)</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Moved &#39;</span><span class="si">{</span><span class="n">targetFile</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; to &#39;</span><span class="si">{</span><span class="n">prospectiveFile</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 
-    <span class="c1"># notify the the downloadsInProgress file that the download has concluded </span>
-    <span class="n">DownloadsInProgressFileInterface</span><span class="o">.</span><span class="n">notifyDownloadFinished</span><span class="p">(</span><span class="n">mediaGrabId</span><span class="p">,</span> <span class="n">PROGRAM_MODE</span><span class="o">.</span><span class="n">TV_EPISODES</span><span class="p">)</span>
-
     <span class="c1"># if fileSystemItem is a directory, then clean up the directory and the rest of the contents</span>
     <span class="k">if</span> <span class="n">targetFile</span> <span class="o">!=</span> <span class="n">fileSystemItem</span><span class="p">:</span> 
-        <span class="n">recycleDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">)</span>
-    
-    <span class="c1"># handle deletion of the container directory created by qbittorrent</span>
-    <span class="n">containerDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">containerDir</span><span class="p">)</span>
+        <span class="n">FolderInterface</span><span class="o">.</span><span class="n">recycleOrDeleteDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
+        <span class="c1"># handle deletion of the container directory created by qbittorrent</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">containerDir</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>auditMediaGrabItemForEpisode collates all the operations necessary to deal with a finished 
+    download (that was initiated by mediaGrab), move it to an organised file system location, and notifies the user</p>
+
+<p>:testedWith: testCompletedDownloadsController:test_auditMediaGrabItemForEpisode</p>
+
+<p>:param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId</p>
+</div>
+
 
                 </section>
                 <section id="auditFileSystemItemsForEpisodes">
@@ -889,27 +1085,44 @@
 
         
             <span class="def">def</span>
-            <span class="name">auditFileSystemItemsForEpisodes</span><span class="signature">(mode, filteredDownloadingItems)</span>:
+            <span class="name">auditFileSystemItemsForEpisodes</span><span class="signature">()</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">auditFileSystemItemsForEpisodes</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">filteredDownloadingItems</span><span class="p">):</span>
-    
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">auditFileSystemItemsForEpisodes</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete</span>
+<span class="sd">        directory</span>
+
+<span class="sd">    :testedWith: testCompletedDownloadsController:test_auditFileSystemItemsForEpisodes</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># auditing is not necessary if the optional env &quot;TV_TARGET_DIR&quot; is not provided</span>
+    <span class="k">if</span> <span class="s2">&quot;TV_TARGET_DIR&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="k">return</span>
+
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;File auditing started.&quot;</span><span class="p">)</span>
     <span class="n">dumpCompleteDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DUMP_COMPLETE_DIR&quot;</span><span class="p">)</span>
     <span class="n">fileSystemItemsFromDirectory</span> <span class="o">=</span> <span class="n">FolderInterface</span><span class="o">.</span><span class="n">getDirContents</span><span class="p">(</span><span class="n">dumpCompleteDir</span><span class="p">)</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Items in dump_complete directory: </span><span class="si">{</span><span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">fileSystemItemsFromDirectory</span><span class="p">]</span> <span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="c1"># deal with directories</span>
+    <span class="n">mediaGrabInitiatedDownloads</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">manuallyInitiatedDownloads</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># divide the directories into two lists, those initiated by mediaGrab and those initiated manually</span>
     <span class="k">for</span> <span class="n">fileSystemItem</span> <span class="ow">in</span> <span class="n">fileSystemItemsFromDirectory</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">filteredDownloadingItems</span><span class="p">:</span>
-            <span class="n">auditFileSystemItemForEpisode</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="n">auditFileSystemItemForEpisode</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete
+    directory</p>
+
+<p>:testedWith: testCompletedDownloadsController:test_auditFileSystemItemsForEpisodes</p>
+</div>
+
 
                 </section>
                 <section id="auditDumpCompleteDir">
@@ -917,14 +1130,14 @@
 
         
             <span class="def">def</span>
-            <span class="name">auditDumpCompleteDir</span><span class="signature">(mode, filteredDownloadingItems)</span>:
+            <span class="name">auditDumpCompleteDir</span><span class="signature">()</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">auditDumpCompleteDir</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">filteredDownloadingItems</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">auditDumpCompleteDir</span><span class="p">():</span>
     <span class="c1"># look for episodes</span>
-    <span class="n">auditFileSystemItemsForEpisodes</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">filteredDownloadingItems</span><span class="p">)</span>
+    <span class="n">auditFileSystemItemsForEpisodes</span><span class="p">()</span>
 </pre></div>
 
         </details>

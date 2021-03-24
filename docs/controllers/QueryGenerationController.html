@@ -28,7 +28,7 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
-                    <a class="function" href="#generateTVEpisodeQueries">generateTVEpisodeQueries</a>
+                    <a class="function" href="#addTVEpisodeQueriesToMediaInfoRecords">addTVEpisodeQueriesToMediaInfoRecords</a>
             </li>
             <li>
                     <a class="function" href="#generateTVEpisodeQueryGroup">generateTVEpisodeQueryGroup</a>
@@ -74,11 +74,11 @@
 <span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">generateTVEpisodeQueries</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">):</span>
 	<span class="n">queryUrls</span> <span class="o">=</span> <span class="p">{}</span>
 	<span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span><span class="p">:</span>
-		<span class="n">queryUrls</span><span class="p">[</span><span class="n">record</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()]</span> <span class="o">=</span> <span class="n">generateTVEpisodeQueryGroup</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getShowName</span><span class="p">(),</span> <span class="n">record</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">(),</span> <span class="n">record</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">())</span>
-	<span class="k">return</span> <span class="n">queryUrls</span>
+		<span class="n">record</span><span class="o">.</span><span class="n">setMediaSearchQueries</span><span class="p">(</span><span class="n">generateTVEpisodeQueryGroup</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getShowName</span><span class="p">(</span>
+		<span class="p">),</span> <span class="n">record</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">(),</span> <span class="n">record</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">()))</span>
 
 
 <span class="k">def</span> <span class="nf">generateTVEpisodeQueryGroup</span><span class="p">(</span><span class="n">mediaName</span><span class="p">,</span> <span class="n">relevantSeason</span><span class="p">,</span> <span class="n">relevantEpisode</span><span class="p">):</span>
@@ -97,21 +97,21 @@
         </details>
 
             </section>
-                <section id="generateTVEpisodeQueries">
-                            <div class="attr function"><a class="headerlink" href="#generateTVEpisodeQueries">#&nbsp;&nbsp</a>
+                <section id="addTVEpisodeQueriesToMediaInfoRecords">
+                            <div class="attr function"><a class="headerlink" href="#addTVEpisodeQueriesToMediaInfoRecords">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">generateTVEpisodeQueries</span><span class="signature">(mediaInfoRecords)</span>:
+            <span class="name">addTVEpisodeQueriesToMediaInfoRecords</span><span class="signature">(mediaInfoRecords)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">generateTVEpisodeQueries</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">):</span>
 	<span class="n">queryUrls</span> <span class="o">=</span> <span class="p">{}</span>
 	<span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span><span class="p">:</span>
-		<span class="n">queryUrls</span><span class="p">[</span><span class="n">record</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()]</span> <span class="o">=</span> <span class="n">generateTVEpisodeQueryGroup</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getShowName</span><span class="p">(),</span> <span class="n">record</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">(),</span> <span class="n">record</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">())</span>
-	<span class="k">return</span> <span class="n">queryUrls</span>
+		<span class="n">record</span><span class="o">.</span><span class="n">setMediaSearchQueries</span><span class="p">(</span><span class="n">generateTVEpisodeQueryGroup</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getShowName</span><span class="p">(</span>
+		<span class="p">),</span> <span class="n">record</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">(),</span> <span class="n">record</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">()))</span>
 </pre></div>
 
         </details>

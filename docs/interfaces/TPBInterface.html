@@ -72,10 +72,10 @@
     <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">torrents</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">torrent</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">torrent</span><span class="o">.</span><span class="n">getSeeders</span><span class="p">())</span>
 
 
-<span class="k">def</span> <span class="nf">getTorrentRecords</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">getTorrentRecords</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="p">):</span>
 
     <span class="c1"># make query for the mediaInfoRecord, if none are found, try the next query format</span>
-    <span class="k">for</span> <span class="n">queryStr</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">queryStr</span> <span class="ow">in</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getMediaSearchQueries</span><span class="p">():</span>
         <span class="n">torrentRecords</span> <span class="o">=</span> <span class="n">queryAPI</span><span class="p">(</span><span class="n">queryStr</span><span class="p">)</span>
         
         <span class="c1">#logging</span>
@@ -122,7 +122,8 @@
         <span class="k">return</span> <span class="n">torrentRecords</span>
 
     <span class="k">except</span> <span class="p">(</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="n">ChunkedEncodingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
-        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="s2">&quot;Problem with TPB API has occurred.&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">responsePrintout</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span> <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span> <span class="k">else</span> <span class="n">response</span>
+        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Problem with TPB API has occurred. Recevied: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[]</span>
 </pre></div>
 
@@ -154,15 +155,15 @@
 
         
             <span class="def">def</span>
-            <span class="name">getTorrentRecords</span><span class="signature">(queries, mediaInfoRecord)</span>:
+            <span class="name">getTorrentRecords</span><span class="signature">(mediaInfoRecord)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getTorrentRecords</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getTorrentRecords</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="p">):</span>
 
     <span class="c1"># make query for the mediaInfoRecord, if none are found, try the next query format</span>
-    <span class="k">for</span> <span class="n">queryStr</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">queryStr</span> <span class="ow">in</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getMediaSearchQueries</span><span class="p">():</span>
         <span class="n">torrentRecords</span> <span class="o">=</span> <span class="n">queryAPI</span><span class="p">(</span><span class="n">queryStr</span><span class="p">)</span>
         
         <span class="c1">#logging</span>
@@ -224,7 +225,8 @@
         <span class="k">return</span> <span class="n">torrentRecords</span>
 
     <span class="k">except</span> <span class="p">(</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="n">ChunkedEncodingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
-        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="s2">&quot;Problem with TPB API has occurred.&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">responsePrintout</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span> <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span> <span class="k">else</span> <span class="n">response</span>
+        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Problem with TPB API has occurred. Recevied: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[]</span>
 </pre></div>
 

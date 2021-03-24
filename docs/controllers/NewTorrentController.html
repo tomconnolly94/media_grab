@@ -54,7 +54,7 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="c1"># internal dependencies</span>
-<span class="kn">from</span> <span class="nn">interfaces</span> <span class="kn">import</span> <span class="n">MediaIndexFileInterface</span><span class="p">,</span> <span class="n">MailInterface</span><span class="p">,</span> <span class="n">DownloadsInProgressFileInterface</span>
+<span class="kn">from</span> <span class="nn">interfaces</span> <span class="kn">import</span> <span class="n">MediaIndexFileInterface</span><span class="p">,</span> <span class="n">MailInterface</span>
 
 
 <span class="k">def</span> <span class="nf">onSuccessfulTorrentAdd</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
@@ -66,9 +66,6 @@
 	<span class="n">torrentExtraInfo</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Latest episode: </span><span class="si">{</span><span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
 	<span class="n">torrentRecord</span> <span class="o">=</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getTorrentRecord</span><span class="p">()</span>
 	<span class="n">MailInterface</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span><span class="o">.</span><span class="n">sendNewTorrentMail</span><span class="p">(</span><span class="n">torrentRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(),</span> <span class="n">torrentExtraInfo</span><span class="p">,</span> <span class="n">torrentRecord</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">())</span>
-
-	<span class="c1"># notify DownloadsInProgress file</span>
-	<span class="n">DownloadsInProgressFileInterface</span><span class="o">.</span><span class="n">notifyDownloadStarted</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getMediaGrabId</span><span class="p">(),</span> <span class="n">mode</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -93,9 +90,6 @@
 	<span class="n">torrentExtraInfo</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Latest episode: </span><span class="si">{</span><span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
 	<span class="n">torrentRecord</span> <span class="o">=</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getTorrentRecord</span><span class="p">()</span>
 	<span class="n">MailInterface</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span><span class="o">.</span><span class="n">sendNewTorrentMail</span><span class="p">(</span><span class="n">torrentRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(),</span> <span class="n">torrentExtraInfo</span><span class="p">,</span> <span class="n">torrentRecord</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">())</span>
-
-	<span class="c1"># notify DownloadsInProgress file</span>
-	<span class="n">DownloadsInProgressFileInterface</span><span class="o">.</span><span class="n">notifyDownloadStarted</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getMediaGrabId</span><span class="p">(),</span> <span class="n">mode</span><span class="p">)</span>
 </pre></div>
 
         </details>
