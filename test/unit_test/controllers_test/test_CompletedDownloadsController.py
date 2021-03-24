@@ -75,9 +75,15 @@ class TestCompletedDownloadsController(unittest.TestCase):
                 CompletedDownloadsController.downloadWasInitiatedByMediaGrab(value))
 
 
-    def test_extractShowName(self):
+    @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
+    def test_extractShowNameMediaGrabDownload(self, downloadWasInitiatedByMediaGrabMock):
+
+        # config fake data
         expectedFakeShowName = "fake show"
         fakeShowName = "fake show--s1e1"
+
+        # config fake mocks
+        downloadWasInitiatedByMediaGrabMock.return_value = True
 
         actualFakeShowName = CompletedDownloadsController.extractShowName(fakeShowName)
         self.assertEqual(expectedFakeShowName, actualFakeShowName)
@@ -85,10 +91,44 @@ class TestCompletedDownloadsController(unittest.TestCase):
         # check empty string
         self.assertEqual(None, CompletedDownloadsController.extractShowName(""))
 
+    @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
+    def test_extractShowNameManualDownload(self, downloadWasInitiatedByMediaGrabMock):
 
-    def test_extractSeasonNumber(self):
+        # config fake data
+        expectedFakeShowName = "fake show"
+        fakeShowNamesSuccessful = [
+            "fake.Show ",
+            "fake Show - S01",
+            "fake.Show - S01E01",
+            "fake.Show -   S01E01",
+            "fake.Show.S01E01",
+            "fake.Show.S01.E01",
+            "Fake.Show.S01.E01",
+            "fake.Show.S01"
+        ]
+
+        # config fake mocks
+        downloadWasInitiatedByMediaGrabMock.return_value = False
+
+        for fakeShowName in fakeShowNamesSuccessful:
+            actualFakeShowName = CompletedDownloadsController.extractShowName(
+                fakeShowName)
+            self.assertEqual(expectedFakeShowName, actualFakeShowName)
+
+        # check empty string
+        self.assertEqual(
+            None, CompletedDownloadsController.extractShowName(""))
+
+
+    @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
+    def test_extractSeasonNumberMediaGrabDownload(self, downloadWasInitiatedByMediaGrabMock):
+
+        # config fake data
         expectedSeasonNumber = 2
         fakeShowName = "fake show--s2e1"
+
+        # config fake mocks
+        downloadWasInitiatedByMediaGrabMock.return_value = True
 
         actualFakeSeasonNumber = CompletedDownloadsController.extractSeasonNumber(fakeShowName)
         self.assertEqual(expectedSeasonNumber, actualFakeSeasonNumber)
@@ -97,15 +137,84 @@ class TestCompletedDownloadsController(unittest.TestCase):
         self.assertEqual(None, CompletedDownloadsController.extractSeasonNumber(""))
 
 
-    def test_extractEpisodeNumber(self):
+    @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
+    def test_extractSeasonNumberManualDownload(self, downloadWasInitiatedByMediaGrabMock):
+
+        # config fake data
+        expectedSeasonNumber = 1
+        fakeShowNamesSuccessful = [
+            "fakeShow - S01",
+            "fakeShow - S01E01",
+            "fakeShow -   S01E01",
+            "fakeShow.S01E01",
+            "fakeShow.S01.E01",
+            "FakeShow.S01.E01",
+            "fakeShow.S01"
+        ]
+
+        # config fake mocks
+        downloadWasInitiatedByMediaGrabMock.return_value = False
+
+        for fakeShowName in fakeShowNamesSuccessful:
+            actualFakeSeasonNumber = CompletedDownloadsController.extractSeasonNumber(
+                fakeShowName)
+            self.assertEqual(expectedSeasonNumber, actualFakeSeasonNumber)
+
+        # check empty string
+        self.assertEqual(
+            None, CompletedDownloadsController.extractSeasonNumber(""))
+
+
+    @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
+    def test_extractEpisodeNumberMediaGrabDownload(self, downloadWasInitiatedByMediaGrabMock):
+
+        # config fake data
         expectedSeasonNumber = 3
         fakeShowName = "fake show--s1e3"
+
+        # config fake mocks
+        downloadWasInitiatedByMediaGrabMock.return_value = True
 
         actualFakeSeasonNumber = CompletedDownloadsController.extractEpisodeNumber(fakeShowName)
         self.assertEqual(expectedSeasonNumber, actualFakeSeasonNumber)
 
         # check empty string
         self.assertEqual(None, CompletedDownloadsController.extractSeasonNumber(""))
+
+
+    @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
+    def test_extractEpisodeNumberManualDownload(self, downloadWasInitiatedByMediaGrabMock):
+
+        # config fake data
+        expectedSeasonNumber = 2
+        fakeShowNamesSuccessful = [
+            "fakeShow - S01E02",
+            "fakeShow -   S01E02",
+            "fakeShow.S01E02",
+            "fakeShow.S01.E02",
+            "FakeShow.S01.E02",
+        ]
+        fakeShowNamesUnsuccessful = [
+            "fakeShow - S01",
+            "fakeShow.S01"
+        ]
+
+        # config fake mocks
+        downloadWasInitiatedByMediaGrabMock.return_value = False
+
+        for fakeShowName in fakeShowNamesSuccessful:
+            actualFakeSeasonNumber = CompletedDownloadsController.extractEpisodeNumber(
+                fakeShowName)
+            self.assertEqual(expectedSeasonNumber, actualFakeSeasonNumber)
+
+        for fakeShowName in fakeShowNamesUnsuccessful:
+            actualFakeSeasonNumber = CompletedDownloadsController.extractEpisodeNumber(
+                fakeShowName)
+            self.assertEqual(None, actualFakeSeasonNumber)
+
+        # check empty string
+        self.assertEqual(
+            None, CompletedDownloadsController.extractSeasonNumber(""))
 
 
     def test_extractExtension(self):
@@ -122,6 +231,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         for fileName in testFileNames:
             actualExtension = CompletedDownloadsController.extractExtension(fileName)
             self.assertEqual(expectedExtension, actualExtension)
+
 
     @mock.patch("controllers.ErrorController.reportError")
     def test_reportItemAlreadyExists(self, reportErrorMock):
