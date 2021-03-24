@@ -32,18 +32,16 @@ def getEnvMockFunc(param):
         return fakeRecycleBinDir
     else:
         assert(None)
+
         
 def cleanUpDirs(directories, downloadingItems):
-    for dir in directories:
-        for root, dirs, files in os.walk(dir):
+    for directory in directories:
+        for root, dirs, files in os.walk(directory):
             for file in files:
-                if file in downloadingItems:
-                    os.remove(os.path.join(root, file))
+                os.remove(os.path.join(root, file))
 
-            downloadingItemDirs = [ item.split("/")[0] for item in downloadingItems ]
-            for dir in dirs:
-                if dir in downloadingItemDirs:
-                    shutil.rmtree(os.path.join(root, dir))
+            for directory in dirs:
+                shutil.rmtree(os.path.join(root, directory))
 
 
 class TestCompletedDownloadsController(unittest.TestCase):
@@ -456,7 +454,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
     @mock.patch("controllers.CompletedDownloadsController.extractSeasonNumber")
     @mock.patch("controllers.CompletedDownloadsController.extractShowName")
     @mock.patch("os.getenv")
-    def test_getProspectiveFilepPath(self, osGetentMock, extractShowNameMock, extractSeasonNumberMock, extractEpisodeNumberMock, ensureDirStructureExistsMock):
+    def test_getProspectiveFilePath(self, osGetentMock, extractShowNameMock, extractSeasonNumberMock, extractEpisodeNumberMock, ensureDirStructureExistsMock):
 
         # config fake data
         fakeTargetTvDir = "fakeTargetTvDir"
@@ -479,16 +477,38 @@ class TestCompletedDownloadsController(unittest.TestCase):
         extractSeasonNumberMock.return_value = fakeSeasonNumber
         extractEpisodeNumberMock.return_value = fakeEpisodeNumber
 
-        # run testable function
-        actualProspectiveFilePath = CompletedDownloadsController.getProspectiveFilePath(fakeMediaGrabId, mode, fakeExtension)
+        # run testable function - run 1: success
+        actualProspectiveFilePath = CompletedDownloadsController.getProspectiveFilePath(
+            fakeMediaGrabId, mode, fakeExtension)
 
         # asserts
-        self.assertEqual(expectedProspectiveFilePath, actualProspectiveFilePath)
+        self.assertEqual(expectedProspectiveFilePath,
+                         actualProspectiveFilePath)
         osGetentMock.assert_called_with(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
         extractShowNameMock.assert_called_with(fakeMediaGrabId)
         extractSeasonNumberMock.assert_called_with(fakeMediaGrabId)
         extractEpisodeNumberMock.assert_called_with(fakeMediaGrabId)
-        ensureDirStructureExistsMock.assert_called_with(expectedTvShowDir, expectedSeasonDir)
+        ensureDirStructureExistsMock.assert_called_with(
+            expectedTvShowDir, expectedSeasonDir)
+
+        # reconfig mocks
+        osGetentMock.return_value = fakeTargetTvDir
+        extractShowNameMock.return_value = fakeShowName
+        extractSeasonNumberMock.return_value = None
+        extractEpisodeNumberMock.return_value = fakeEpisodeNumber
+        ensureDirStructureExistsMock.reset_mock()
+
+        # run testable function - run 2: failure
+        actualProspectiveFilePath = CompletedDownloadsController.getProspectiveFilePath(
+            fakeMediaGrabId, mode, fakeExtension)
+
+        # asserts
+        self.assertIsNone(actualProspectiveFilePath)
+        osGetentMock.assert_called_with(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
+        extractShowNameMock.assert_called_with(fakeMediaGrabId)
+        extractSeasonNumberMock.assert_called_with(fakeMediaGrabId)
+        extractEpisodeNumberMock.assert_called_with(fakeMediaGrabId)
+        ensureDirStructureExistsMock.assert_not_called()
 
     @mock.patch("logging.info")
     @mock.patch("os.scandir")
@@ -603,19 +623,20 @@ class TestCompletedDownloadsController(unittest.TestCase):
         auditFileSystemItemForEpisodeMock.assert_called_with(
             fakeFileSystemItems[0])
 
-    @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
     @mock.patch("interfaces.QBittorrentInterface.getInstance")
     @mock.patch("logging.info")
     @mock.patch("interfaces.DownloadsInProgressFileInterface.notifyDownloadFinished")
     @mock.patch("controllers.CompletedDownloadsController.reportItemAlreadyExists")
     @mock.patch('os.getenv')
-    def test_auditFilesWithFileSystem(self, getEnvMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, loggingInfoMock, qBittorrentInterfaceGetInstanceMock, downloadWasInitiatedByMediaGrabMock):
+    def test_auditFilesWithFileSystem(self, getEnvMock, reportItemAlreadyExistsMock, notifyDownloadFinishedMock, loggingInfoMock, qBittorrentInterfaceGetInstanceMock):
 
         # init items
         downloadingItems = [
-            "fake tv show name--s01e01.mp4",
-            "fake tv show name--s01e02.mp4",
-            "fake-tv-show-name.s01.e03/fake tv show name--s01e03.mp4"
+            "fake tv show name--s01e01/fake tv show name.s01e01.mp4", # mediaGrab initiated download - no sub folder
+            "fake tv show name--s01e02/fake-tv-show-name.s01.e02/fake-tv-show-name.s01.e02.mp4", # mediaGrab initiated download - with sub folder
+            "fake tv show name s01e03.mp4",  # manually initiated download - no sub folder
+            "fake-tv-show-name.s01.e04/fake-tv-show-name.s01.e04.mp4", # manually initiated download - with sub folder
+            "non-parsable item"
         ] # representation of what is in the dump_complete folder
 
         # config fake data #
@@ -625,7 +646,6 @@ class TestCompletedDownloadsController(unittest.TestCase):
             "tv-episodes": [
                 "fake tv show name--s01e01",
                 "fake tv show name--s01e02",
-                "fake tv show name--s01e03",
                 "fakeDownloadingFile2--s1e4",
                 "fakeDownloadingFile3--s3e6"
             ]
@@ -637,7 +657,6 @@ class TestCompletedDownloadsController(unittest.TestCase):
         # assign mocked instance to return_value for mocked getInstance()
         qBittorrentInterfaceGetInstanceMock.return_value = qBittorrentInterfaceInstanceMock
         qBittorrentInterfaceInstanceMock.qBittorrentInterfaceInstanceMock.pauseTorrent.return_value = True
-        downloadWasInitiatedByMediaGrabMock.return_value = True
 
         # config mocks
         getEnvMock.side_effect = getEnvMockFunc
@@ -645,44 +664,36 @@ class TestCompletedDownloadsController(unittest.TestCase):
         # setup fake files
         for path in downloadingItems:
             pathParts = path.split("/")
-            newDir = ""
+            directories = pathParts[:-1]
+            newDirPath = fakeDumpCompleteDir
 
+            # create directories
+            for directory in directories:
+                newDirPath = os.path.join(newDirPath, directory)
+                if not os.path.isdir(newDirPath):
+                    os.mkdir(newDirPath)
 
-            newDir = "/".join(pathParts[:-1])
-            fileName = pathParts[-1]
-            fileNameNoExt = fileName.split(".mp4")[0]
-            baseDirPath = os.path.join(fakeDumpCompleteDir, fileNameNoExt)
-            if not os.path.isdir(baseDirPath):
-                os.mkdir(baseDirPath)
-                
-            if len(pathParts) > 1:
-                newDir = "/".join(pathParts[:-1])
-                dirPath = os.path.join(baseDirPath, newDir)
-                if not os.path.isdir(dirPath):
-                    os.mkdir(dirPath)
+            newFilePath = os.path.join(fakeDumpCompleteDir, path)
 
-            episodeFile = os.path.join(baseDirPath, newDir, pathParts[-1])
-            if not os.path.isfile(episodeFile):
-                os.mknod(episodeFile)
-
-        # this is required so that the new folder created under fakeTargetTvDir can be found and cleaned up
-        downloadingItems.append(expectedTvShowName) 
+            if not os.path.isfile(newFilePath):
+                os.mknod(newFilePath)
 
         try:
             # assert state is as expected before audit method is called
-            self.assertTrue(len(list(os.scandir(fakeTargetTvDir))) == 0)
-            numItemsInDumpCompleteBefore = len(list(os.scandir(fakeDumpCompleteDir)))
-            self.assertTrue(numItemsInDumpCompleteBefore >= 2)
-            self.assertTrue(len(list(os.scandir(fakeRecycleBinDir))) == 0)
+            self.assertEqual(0, len(list(os.scandir(fakeTargetTvDir))))
+            self.assertEqual(len(downloadingItems), len(
+                list(os.scandir(fakeDumpCompleteDir))))
+            self.assertEqual(0, len(list(os.scandir(fakeRecycleBinDir))))
 
             # run auditDumpCompleteDir
             CompletedDownloadsController.auditDumpCompleteDir(fakeFilteredDownloadingItems["tv-episodes"])
 
             expectedNumItems = len(downloadingItems) - 1
             # assert that the contents of downloadingItems has been moved from the `dummy_directories/dump_complete` directory to the `dummy_directories/tv` directory
-            self.assertTrue(len(list(os.scandir(os.path.join(fakeTargetTvDir, expectedTvShowName, "Season 1")))) == expectedNumItems)
-            self.assertTrue(len(list(os.scandir(fakeDumpCompleteDir))) == numItemsInDumpCompleteBefore - expectedNumItems)
-            self.assertTrue(len(list(os.scandir(fakeRecycleBinDir))) == 1)
+            self.assertEqual(4, len(list(os.scandir(os.path.join(
+                fakeTargetTvDir, expectedTvShowName, "Season 1")))))
+            self.assertEqual(1, len(list(os.scandir(fakeDumpCompleteDir))))
+            self.assertEqual(2, len(list(os.scandir(fakeRecycleBinDir))))
             notifyDownloadFinishedMock.assert_called()
             loggingInfoMock.assert_called()
             reportItemAlreadyExistsMock.assert_not_called()

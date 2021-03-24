@@ -24,7 +24,7 @@ def downloadWasInitiatedByMediaGrab(downloadId):
     """
 
     try:
-        regexRaw = r"\w+--s\de\d"
+        regexRaw = r"[ \w]+--s\d+e\d+"
         match = re.search(regexRaw, downloadId,
                             re.IGNORECASE | re.MULTILINE)
         if match:
@@ -254,6 +254,9 @@ def getProspectiveFilePath(downloadId, mode, extension):
     episodeNumber = extractEpisodeNumber(downloadId) # extract episode number
     seasonDir = os.path.join(tvShowDir, f"Season {seasonNumber}") # target path for the relevant season directory of the tv show
 
+    if not showName or not seasonNumber or not episodeNumber:
+        return None
+
     ensureDirStructureExists(tvShowDir, seasonDir)
     prospectiveFile = os.path.join(seasonDir, f"{showName} - S0{seasonNumber}E0{episodeNumber}{extension}")
     return prospectiveFile
@@ -296,20 +299,26 @@ def auditFileSystemItemForEpisode(fileSystemItem):
     if not fileSystemItem:
         return
     
-    requestTorrentPause(fileSystemItem.name) # pause torrent to prevent unneccessary seeding
-
-    logging.info(f"{fileSystemItem.name} has finished downloading and will be moved.")
-    
     targetFile = getTargetFile(fileSystemItem)
 
     # if target file could not be extracted, skip this fileSystemItem
     if not targetFile:
         return
+
     extension = extractExtension(targetFile.name)
     
     # generate the prosepctive file path, ensuring all parent directories exist
     prospectiveFile = getProspectiveFilePath(
         downloadId, PROGRAM_MODE.TV_EPISODES, extension)
+
+    if not prospectiveFile:
+        return
+
+    # pause torrent to prevent unneccessary seeding
+    requestTorrentPause(fileSystemItem.name)
+
+    logging.info(
+        f"{fileSystemItem.name} has finished downloading and will be moved.")
 
     # check if the prospective target file already exists
     if FolderInterface.fileExists(prospectiveFile):
@@ -357,8 +366,8 @@ def auditFileSystemItemsForEpisodes(filteredDownloadingItems):
 
     # divide the directories into two lists, those initiated by mediaGrab and those initiated manually
     for fileSystemItem in fileSystemItemsFromDirectory:
-        if fileSystemItem.name in filteredDownloadingItems:
-            auditFileSystemItemForEpisode(fileSystemItem)
+        # if fileSystemItem.name in filteredDownloadingItems:
+        auditFileSystemItemForEpisode(fileSystemItem)
 
 
 
