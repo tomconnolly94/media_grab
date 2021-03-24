@@ -11,10 +11,9 @@ from dataTypes.TorrentRecord import TorrentRecord
 
 class TestNewTorrentController(unittest.TestCase):
 
-    @mock.patch('interfaces.DownloadsInProgressFileInterface.notifyDownloadStarted')
     @mock.patch('interfaces.MailInterface.getInstance')
     @mock.patch('interfaces.MediaIndexFileInterface.writeMediaFile')
-    def test_onSuccessfulTorrentAdd(self, writeMediaFileMock, mailInterfaceGetInstanceMock, notifyDownloadStartedMock):
+    def test_onSuccessfulTorrentAdd(self, writeMediaFileMock, mailInterfaceGetInstanceMock):
 
         # config fake values
         fakeTorrent = TorrentRecord("fakeTorrentName", "fakeId", "fakeInfoHash", "5")
@@ -33,7 +32,6 @@ class TestNewTorrentController(unittest.TestCase):
         # mock function asserts
         writeMediaFileMock.assert_called_once_with(fakeMediaInfoRecord)
         mailInterfaceInstanceMock.sendNewTorrentMail.assert_called_once_with(fakeTorrent.getName(),  f"Latest episode: {fakeMediaInfoRecord.getLatestEpisodeNumber()}", fakeTorrent.getMagnet())
-        notifyDownloadStartedMock.assert_called_once_with(expectedMediaGrabId, activeMode)
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@
 import logging
 
 # internal dependencies
-from interfaces import TPBInterface, DownloadsInProgressFileInterface, QBittorrentInterface,MediaIndexFileInterface
+from interfaces import TPBInterface, QBittorrentInterface,MediaIndexFileInterface
 from controllers import QueryGenerationController, NewTorrentController, CompletedDownloadsController
 from dataTypes.ProgramMode import PROGRAM_MODE 
 
@@ -28,7 +28,7 @@ def getMediaInfoRecordsWithTorrents(mediaInfoRecords):
             chosenTorrent = None
 
             downloadIds = [ torrent.getName() for torrent in torrentRecords ]
-            chosenDownloadId = DownloadsInProgressFileInterface.findNewDownload(downloadIds)
+            chosenDownloadId = downloadIds[0]
 
             if not chosenDownloadId:
                 continue
@@ -55,7 +55,7 @@ def getMediaInfoRecordsWithTorrents(mediaInfoRecords):
 def runProgramLogic(mode):
 
     #analyse folder to look for completed downloads
-    CompletedDownloadsController.auditDumpCompleteDir(DownloadsInProgressFileInterface.getDownloadingItems(mode))
+    CompletedDownloadsController.auditDumpCompleteDir()
 
     mutatingFilter = []
 

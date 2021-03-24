@@ -30,11 +30,10 @@ class TestLogicController(unittest.TestCase):
         self.assertEqual(relevantMediaInfoRecord, actualMediaInfoRecord)
 
 
-    @mock.patch("interfaces.DownloadsInProgressFileInterface.findNewDownload")
     @mock.patch("logging.info")
     @mock.patch("interfaces.TPBInterface.getTorrentRecords")
     @mock.patch("controllers.LogicController.findMediaInfoRecord")
-    def test_getMediaInfoRecordsWithTorrents(self, findMediaInfoRecordMock, getTorrentRecordsMock, loggingInfoMock, findNewDownloadMock):      
+    def test_getMediaInfoRecordsWithTorrents(self, findMediaInfoRecordMock, getTorrentRecordsMock, loggingInfoMock):      
 
         fakeTorrentRecords = [
             TorrentRecord("fakeTorrentTitle1", "id1", "fakeInfoHash1", "4", "3"),
@@ -51,8 +50,7 @@ class TestLogicController(unittest.TestCase):
 
         # configure mocks
         findMediaInfoRecordMock.side_effect = fakeMediaInfoRecords
-        getTorrentRecordsMock.return_value = fakeTorrentRecords
-        findNewDownloadMock.side_effect = ["fakeTorrentTitle1", None, "fakeTorrentTitle3"]
+        getTorrentRecordsMock.side_effect = [fakeTorrentRecords, [], fakeTorrentRecords[2:]]
 
         # expected outputs
         expectedFakeMediaInfoRecords = []
@@ -86,22 +84,16 @@ class TestLogicController(unittest.TestCase):
         ]
         loggingInfoMock.has_calls(loggingInfoCalls)
 
-        fakeTorrentRecordsNames = [ torrent.getName() for torrent in fakeTorrentRecords ]        
-        findNewDownloadCalls = [
-            call(fakeTorrentRecordsNames),
-            call(fakeTorrentRecordsNames),
-        ]
-        findNewDownloadMock.has_calls(findNewDownloadCalls)
+        fakeTorrentRecordsNames = [ torrent.getName() for torrent in fakeTorrentRecords ]
 
 
     @mock.patch("controllers.NewTorrentController.onSuccessfulTorrentAdd")
     @mock.patch("interfaces.QBittorrentInterface.getInstance")
     @mock.patch("controllers.LogicController.getMediaInfoRecordsWithTorrents")
     @mock.patch("controllers.CompletedDownloadsController.auditDumpCompleteDir")
-    @mock.patch("interfaces.DownloadsInProgressFileInterface.getDownloadingItems")
     @mock.patch("controllers.QueryGenerationController.addTVEpisodeQueriesToMediaInfoRecords")
     @mock.patch("interfaces.MediaIndexFileInterface.loadMediaFile")
-    def test_runProgramLogic(self, loadMediaFileMock, addTVEpisodeQueriesToMediaInfoRecordsMock, getDownloadingItemsMock, auditDumpCompleteDirMock, getMediaInfoRecordsWithTorrentsMock, qbittorrentInterfaceGetInstanceMock, onSuccessfulTorrentAddMock):
+    def test_runProgramLogic(self, loadMediaFileMock, addTVEpisodeQueriesToMediaInfoRecordsMock, auditDumpCompleteDirMock, getMediaInfoRecordsWithTorrentsMock, qbittorrentInterfaceGetInstanceMock, onSuccessfulTorrentAddMock):
         
         fakeMediaInfoRecord1 = MediaInfoRecord("fakeMediaInfoName1", 1, 1)
         fakeMediaInfoRecord2 = MediaInfoRecord("fakeMediaInfoName2", 1, 1)
@@ -126,10 +118,8 @@ class TestLogicController(unittest.TestCase):
 
         # config fake data
         activeMode = PROGRAM_MODE.TV_EPISODES
-        fakeDownloadingItems =  ["downloadingItem1", "downloadingItem2"]
         
         # config mocks
-        getDownloadingItemsMock.return_value = fakeDownloadingItems
         getMediaInfoRecordsWithTorrentsMock.side_effect = [
             fakeMediaInfoRecordsWithTorrentsFiltered,
             []
@@ -151,8 +141,7 @@ class TestLogicController(unittest.TestCase):
             call(fakeMediaInfoRecordsOriginalFull),
         ]
         addTVEpisodeQueriesToMediaInfoRecordsMock.assert_has_calls(addTVEpisodeQueriesToMediaInfoRecordsMockCalls)
-        getDownloadingItemsMock.assert_called_with(activeMode)
-        auditDumpCompleteDirMock.assert_called_with(fakeDownloadingItems)
+        auditDumpCompleteDirMock.assert_called_with()
 
         getMediaInfoRecordsWithTorrentsMockCalls = [
             call(fakeMediaInfoRecordsOriginalFull),

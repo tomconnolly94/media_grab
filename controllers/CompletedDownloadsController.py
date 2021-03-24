@@ -9,7 +9,7 @@ import shutil
 # internal dependencies
 from dataTypes.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP, PROGRAM_MODE_MAP
 from dataTypes.ProgramMode import PROGRAM_MODE
-from interfaces import FolderInterface, DownloadsInProgressFileInterface, QBittorrentInterface
+from interfaces import FolderInterface, QBittorrentInterface
 from controllers import ErrorController
 
 
@@ -330,9 +330,6 @@ def auditFileSystemItemForEpisode(fileSystemItem):
     os.rename(targetFile.path, prospectiveFile)
     logging.info(f"Moved '{targetFile.path}' to '{prospectiveFile}'")
 
-    # notify the the downloadsInProgress file that the download has concluded 
-    DownloadsInProgressFileInterface.notifyDownloadFinished(downloadId, PROGRAM_MODE.TV_EPISODES)
-
     # if fileSystemItem is a directory, then clean up the directory and the rest of the contents
     if targetFile != fileSystemItem: 
         FolderInterface.recycleOrDeleteDir(fileSystemItem.path)
@@ -342,15 +339,13 @@ def auditFileSystemItemForEpisode(fileSystemItem):
         os.rmdir(containerDir)
 
 
-def auditFileSystemItemsForEpisodes(filteredDownloadingItems):
+def auditFileSystemItemsForEpisodes():
     """
     auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete
         directory
 
     :testedWith: testCompletedDownloadsController:test_auditFileSystemItemsForEpisodes
 
-    :param mode: the mode of the program run
-    :param filteredDownloadingItems: items which are still downloaded and were started with media_grab (extracted from the DownloadsInProgress file)
     """
     # auditing is not necessary if the optional env "TV_TARGET_DIR" is not provided
     if "TV_TARGET_DIR" not in os.environ:
@@ -366,11 +361,10 @@ def auditFileSystemItemsForEpisodes(filteredDownloadingItems):
 
     # divide the directories into two lists, those initiated by mediaGrab and those initiated manually
     for fileSystemItem in fileSystemItemsFromDirectory:
-        # if fileSystemItem.name in filteredDownloadingItems:
         auditFileSystemItemForEpisode(fileSystemItem)
 
 
 
-def auditDumpCompleteDir(filteredDownloadingItems):
+def auditDumpCompleteDir():
     # look for episodes
-    auditFileSystemItemsForEpisodes(filteredDownloadingItems)
+    auditFileSystemItemsForEpisodes()

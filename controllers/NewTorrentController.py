@@ -4,7 +4,7 @@
 import logging
 
 # internal dependencies
-from interfaces import MediaIndexFileInterface, MailInterface, DownloadsInProgressFileInterface
+from interfaces import MediaIndexFileInterface, MailInterface
 
 
 def onSuccessfulTorrentAdd(mediaInfoRecord, mode):
@@ -16,6 +16,3 @@ def onSuccessfulTorrentAdd(mediaInfoRecord, mode):
 	torrentExtraInfo = f"Latest episode: {mediaInfoRecord.getLatestEpisodeNumber()}"
 	torrentRecord = mediaInfoRecord.getTorrentRecord()
 	MailInterface.getInstance().sendNewTorrentMail(torrentRecord.getName(), torrentExtraInfo, torrentRecord.getMagnet())
-
-	# notify DownloadsInProgress file
-	DownloadsInProgressFileInterface.notifyDownloadStarted(mediaInfoRecord.getMediaGrabId(), mode)
