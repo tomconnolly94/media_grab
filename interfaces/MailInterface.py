@@ -5,6 +5,9 @@ import smtplib
 import os
 import logging
 
+# internal dependencies
+from dataTypes.MailItem import MailItem
+
 global mailInterfaceInstance
 mailInterfaceInstance = None
 
@@ -15,49 +18,79 @@ def getInstance():
         mailInterfaceInstance = MailInterface()
     return mailInterfaceInstance
 
+
 class MailInterface():
 
-    def __init__(self, enterLogMessage=None, toEmailAddress=None, environment=None, mailUsername=None, mailPassword=None):
+    def __init__(self, enterLogMessage=None, toEmailAddress=None, environment=None, mailUsername=None, mailPassword=None, collateMail=True):
         # assign class properties if they are provided, use defaults if they are not
-        self.enterLogMessage = enterLogMessage if enterLogMessage else "MailInterface:sendMail called."
-        self.toEmailAddress = toEmailAddress if toEmailAddress else "tom.connolly@protonmail.com"
-        self.environment = environment if environment else os.getenv("ENVIRONMENT")
-        self.mailUsername = mailUsername if mailUsername else os.getenv("MAIL_USERNAME")
-        self.mailPassword = mailPassword if mailPassword else os.getenv("MAIL_PASSWORD")
+        self.__enterLogMessage = enterLogMessage if enterLogMessage else "MailInterface:__sendMail called."
+        self.__toEmailAddress = toEmailAddress if toEmailAddress else "tom.connolly@protonmail.com"
+        self.__environment = environment if environment else os.getenv("ENVIRONMENT")
+        self.__mailUsername = mailUsername if mailUsername else os.getenv("MAIL_USERNAME")
+        self.__mailPassword = mailPassword if mailPassword else os.getenv("MAIL_PASSWORD")
+        self.__collateMail = collateMail
+        self.__mailItems = []
 
+    ##### Private functions start #####
 
-    def sendMail(self, heading, messageBody):
-        logging.info(self.enterLogMessage)
+    def __sendMail(self, mailItem):
 
-        #only send mail when in production mode
-        if self.environment == "production":
+        heading = mailItem.getHeading()
+        messageBody = mailItem.getContent()
+
+        logging.info(self.__enterLogMessage)
+
+        if self.__environment == "production":
             with smtplib.SMTP('smtp.gmail.com', 587) as server:
+                # init mail server connection
                 server.starttls()
                 server.ehlo()
 
-                #Next, log in to the server                
-                server.login(self.mailUsername, self.mailPassword)
-                #server.login('tomconnollyapps@gmail.com', 'Ring6Door9Sofa3')
+                # log in to the server                
+                server.login(self.__mailUsername, self.__mailPassword)
 
                 mailContent = f'Subject: [Media Grab] {heading}\n\n{messageBody}'
+                server.sendmail(self.__mailUsername,
+                                    self.__toEmailAddress, 
+                                    mailContent)
 
-                #Send the email
-                server.sendmail(self.mailUsername, self.toEmailAddress, mailContent)
-        elif self.environment == "dev":
-            logging.info(f"Program is running in {self.environment} mode. No email has been sent.")
+                
+        elif self.__environment == "dev":
+            logging.info(f"Program is running in {self.__environment} mode. No email has been sent.")
         else:
-            logging.info(f"Environment mode: {self.environment} is not recognised.")
+            logging.info(f"Environment mode: {self.__environment} is not recognised.")
 
-    
+
+    def __submitNewMailItem(self, mailItem):
+        self.__mailItems.append(mailItem)
+
+    ##### Private functions end #####
+
+    ##### Public functions start #####
+
+    def pushMail(self, heading, messageBody):
+        if self.__collateMail:
+            self.__submitNewMailItem(
+                MailItem(heading, messageBody))
+        else:
+            self.__sendMail(MailItem(heading, messageBody))
+
+
     def sendNewTorrentMail(self, torrentName, torrentExtraInfo, torrentMagnet):
         messageBody = f'ADDED TORRENT: {torrentName} {torrentExtraInfo} \n\n Magnet:{torrentMagnet}'
-        self.sendMail("A new torrent has just been added.", messageBody)
+        self.pushMail("A new torrent has just been added.", messageBody)
+
+    
+    def sendAllCollatedMailItems(self):
+        for mailItem in self.__mailItems:
+            self.__sendMail(mailItem)
 
 
     def sendTestMail(self):
-        self.environment = "production"
-        self.sendMail("Media Grab: Test Message", "test message generated from running the interfaces/MailInterface.py as __main__")
+        self.__environment = "production"
+        self.__sendMail("Media Grab: Test Message", "test message generated from running the interfaces/MailInterface.py as __main__")
 
+    ##### Public functions end #####
 
 if __name__== "__main__":
     mailInterface = MailInterface() 

@@ -113,9 +113,22 @@ class TestCompletedDownloadsController(unittest.TestCase):
                 fakeShowName)
             self.assertEqual(expectedFakeShowName, actualFakeShowName)
 
+
+    @mock.patch("controllers.ErrorController.reportError")
+    @mock.patch("re.match")
+    def test_extractShowNameManualDownloadFails(self, reMatchMock, reportErrorMock):
+
+        # config fake data
+        fakeException = AttributeError("fakeException")
+
+        # config mocks
+        reMatchMock.side_effect = fakeException
+
         # check empty string
         self.assertEqual(
             None, CompletedDownloadsController.extractShowName(""))
+        reportErrorMock.assert_called_with(
+            "Exception occurred when extracting season number with regex", exception=fakeException, sendEmail=True)
 
 
     @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")

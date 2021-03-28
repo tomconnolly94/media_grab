@@ -63,7 +63,7 @@ def assertVitalEnvValuesExist():
 
 	if essentialEnvs.issubset(os.environ):
 		return True
-	exceptionText = "Some of the required env entries are not present, please review your .env file. Program exited"
+	exceptionText = "Some of the required env entries are not present, please review your .env file. Program exited."
 	exception = Exception(exceptionText)
 	ErrorController.reportError(exceptionText, exception=exception, sendEmail=True)
 	raise exception
@@ -78,11 +78,15 @@ def main(argv):
 
 	# catch all exceptions so they are always reported
 	try:
-		LogicController.runProgramLogic(mode)		
+		LogicController.runProgramLogic(mode)
 		logging.info("Media grab app exiting.")
 	
 	except Exception as exception:
 		ErrorController.reportError("Exception occurred", exception=exception, sendEmail=True)
+	
+	finally:
+		# send mail items that have been collated
+		MailInterface.getInstance().sendAllCollatedMailItems()
 
 
 if __name__== "__main__":

@@ -12,24 +12,28 @@ class TestMailInterface(unittest.TestCase):
     @mock.patch('smtplib.SMTP')
     @mock.patch('os.getenv')
     @mock.patch('logging.info')
-    def test_sendMailDev(self, loggingInfoDevMock, osGetEnvMock, smtpMock):
+    def test_sendMailSingleDev(self, loggingInfoDevMock, osGetEnvMock, smtpMock):
                 
         # config inputs
         fakeHeading = "fake heading"
         fakeMessage = "fake message"
 
         # called testable method
-        mailInterface = MailInterface(environment="dev")
-        mailInterface.sendMail(fakeHeading, fakeMessage)
+        mailInterface = MailInterface(environment="dev", collateMail=False)
+        mailInterface.pushMail(fakeHeading, fakeMessage)
 
+        # mock
+        loggingCalls = [
+            call('MailInterface:__sendMail called.'),
+            call("Program is running in dev mode. No email has been sent.")
+        ]
         # mock asserts
-        loggingInfoDevMock.assert_called_with("Program is running in dev mode. No email has been sent.")
-
+        loggingInfoDevMock.assert_has_calls(loggingCalls)
 
     @mock.patch('smtplib.SMTP')
     @mock.patch('os.getenv')
     @mock.patch('logging.info')
-    def test_sendMailProduction(self, loggingInfoProdMock, osGetEnvMock, smtpMock):
+    def test_sendMailSingleProduction(self, loggingInfoProdMock, osGetEnvMock, smtpMock):
 
         # config inputs
         fakeToEmailAddress = "fakeToEmailAddress"
@@ -41,12 +45,13 @@ class TestMailInterface(unittest.TestCase):
         fakeMessage = "fake message"
 
         # called testable method
-        mailInterface = MailInterface(toEmailAddress=fakeToEmailAddress, environment=envValue, mailUsername=fakeMailUsername, mailPassword=fakeMailPassword)
+        mailInterface = MailInterface(toEmailAddress=fakeToEmailAddress, environment=envValue,
+                                      mailUsername=fakeMailUsername, mailPassword=fakeMailPassword, collateMail=False)
 
-        mailInterface.sendMail(fakeHeading, fakeMessage)
+        mailInterface.pushMail(fakeHeading, fakeMessage)
 
         # mock asserts
-        calls = [ call("MailInterface:sendMail called.")]
+        calls = [call("MailInterface:__sendMail called.")]
         loggingInfoProdMock.assert_has_calls(calls)
 
         calls = [
@@ -60,9 +65,33 @@ class TestMailInterface(unittest.TestCase):
         ]
         smtpMock.assert_has_calls(calls)
 
-        self.assertIsNotNone(mailInterface.environment)
-        self.assertIsNotNone(mailInterface.mailUsername)
-        self.assertIsNotNone(mailInterface.mailPassword)
+
+    @mock.patch('smtplib.SMTP')
+    @mock.patch('os.getenv')
+    @mock.patch('logging.info')
+    def test_sendMailMultiDev(self, loggingInfoDevMock, osGetEnvMock, smtpMock):
+
+        # config inputs
+        fakeHeading1 = "fake heading 1"
+        fakeHeading2 = "fake heading 2"
+        fakeMessage = "fake message"
+
+        # called testable method
+        mailInterface = MailInterface(environment="dev")
+        mailInterface.pushMail(fakeHeading1, fakeMessage)
+        mailInterface.pushMail(fakeHeading2, fakeMessage)
+
+        mailInterface.sendAllCollatedMailItems()
+
+        loggingCalls = [
+            call('MailInterface:__sendMail called.'),
+            call("Program is running in dev mode. No email has been sent."), 
+            call('MailInterface:__sendMail called.'),
+            call("Program is running in dev mode. No email has been sent.")
+        ]
+        # mock asserts
+        loggingInfoDevMock.assert_has_calls(loggingCalls)
+
 
 if __name__ == '__main__':
     unittest.main()
