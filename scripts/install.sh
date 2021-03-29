@@ -1,17 +1,19 @@
 #!/bin/bash
 
+SCRIPTDIR=$(dirname "$0")
+
 # create python virtual env
-virtualenv venv
+virtualenv $SCRIPTDIR/venv
 
 # activate virtual env
-source venv/bin/activate
+source $SCRIPTDIR/venv/bin/activate
 
 # install pip requirements
-pip install -r requirements.txt
+pip install -r $SCRIPTDIR/requirements.txt
 
 # create and fill env file
-touch .env
-cat >.env <<EOL
+touch $SCRIPTDIR/.env
+cat >$SCRIPTDIR/.env <<EOL
 QBT_URL=http://127.0.0.1:8081
 QBT_USERNAME=admin
 QBT_PASSWORD=qbt_password
@@ -25,20 +27,23 @@ TV_TARGET_DIR=./tv_target_dir
 EOL
 
 # create data files
-mkdir data
+mkdir $SCRIPTDIR/data
 
-touch data/MediaIndex.json
-cat >data/MediaIndex.json <<EOL
+touch $SCRIPTDIR/data/MediaIndex.json
+cat >$SCRIPTDIR/data/MediaIndex.json <<EOL
 {"media": []}
 EOL
 
-touch data/DownloadsInProgress.json
-cat >data/DownloadsInProgress.json <<EOL
+touch $SCRIPTDIR/data/DownloadsInProgress.json
+cat >$SCRIPTDIR/data/DownloadsInProgress.json <<EOL
 {"tv-seasons": [], "tv-episodes": []}
 EOL
 
 # create logs directory
-mkdir logs
+mkdir $SCRIPTDIR/logs
+
+# install cron job
+cp $SCRIPTDIR/scripts/media_grab_cronjob.sh /etc/cron.d/media_grab
 
 echo ""
 echo "Please remember to update your new .env file."
