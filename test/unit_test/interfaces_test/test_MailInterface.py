@@ -6,6 +6,8 @@ import os
 
 # internal dependencies
 from interfaces.MailInterface import MailInterface
+from dataTypes.MailItem import MailItemType
+
 
 class TestMailInterface(unittest.TestCase):
 
@@ -72,20 +74,16 @@ class TestMailInterface(unittest.TestCase):
     def test_sendMailMultiDev(self, loggingInfoDevMock, osGetEnvMock, smtpMock):
 
         # config inputs
-        fakeHeading1 = "fake heading 1"
-        fakeHeading2 = "fake heading 2"
         fakeMessage = "fake message"
 
         # called testable method
         mailInterface = MailInterface(environment="dev")
-        mailInterface.pushMail(fakeHeading1, fakeMessage)
-        mailInterface.pushMail(fakeHeading2, fakeMessage)
+        mailInterface.pushMail(fakeMessage, MailItemType.ERROR)
+        mailInterface.pushMail(fakeMessage, MailItemType.ERROR)
 
         mailInterface.sendAllCollatedMailItems()
 
         loggingCalls = [
-            call('MailInterface:__sendMail called.'),
-            call("Program is running in dev mode. No email has been sent."), 
             call('MailInterface:__sendMail called.'),
             call("Program is running in dev mode. No email has been sent.")
         ]

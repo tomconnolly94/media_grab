@@ -7,6 +7,7 @@ import inspect
 
 # internal dependencies
 from interfaces import MailInterface
+from dataTypes.MailItem import MailItemType
 
 
 def reportError(message="", exception=None, sendEmail=False):
@@ -35,4 +36,4 @@ def reportError(message="", exception=None, sendEmail=False):
             message += f"{moreLogsMessage} console output"
 
         mailInterface = MailInterface.getInstance()
-        mailInterface.pushMail("Houston we have a problem", message)
+        mailInterface.pushMail(MailItemType.ERROR, message)

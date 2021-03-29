@@ -6,7 +6,8 @@ import os
 import logging
 
 # internal dependencies
-from dataTypes.MailItem import MailItem
+from dataTypes.MailItem import MailItem, MailItemType
+from controllers import ErrorController
 
 global mailInterfaceInstance
 mailInterfaceInstance = None
@@ -17,6 +18,8 @@ def getInstance():
     if not mailInterfaceInstance:
         mailInterfaceInstance = MailInterface()
     return mailInterfaceInstance
+
+errorMailHeading = "Houston we have a problem"
 
 
 class MailInterface():
@@ -33,10 +36,7 @@ class MailInterface():
 
     ##### Private functions start #####
 
-    def __sendMail(self, mailItem):
-
-        heading = mailItem.getHeading()
-        messageBody = mailItem.getContent()
+    def __sendMail(self, heading, messageBody):
 
         logging.info(self.__enterLogMessage)
 
@@ -60,20 +60,16 @@ class MailInterface():
         else:
             logging.info(f"Environment mode: {self.__environment} is not recognised.")
 
-
-    def __submitNewMailItem(self, mailItem):
-        self.__mailItems.append(mailItem)
-
     ##### Private functions end #####
 
     ##### Public functions start #####
 
-    def pushMail(self, heading, messageBody):
+    def pushMail(self, messageBody, mailItemType):
         if self.__collateMail:
-            self.__submitNewMailItem(
-                MailItem(heading, messageBody))
+            self.__mailItems.append(
+                MailItem(messageBody, mailItemType))
         else:
-            self.__sendMail(MailItem(heading, messageBody))
+            self.__sendMail(messageBody, mailItemType)
 
 
     def sendNewTorrentMail(self, torrentName, torrentExtraInfo, torrentMagnet):
@@ -82,17 +78,39 @@ class MailInterface():
 
     
     def sendAllCollatedMailItems(self):
+        errorMailMessages = ""
+        newTorrentMailMessages = ""
+
+        numErrorMessages = 0
+        numNewTorrentMessages = 0
+
         for mailItem in self.__mailItems:
-            self.__sendMail(mailItem)
+            if mailItem.getMailItemType() == MailItemType.ERROR:
+                errorMailMessages += mailItem.getContent() + "\n\n\n"
+                numErrorMessages += 1
+            elif mailItem.getMailItemType() == MailItemType.NEW_TORRENT:
+                newTorrentMailMessages += mailItem.getContent() + "\n\n\n"
+                numNewTorrentMessages += 1
+            else:
+                ErrorController.reportError(f"MailItemType: {mailItem.getMailItemType()} not handled!")
+        
+        if numNewTorrentMessages > 0:
+            newTorrentMailMessage = "Added new downloads" if numErrorMessages > 1 else "Added new downloads"
+
+            self.__sendMail(newTorrentMailMessage, newTorrentMailMessages)
+
+        if numErrorMessages > 0:
+            self.__sendMail("Houston we have a problem!", errorMailMessages)
 
 
     def sendTestMail(self):
         self.__environment = "production"
-        self.__sendMail("Media Grab: Test Message", "test message generated from running the interfaces/MailInterface.py as __main__")
+        self.pushMail("Media Grab: Test Message", "test message generated from running the interfaces/MailInterface.py as __main__")
 
     ##### Public functions end #####
 
 if __name__== "__main__":
-    mailInterface = MailInterface() 
+    mailInterface = MailInterface()
+    mailInterface.sendTestMail()
     mailInterface.sendTestMail()
     pass
