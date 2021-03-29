@@ -70,12 +70,6 @@ class MailInterface():
                 MailItem(messageBody, mailItemType))
         else:
             self.__sendMail(messageBody, mailItemType)
-
-
-    def sendNewTorrentMail(self, torrentName, torrentExtraInfo, torrentMagnet):
-        messageBody = f'ADDED TORRENT: {torrentName} {torrentExtraInfo} \n\n Magnet:{torrentMagnet}'
-        self.pushMail("A new torrent has just been added.", messageBody)
-
     
     def sendAllCollatedMailItems(self):
         errorMailMessages = ""
@@ -83,19 +77,20 @@ class MailInterface():
 
         numErrorMessages = 0
         numNewTorrentMessages = 0
+        messageSuffix = "\n\n\n----------------------------------------\n"
 
         for mailItem in self.__mailItems:
             if mailItem.getMailItemType() == MailItemType.ERROR:
-                errorMailMessages += mailItem.getContent() + "\n\n\n"
+                errorMailMessages += mailItem.getContent() + messageSuffix
                 numErrorMessages += 1
             elif mailItem.getMailItemType() == MailItemType.NEW_TORRENT:
-                newTorrentMailMessages += mailItem.getContent() + "\n\n\n"
+                newTorrentMailMessages += mailItem.getContent() + messageSuffix
                 numNewTorrentMessages += 1
             else:
                 ErrorController.reportError(f"MailItemType: {mailItem.getMailItemType()} not handled!")
         
         if numNewTorrentMessages > 0:
-            newTorrentMailMessage = "Added new downloads" if numErrorMessages > 1 else "Added new downloads"
+            newTorrentMailMessage = "New torrents have just been added." if numNewTorrentMessages > 1 else "A new torrent has just been added."
 
             self.__sendMail(newTorrentMailMessage, newTorrentMailMessages)
 

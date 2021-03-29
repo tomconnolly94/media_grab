@@ -5,6 +5,7 @@ import logging
 
 # internal dependencies
 from interfaces import MediaIndexFileInterface, MailInterface
+from dataTypes.MailItem import MailItemType
 
 
 def onSuccessfulTorrentAdd(mediaInfoRecord, mode):
@@ -15,4 +16,5 @@ def onSuccessfulTorrentAdd(mediaInfoRecord, mode):
 	# send email notification
 	torrentExtraInfo = f"Latest episode: {mediaInfoRecord.getLatestEpisodeNumber()}"
 	torrentRecord = mediaInfoRecord.getTorrentRecord()
-	MailInterface.getInstance().sendNewTorrentMail(torrentRecord.getName(), torrentExtraInfo, torrentRecord.getMagnet())
+	messageBody = f'ADDED TORRENT: {torrentRecord.getName()} {torrentExtraInfo} \n\n Magnet:{torrentRecord.getMagnet()}'
+	MailInterface.getInstance().pushMail(messageBody, MailItemType.NEW_TORRENT)

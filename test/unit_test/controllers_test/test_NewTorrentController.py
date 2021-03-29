@@ -8,6 +8,7 @@ from controllers import NewTorrentController
 from dataTypes.ProgramMode import PROGRAM_MODE
 from dataTypes.MediaInfoRecord import MediaInfoRecord
 from dataTypes.TorrentRecord import TorrentRecord
+from dataTypes.MailItem import MailItemType
 
 class TestNewTorrentController(unittest.TestCase):
 
@@ -31,7 +32,8 @@ class TestNewTorrentController(unittest.TestCase):
         
         # mock function asserts
         writeMediaFileMock.assert_called_once_with(fakeMediaInfoRecord)
-        mailInterfaceInstanceMock.sendNewTorrentMail.assert_called_once_with(fakeTorrent.getName(),  f"Latest episode: {fakeMediaInfoRecord.getLatestEpisodeNumber()}", fakeTorrent.getMagnet())
+        mailInterfaceInstanceMock.pushMail.assert_called_once_with(
+            "ADDED TORRENT: fakeTorrentName Latest episode: 1 \n\n Magnet:magnet:?xt=urn:btih:fakeInfoHash&dn=fakeTorrentName", MailItemType.NEW_TORRENT)
 
 
 if __name__ == '__main__':
