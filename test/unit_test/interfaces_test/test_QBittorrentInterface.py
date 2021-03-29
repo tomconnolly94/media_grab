@@ -16,7 +16,7 @@ class TestQBittorrentInterface(unittest.TestCase):
 
         # config fake values
         fakeTorrent = TorrentRecord("fakeTorrentName1", "id", "fakeInfoHash", 2)
-        fakeMediaInfoRecord = MediaInfoRecord("fakeShowName", 1, 2, fakeTorrent)
+        fakeMediaInfoRecord = MediaInfoRecord("fakeShowName", 1, 2, [], fakeTorrent)
         fakeDumpCompleteDir = "/fake/dump/complete/dir"
 
         # create testable object and override the qb member

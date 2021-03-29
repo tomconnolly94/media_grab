@@ -3,12 +3,13 @@
 
 class MediaInfoRecord():
 
-    def __init__(self, showName, latestSeasonNumber, latestEpisodeNumber, torrentRecord=None, mediaSearchQueries=None):
+    def __init__(self, showName, latestSeasonNumber, latestEpisodeNumber, blacklistTerms=[], torrentRecord=None, mediaSearchQueries=None):
         self.__showName = showName
         self.__latestSeasonNumber = int(latestSeasonNumber)
         self.__latestEpisodeNumber = int(latestEpisodeNumber)
         self.__torrentRecord = torrentRecord
         self.__mediaSearchQueries = mediaSearchQueries
+        self.__blacklistTerms = blacklistTerms
 
     ########## accessor functions start ##########
 
@@ -31,9 +32,13 @@ class MediaInfoRecord():
     def getLatestEpisodeNumber(self):
         return self.__latestEpisodeNumber
 
-    
+
     def getMediaSearchQueries(self):
         return self.__mediaSearchQueries
+
+
+    def getBlacklistTerms(self):
+        return self.__blacklistTerms
 
     ########## accessor functions end ##########
 
@@ -63,5 +68,6 @@ class MediaInfoRecord():
             "typeSpecificData": {
                 "latestSeason": self.__latestSeasonNumber,
                 "latestEpisode": self.__latestEpisodeNumber
-            }
+            },
+            "blacklistTerms": self.__blacklistTerms
         }

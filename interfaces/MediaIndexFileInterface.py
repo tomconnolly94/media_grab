@@ -69,8 +69,12 @@ def loadMediaFile():
 		mediaInfoRecords = []
 		mediaInfoRecordsRaw = json.loads(mediaIndexfile.read())["media"]
 		for mediaInfoRecordRaw in mediaInfoRecordsRaw:
+
+			blacklistTerms = mediaInfoRecordRaw["blacklistTerms"] if "blacklistTerms" in mediaInfoRecordRaw.keys() else []
+
 			mediaInfoRecords.append(MediaInfoRecord(mediaInfoRecordRaw["name"], 
 				mediaInfoRecordRaw["typeSpecificData"]["latestSeason"], 
-				mediaInfoRecordRaw["typeSpecificData"]["latestEpisode"]))
+				mediaInfoRecordRaw["typeSpecificData"]["latestEpisode"],
+				blacklistTerms))
 		
 		return mediaInfoRecords

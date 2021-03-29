@@ -18,7 +18,7 @@ class TestNewTorrentController(unittest.TestCase):
 
         # config fake values
         fakeTorrent = TorrentRecord("fakeTorrentName", "fakeId", "fakeInfoHash", "5")
-        fakeMediaInfoRecord = MediaInfoRecord("fakeRecordName", 1, 1, fakeTorrent)
+        fakeMediaInfoRecord = MediaInfoRecord("fakeRecordName", 1, 1, [], fakeTorrent)
         expectedMediaGrabId = "fakeRecordName--s1e1"
         activeMode = PROGRAM_MODE.TV_EPISODES
 
