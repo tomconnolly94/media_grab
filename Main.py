@@ -9,6 +9,7 @@ import getopt
 
 # internal dependencies
 from controllers import LoggingController, LogicController, ErrorController
+from interfaces import MailInterface
 from dataTypes.ProgramModeMap import PROGRAM_MODE_MAP
 from dataTypes.ProgramMode import PROGRAM_MODE
 

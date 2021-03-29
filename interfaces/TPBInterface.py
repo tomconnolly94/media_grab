@@ -4,7 +4,7 @@
 import requests
 import logging
 import json
-from requests.exceptions import ChunkedEncodingError
+from requests.exceptions import ChunkedEncodingError, ConnectionError
 from json.decoder import JSONDecodeError
 
 # internal dependencies
@@ -48,6 +48,7 @@ def queryAPI(queryTerm):
     
     # create query url
     queryUrl = f"https://apibay.org/q.php?q={queryTerm}"
+    response = None
 
     try:
         # make query and load json data
@@ -65,7 +66,11 @@ def queryAPI(queryTerm):
 
         return torrentRecords
 
-    except (JSONDecodeError, ChunkedEncodingError) as exception:
-        responsePrintout = response.content if response.content else response
-        ErrorController.reportError(f"Problem with TPB API has occurred. Recevied: {response.content}", exception, True)
+    except (JSONDecodeError, ChunkedEncodingError, ConnectionError) as exception:
+
+        errorString = "Problem with TPB API has occurred."
+
+        if response and response.content:
+            errorString += f" Received: {response.content}"
+        ErrorController.reportError(errorString, exception, True)
         return []
