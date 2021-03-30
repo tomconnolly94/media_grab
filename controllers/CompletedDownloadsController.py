@@ -394,4 +394,4 @@ def permanentlyDeleteExpiredItems():
         fileAge = datetime.fromtimestamp(os.path.getctime(logFile.path))
 
         if fileAge < oneWeekTimeThreshold:
-            FolderInterface.deleteDir(logFile.path)
+            FolderInterface.deleteFile(logFile.path)

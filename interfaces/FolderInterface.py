@@ -44,6 +44,17 @@ def deleteDir(directoryPath):
         ErrorController.reportError(f"Exception occurred whilst deleting residual directory `{directoryPath}`", exception=exception, sendEmail=True)
         return False
 
+def deleteFile(filePath):
+    try:
+        if os.path.exists(filePath):
+            os.remove(filePath)
+            logging.info(f"Deleted '{filePath}'")
+
+    except OSError as exception:
+        ErrorController.reportError(
+            f"Exception occurred whilst deleting residual file `{filePath}`", exception=exception, sendEmail=True)
+        return False
+
 
 def recycleOrDeleteDir(directoryPath):
     """
