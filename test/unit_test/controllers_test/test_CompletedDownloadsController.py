@@ -632,11 +632,12 @@ class TestCompletedDownloadsController(unittest.TestCase):
         auditFileSystemItemForEpisodeMock.assert_called_with(
             fakeFileSystemItems[0])
 
+    @mock.patch("controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems")
     @mock.patch("interfaces.QBittorrentInterface.getInstance")
     @mock.patch("logging.info")
     @mock.patch("controllers.CompletedDownloadsController.reportItemAlreadyExists")
     @mock.patch('os.getenv')
-    def test_auditFilesWithFileSystem(self, getEnvMock, reportItemAlreadyExistsMock, loggingInfoMock, qBittorrentInterfaceGetInstanceMock):
+    def test_auditFilesWithFileSystem(self, getEnvMock, reportItemAlreadyExistsMock, loggingInfoMock, qBittorrentInterfaceGetInstanceMock, permanentlyDeleteExpiredItemsMock):
 
         # init items
         downloadingItems = [
@@ -694,11 +695,49 @@ class TestCompletedDownloadsController(unittest.TestCase):
             self.assertEqual(1, len(list(os.scandir(fakeDumpCompleteDir))))
             self.assertEqual(2, len(list(os.scandir(fakeRecycleBinDir))))
             loggingInfoMock.assert_called()
+            permanentlyDeleteExpiredItemsMock.assert_called()
             reportItemAlreadyExistsMock.assert_not_called()
 
         finally:
             # clean up moved files
             cleanUpDirs(directoriesToCleanUp, downloadingItems)
+
+
+    @mock.patch('interfaces.FolderInterface.deleteDir')
+    @mock.patch('os.path.getctime')
+    @mock.patch('interfaces.FolderInterface.getDirContents')
+    def test_permanentlyDeleteExpiredItems(self, getDirContentsMock, getctimeMock, deleteDirMock):
+
+        logsDir = "logs"
+
+        def getDirContents(directory):
+
+            assert(directory in [fakeRecycleBinDir, logsDir])
+
+            return [
+                FakeFileSystemItem("fakeDirName1", os.path.join(directory, "fakePath1")),
+                FakeFileSystemItem("fakeDirName2", os.path.join(directory, "fakePath2"))
+            ]
+
+        # config mocks
+        getDirContentsMock.side_effect = getDirContents
+        getctimeMock.side_effect = [
+            1614112827.056091, # 5 weeks old
+            1615322451.916936, # 3 weeks old
+            1616445679.194913, # 8 days old
+            1616618502.277024 # 6 days old
+        ]
+        
+        # run testable function
+        CompletedDownloadsController.permanentlyDeleteExpiredItems()
+
+        # mock asserts
+        calls = [
+            call(os.path.join(fakeRecycleBinDir, "fakePath1")),
+            call(os.path.join(logsDir, "fakePath1"))
+        ]
+        deleteDirMock.assert_has_calls(calls)
+
 
 
 if __name__ == '__main__':

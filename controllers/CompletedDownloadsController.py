@@ -5,6 +5,7 @@ import os
 import logging
 import re
 import shutil
+from datetime import datetime, timedelta
 
 # internal dependencies
 from dataTypes.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP, PROGRAM_MODE_MAP
@@ -364,7 +365,33 @@ def auditFileSystemItemsForEpisodes():
         auditFileSystemItemForEpisode(fileSystemItem)
 
 
-
 def auditDumpCompleteDir():
     # look for episodes
     auditFileSystemItemsForEpisodes()
+    # deal with expired recycled items and logs
+    permanentlyDeleteExpiredItems()
+
+
+def permanentlyDeleteExpiredItems():
+    # delete recycled directories older than 4 weeks
+    recycleBinDir = os.getenv("RECYCLE_BIN_DIR")
+    recycledFileSystemDirs = FolderInterface.getDirContents(
+        recycleBinDir)
+
+    fourWeekTimeThreshold = datetime.now() - timedelta(weeks=4)
+    oneWeekTimeThreshold = datetime.now() - timedelta(weeks=1)
+
+    for directoryItem in recycledFileSystemDirs:
+        fileAge = datetime.fromtimestamp(os.path.getctime(directoryItem.path))
+
+        if fileAge < fourWeekTimeThreshold:
+            FolderInterface.deleteDir(directoryItem.path)
+
+    # get log files from logs dir
+    logFiles = FolderInterface.getDirContents("logs")
+
+    for logFile in logFiles:
+        fileAge = datetime.fromtimestamp(os.path.getctime(logFile.path))
+
+        if fileAge < oneWeekTimeThreshold:
+            FolderInterface.deleteDir(logFile.path)
