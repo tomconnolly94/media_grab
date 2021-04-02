@@ -11,7 +11,11 @@ from dataTypes.MailItem import MailItemType
 
 
 def reportError(message="", exception=None, sendEmail=False):
+    """
+    reportError reports an error properly, offering options via params to detail a specific error message, capture the exception, and send an email
 
+    :testedWith: testCompletedDownloadsController:test_auditFileSystemItemsForEpisodes
+    """
     frame = inspect.stack()[1][0]
     info = inspect.getframeinfo(frame)
     logPrefix = f"{info.filename}:{info.function}():{info.lineno}"
