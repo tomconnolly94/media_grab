@@ -18,7 +18,7 @@ def downloadWasInitiatedByMediaGrab(downloadId):
     """
     downloadWasInitiatedByMediaGrab checks if a download was initiated by mediaGrab using a regex
 
-    :testedWith: testCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab
+    :testedWith: TestCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab
 
     :param downloadId: the downloadId of the download
     :return: the tv show name or `None` if one cannot be found
@@ -41,7 +41,7 @@ def extractShowName(downloadId):
     """
     extractShowName extracts the show name from the downloadId, using a different method depending on whether the download was initiated by mediaGrab or not
 
-    :testedWith: testCompletedDownloadsController:test_extractShowName
+    :testedWith: TestCompletedDownloadsController:test_extractShowName
 
     :param downloadId: the downloadId of the download
     :return: the tv show name or `None` if one cannot be found
@@ -76,7 +76,7 @@ def extractSeasonNumber(downloadId):
     """
     extractSeasonNumber extracts the season number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not
 
-    :testedWith: testCompletedDownloadsController:test_extractSeasonNumber
+    :testedWith: TestCompletedDownloadsController:test_extractSeasonNumber
 
     :param downloadId: the downloadId of the download
     :return: the season number or `None` if one cannot be found
@@ -105,7 +105,7 @@ def extractEpisodeNumber(downloadId):
     """
     extractEpisodeNumber extracts the episode number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not
 
-    :testedWith: testCompletedDownloadsController:test_extractEpisodeNumber
+    :testedWith: TestCompletedDownloadsController:test_extractEpisodeNumber
 
     :param downloadId: the downloadId of the download
     :return: the episode number or `None` if one cannot be found
@@ -134,7 +134,7 @@ def extractExtension(fileName):
     """
     extractExtension extracts the extension from a file name.
 
-    :testedWith: testCompletedDownloadsController:test_extractExtension
+    :testedWith: TestCompletedDownloadsController:test_extractExtension
 
     :param fileName: the full name of the file
     :return: the file extension or an empty string if none can be found
@@ -146,7 +146,7 @@ def reportItemAlreadyExists(newItemLocation, downloadName):
     """
     reportItemAlreadyExists reports that the item already exists in the file system
 
-    :testedWith: testCompletedDownloadsController:test_reportItemAlreadyExists
+    :testedWith: TestCompletedDownloadsController:test_reportItemAlreadyExists
 
     :param newItemLocation: the prospective location of the finished download
     :param downloadName: the original name of the download
@@ -159,7 +159,7 @@ def getLargestItemInDir(directory):
     """
     getLargestItemInDir finds the largest item inside the given directory
 
-    :testedWith: testCompletedDownloadsController:test_getLargestItemInDir
+    :testedWith: TestCompletedDownloadsController:test_getLargestItemInDir
 
     :param directory: the directory to be explored
     :return: the largest item in the drectory or `None` if the directory is empty
@@ -177,7 +177,7 @@ def requestTorrentPause(torrentName):
     """
     requestTorrentPause requests that the torrent client pauses the activity of the torrent
 
-    :testedWith: testCompletedDownloadsController:test_requestTorrentPause
+    :testedWith: TestCompletedDownloadsController:test_requestTorrentPause
 
     :param torrentName: the name of the torrent to be paused
     """
@@ -195,7 +195,7 @@ def ensureDirStructureExists(tvShowDirPath, seasonDirPath):
     ensureDirStructureExists explores the file system to ensure that the directory structure
         required as a target for the download exists
 
-    :testedWith: testCompletedDownloadsController:test_ensureDirStructureExists
+    :testedWith: TestCompletedDownloadsController:test_ensureDirStructureExists
 
     :param tvShowDirPath: the name of the tv show from the download
     :param seasonDirPath: the number of the season from the download
@@ -220,7 +220,7 @@ def getTargetFile(fileSystemItem):
     """
     getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could be the directory that the target file is in
 
-    :testedWith: testCompletedDownloadsController:test_getTargetFile
+    :testedWith: TestCompletedDownloadsController:test_getTargetFile
 
     :param fileSystemItem: the file system item, it could be a directory or a file
     :return: the file system item if it is a file or if it is a directory then the largest file in that directory
@@ -241,7 +241,7 @@ def getProspectiveFilePath(downloadId, mode, extension):
     """
     getProspectiveFilePath create the prospective file path by extracting the necessary info like the tv show name and season/episode numbers
 
-    :testedWith: testCompletedDownloadsController:test_getProspectiveFilepPath
+    :testedWith: TestCompletedDownloadsController:test_getProspectiveFilepPath
 
     :param downloadId: the downloadId for the downloaded item
     :param mode: the mode of the program run
@@ -267,7 +267,7 @@ def unWrapQBittorrentWrapperDir(fileSystemItem):
     """
     unWrapQBittorrentWrapperDir browses past the identifiable directory provided by qbittorrent to access the downloaded item  
 
-    :testedWith: testCompletedDownloadsController:test_unWrapQBittorrentWrapperDir
+    :testedWith: TestCompletedDownloadsController:test_unWrapQBittorrentWrapperDir
 
     :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId
     :return: the file system item, could be a file or directory which is the only contents of the input dir
@@ -287,7 +287,7 @@ def auditFileSystemItemForEpisode(fileSystemItem):
     auditMediaGrabItemForEpisode collates all the operations necessary to deal with a finished 
         download (that was initiated by mediaGrab), move it to an organised file system location, and notifies the user
 
-    :testedWith: testCompletedDownloadsController:test_auditMediaGrabItemForEpisode
+    :testedWith: TestCompletedDownloadsController:test_auditMediaGrabItemForEpisode
 
     :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId
     """
@@ -342,11 +342,9 @@ def auditFileSystemItemForEpisode(fileSystemItem):
 
 def auditFileSystemItemsForEpisodes():
     """
-    auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete
-        directory
+    auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete directory
 
-    :testedWith: testCompletedDownloadsController:test_auditFileSystemItemsForEpisodes
-
+    :testedWith: TestCompletedDownloadsController:test_auditFileSystemItemsForEpisodes
     """
     # auditing is not necessary if the optional env "TV_TARGET_DIR" is not provided
     if "TV_TARGET_DIR" not in os.environ:
@@ -366,6 +364,11 @@ def auditFileSystemItemsForEpisodes():
 
 
 def auditDumpCompleteDir():
+    """
+    auditDumpCompleteDir wrapper, entry function to this module to collate all operations necessary for download directory auditing
+
+    :testedWith: TestCompletedDownloadsController:test_auditFilesWithFileSystem
+    """
     # look for episodes
     auditFileSystemItemsForEpisodes()
     # deal with expired recycled items and logs
@@ -373,25 +376,30 @@ def auditDumpCompleteDir():
 
 
 def permanentlyDeleteExpiredItems():
+    """
+    permanentlyDeleteExpiredItems performs a sub audit of the recycle_bin directory and the log directory, in order to delete any files or directories that are deemed too old
+
+    :testedWith: TestCompletedDownloadsController:test_permanentlyDeleteExpiredItems
+    """
     # delete recycled directories older than 4 weeks
     recycleBinDir = os.getenv("RECYCLE_BIN_DIR")
     recycledFileSystemDirs = FolderInterface.getDirContents(
         recycleBinDir)
 
-    fourWeekTimeThreshold = datetime.now() - timedelta(weeks=4)
-    oneWeekTimeThreshold = datetime.now() - timedelta(weeks=1)
+    dateFourWeeksAgo = datetime.now() - timedelta(weeks=4)
+    dateOneWeekAgo = datetime.now() - timedelta(weeks=1)
 
     for directoryItem in recycledFileSystemDirs:
-        fileAge = datetime.fromtimestamp(os.path.getctime(directoryItem.path))
+        fileCreationDate = datetime.fromtimestamp(os.path.getctime(directoryItem.path))
 
-        if fileAge < fourWeekTimeThreshold:
+        if fileCreationDate < dateFourWeeksAgo:
             FolderInterface.deleteDir(directoryItem.path)
 
     # get log files from logs dir
     logFiles = FolderInterface.getDirContents("logs")
 
     for logFile in logFiles:
-        fileAge = datetime.fromtimestamp(os.path.getctime(logFile.path))
+        fileCreationDate = datetime.fromtimestamp(os.path.getctime(logFile.path))
 
-        if fileAge < oneWeekTimeThreshold:
+        if fileCreationDate < dateOneWeekAgo:
             FolderInterface.deleteFile(logFile.path)

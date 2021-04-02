@@ -12,7 +12,8 @@ from dataTypes.MediaInfoRecord import MediaInfoRecord
 class TestQBittorrentInterface(unittest.TestCase):
 
     @mock.patch("logging.info")
-    def test_torrentDownload(self, loggingInfoMock):
+    @mock.patch("os.getenv")
+    def test_torrentDownload(self, getEnvMock, loggingInfoMock):
 
         # config fake values
         fakeTorrent = TorrentRecord("fakeTorrentName1", "id", "fakeInfoHash", 2)
@@ -20,6 +21,7 @@ class TestQBittorrentInterface(unittest.TestCase):
         fakeDumpCompleteDir = "/fake/dump/complete/dir"
 
         # create testable object and override the qb member
+        getEnvMock.return_value = None # this prevents the qbittorrent client fromr eaching out to a server
         qBittorrentInterface = QBittorrentInterface(fakeDumpCompleteDir)
         qBittorrentInterface.qb = MagicMock()
         qBittorrentInterface.qb.download_from_link.return_value = "Ok."

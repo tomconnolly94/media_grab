@@ -5,6 +5,7 @@ import os
 from unittest.mock import call
 import shutil
 from mock import MagicMock
+from datetime import datetime, timedelta
 
 # internal dependencies
 from controllers import CompletedDownloadsController
@@ -702,11 +703,11 @@ class TestCompletedDownloadsController(unittest.TestCase):
             # clean up moved files
             cleanUpDirs(directoriesToCleanUp, downloadingItems)
 
-
+    @mock.patch('interfaces.FolderInterface.deleteFile')
     @mock.patch('interfaces.FolderInterface.deleteDir')
     @mock.patch('os.path.getctime')
     @mock.patch('interfaces.FolderInterface.getDirContents')
-    def test_permanentlyDeleteExpiredItems(self, getDirContentsMock, getctimeMock, deleteDirMock):
+    def test_permanentlyDeleteExpiredItems(self, getDirContentsMock, getctimeMock, deleteDirMock, deleteFileMock):
 
         logsDir = "logs"
 
@@ -722,21 +723,19 @@ class TestCompletedDownloadsController(unittest.TestCase):
         # config mocks
         getDirContentsMock.side_effect = getDirContents
         getctimeMock.side_effect = [
-            1614112827.056091, # 5 weeks old
-            1615322451.916936, # 3 weeks old
-            1616445679.194913, # 8 days old
-            1616618502.277024 # 6 days old
+            (datetime.now() - timedelta(weeks=5)).timestamp(), # 5 weeks old
+            (datetime.now() - timedelta(weeks=3)).timestamp(), # 3 weeks old
+            (datetime.now() - timedelta(days=8)).timestamp(), # 8 days old
+            (datetime.now() - timedelta(days=6)).timestamp(), # 6 days old
         ]
         
         # run testable function
         CompletedDownloadsController.permanentlyDeleteExpiredItems()
 
         # mock asserts
-        calls = [
-            call(os.path.join(fakeRecycleBinDir, "fakePath1")),
-            call(os.path.join(logsDir, "fakePath1"))
-        ]
-        deleteDirMock.assert_has_calls(calls)
+        deleteDirMock.assert_called_with(
+            os.path.join(fakeRecycleBinDir, "fakePath1"))
+        deleteFileMock.assert_called_with(os.path.join(logsDir, "fakePath1"))
 
 
 
