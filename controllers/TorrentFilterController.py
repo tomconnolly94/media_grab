@@ -29,7 +29,7 @@ def filterEpisodeTorrents(torrents, mediaInfoRecord):
 	relevantSeason = str(mediaInfoRecord.getLatestSeasonNumber()).zfill(2)
 	relevantEpisode = str(mediaInfoRecord.getLatestEpisodeNumber()).zfill(2)
 
-	episodeRegex = rf"[{nameFirstLetter.upper()}|{nameFirstLetter}]{restOfName}\D*[Ss]{relevantSeason}[Ee]{relevantEpisode}"
+	episodeRegex = rf"{nameFirstLetter}{restOfName}\D*[Ss]{relevantSeason}[Ee]{relevantEpisode}"
 	logging.info(f"Regex filter used: {episodeRegex}")
 	episodeRegex = re.compile(episodeRegex, flags=re.IGNORECASE | re.MULTILINE)
 	
