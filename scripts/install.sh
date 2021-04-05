@@ -1,19 +1,21 @@
 #!/bin/bash
+# file shall be located in <BASEDIR>/scripts
 
 SCRIPTDIR=$(dirname "$0")
+BASEDIR=$SCRIPTDIR/..
 
 # create python virtual env
-virtualenv $SCRIPTDIR/venv
+virtualenv $BASEDIR/venv
 
 # activate virtual env
-source $SCRIPTDIR/venv/bin/activate
+source $BASEDIR/venv/bin/activate
 
 # install pip requirements
-pip install -r $SCRIPTDIR/requirements.txt
+pip install -r $BASEDIR/requirements.txt
 
 # create and fill env file
-touch $SCRIPTDIR/.env
-cat >$SCRIPTDIR/.env <<EOL
+touch $BASEDIR/.env
+cat >$BASEDIR/.env <<EOL
 QBT_URL=http://127.0.0.1:8081
 QBT_USERNAME=admin
 QBT_PASSWORD=qbt_password
@@ -27,26 +29,21 @@ TV_TARGET_DIR=./tv_target_dir
 EOL
 
 # create data files
-mkdir $SCRIPTDIR/data
+mkdir $BASEDIR/data
 
-touch $SCRIPTDIR/data/MediaIndex.json
-cat >$SCRIPTDIR/data/MediaIndex.json <<EOL
+# create empty mediaIndex.json file and fill it with the base json structure
+touch $BASEDIR/data/MediaIndex.json
+cat >$BASEDIR/data/MediaIndex.json <<EOL
 {"media": []}
 EOL
 
-touch $SCRIPTDIR/data/DownloadsInProgress.json
-cat >$SCRIPTDIR/data/DownloadsInProgress.json <<EOL
-{"tv-seasons": [], "tv-episodes": []}
-EOL
 
 # create logs directory
-mkdir $SCRIPTDIR/logs
+mkdir $BASEDIR/logs
 
 # install cron job
-cp $SCRIPTDIR/scripts/media_grab_cronjob.sh /etc/cron.d/media_grab
+cp $BASEDIR/scripts/media_grab_cronjob.sh /etc/cron.d/media_grab
 
 echo ""
 echo "Please remember to update your new .env file."
 echo "All done. Enjoy! :)"
-
-# setup cronjob to run program periodically

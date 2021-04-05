@@ -56,7 +56,6 @@ def assertVitalEnvValuesExist():
 	essentialEnvs = set([
 		"QBT_URL", # necessary to submit torrents
 		"MEDIA_FILE", # necessary to query torrents
-		"DOWNLOADS_IN_PROGRESS_FILE", # necessary to track downloading torrents
 		"ENVIRONMENT", # necessary to determine the mode of the program
 		"DUMP_COMPLETE_DIR", # necessary to determine where to deposit (and find) downloaded items
 		"THE_MOVIE_DATABASE_API_KEY" # necessary to get information about the requested media
