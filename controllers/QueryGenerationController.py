@@ -22,6 +22,12 @@ episodeTemplates = [
 
 
 def addTVEpisodeQueriesToMediaInfoRecords(mediaInfoRecords):
+	"""
+	addTVEpisodeQueriesToMediaInfoRecords for each mediaInfoRecord passed in, a group of queries is generated that are, when put through a torrent search engine, likely to return relevant torrent results. This group is assigned to the original object so no return value is required.
+	:testedWith: TestQueryGenerationController:test_addTVEpisodeQueriesToMediaInfoRecords
+	:param mediaInfoRecords: a list of mediaInfoRecords 
+	:return: None
+	"""
 	queryUrls = {}
 	for record in mediaInfoRecords:
 		record.setMediaSearchQueries(generateTVEpisodeQueryGroup(record.getShowName(
@@ -29,6 +35,14 @@ def addTVEpisodeQueriesToMediaInfoRecords(mediaInfoRecords):
 
 
 def generateTVEpisodeQueryGroup(mediaName, relevantSeason, relevantEpisode):
+	"""
+	generateTVEpisodeQueryGroup for the input mediaName and the relevant season and episode numbers, use the query templated to generate query strings that are likely to return torrent results
+	:testedWith: TestQueryGenerationController:test_generateEpisodeQueryGroup
+	:param mediaName: the name of the media
+	:param relevantSeason: the season number
+	:param relevantEpisode: the episode number
+	:return: a list of query strings
+	"""
 	queries = []
 
 	for index, template in enumerate(episodeTemplates):

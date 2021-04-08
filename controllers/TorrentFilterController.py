@@ -7,6 +7,12 @@ from num2words import num2words
 
 
 def createBlacklistFilterFunc(backlistTerms):
+	"""
+	createBlacklistFilterFunc defines and returns a function that can be passed to a filter call to remove all torrents that contain any of the disallowed blacklistTerms
+	:testedWith: TestTorrentFilterController:test_createBlacklistFilterFunc
+	:param blacklistTerms: a list of strings representing terms that the torrent name should not contain
+	:return: a function that will filter for blacklist terms
+	"""
 	def blacklistFilterFunc(item):
 
 		for term in backlistTerms:
@@ -18,7 +24,13 @@ def createBlacklistFilterFunc(backlistTerms):
 
 
 def filterEpisodeTorrents(torrents, mediaInfoRecord):
-
+	"""
+	filterEpisodeTorrents applies a set of filters that involve regex matching with the download name and ensuring the number of sources exceeds one
+	:testedWith: TestTorrentFilterController:filterEpisodeTorrents
+	:param torrents: a list of potential download items for the mediaInfoRecord to be filtered
+	:param mediaInfoRecord: the mediaInfoRecord for which the torrents were found
+	:return: a list of filtered downloads
+	"""
 	if not torrents:
 		return []
 		

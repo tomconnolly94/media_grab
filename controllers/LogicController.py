@@ -9,13 +9,13 @@ from controllers import QueryGenerationController, NewTorrentController, Complet
 from dataTypes.ProgramMode import PROGRAM_MODE 
 
 
-def findMediaInfoRecord(mediaInfoRecords, mediaInfoName):
-	for record in mediaInfoRecords:
-		if record.getShowName() == mediaInfoName:
-			return record
-
-
 def getMediaInfoRecordsWithTorrents(mediaInfoRecords):
+    """
+    getMediaInfoRecordsWithTorrents uses the TPB interface to assign a torrentRecord to each mediaInfoRecord passed in, records for which a torrent cannot be found are not returned 
+    :testedWith: TestLogicController:test_getMediaInfoRecordsWithTorrents
+    :param mediaInfoRecords: the downloadId of the download
+    :return: mediaInfoRecords with valid torrentRecords
+    """
     mediaInfoRecordsWithTorrents = []
 
     for mediaInfoRecord in mediaInfoRecords:
@@ -53,7 +53,12 @@ def getMediaInfoRecordsWithTorrents(mediaInfoRecords):
 
 
 def runProgramLogic(mode):
-
+    """
+    runProgramLogic groups the core of the top level operations of the program together
+    :testedWith: TestLogicController:test_runProgramLogic
+    :param mode: the mode of the program run, the type of media the program is focusing on
+    :return: None
+    """
     #analyse folder to look for completed downloads
     CompletedDownloadsController.auditDumpCompleteDir()
 
