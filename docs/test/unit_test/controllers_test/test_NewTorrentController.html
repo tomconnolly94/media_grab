@@ -64,6 +64,7 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
 <span class="kn">from</span> <span class="nn">dataTypes.ProgramMode</span> <span class="kn">import</span> <span class="n">PROGRAM_MODE</span>
 <span class="kn">from</span> <span class="nn">dataTypes.MediaInfoRecord</span> <span class="kn">import</span> <span class="n">MediaInfoRecord</span>
 <span class="kn">from</span> <span class="nn">dataTypes.TorrentRecord</span> <span class="kn">import</span> <span class="n">TorrentRecord</span>
+<span class="kn">from</span> <span class="nn">dataTypes.MailItem</span> <span class="kn">import</span> <span class="n">MailItemType</span>
 
 <span class="k">class</span> <span class="nc">TestNewTorrentController</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
 
@@ -73,7 +74,7 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
 
         <span class="c1"># config fake values</span>
         <span class="n">fakeTorrent</span> <span class="o">=</span> <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;fakeTorrentName&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">)</span>
-        <span class="n">fakeMediaInfoRecord</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeRecordName&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">fakeTorrent</span><span class="p">)</span>
+        <span class="n">fakeMediaInfoRecord</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeRecordName&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[],</span> <span class="n">fakeTorrent</span><span class="p">)</span>
         <span class="n">expectedMediaGrabId</span> <span class="o">=</span> <span class="s2">&quot;fakeRecordName--s1e1&quot;</span>
         <span class="n">activeMode</span> <span class="o">=</span> <span class="n">PROGRAM_MODE</span><span class="o">.</span><span class="n">TV_EPISODES</span>
 
@@ -87,7 +88,8 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
         
         <span class="c1"># mock function asserts</span>
         <span class="n">writeMediaFileMock</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">fakeMediaInfoRecord</span><span class="p">)</span>
-        <span class="n">mailInterfaceInstanceMock</span><span class="o">.</span><span class="n">sendNewTorrentMail</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getName</span><span class="p">(),</span>  <span class="sa">f</span><span class="s2">&quot;Latest episode: </span><span class="si">{</span><span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">())</span>
+        <span class="n">mailInterfaceInstanceMock</span><span class="o">.</span><span class="n">pushMail</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span>
+            <span class="s2">&quot;ADDED TORRENT: fakeTorrentName Latest episode: 1 </span><span class="se">\n\n</span><span class="s2"> Magnet:magnet:?xt=urn:btih:fakeInfoHash&amp;dn=fakeTorrentName&quot;</span><span class="p">,</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">NEW_TORRENT</span><span class="p">)</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
@@ -119,7 +121,7 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
 
         <span class="c1"># config fake values</span>
         <span class="n">fakeTorrent</span> <span class="o">=</span> <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;fakeTorrentName&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">)</span>
-        <span class="n">fakeMediaInfoRecord</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeRecordName&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">fakeTorrent</span><span class="p">)</span>
+        <span class="n">fakeMediaInfoRecord</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeRecordName&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[],</span> <span class="n">fakeTorrent</span><span class="p">)</span>
         <span class="n">expectedMediaGrabId</span> <span class="o">=</span> <span class="s2">&quot;fakeRecordName--s1e1&quot;</span>
         <span class="n">activeMode</span> <span class="o">=</span> <span class="n">PROGRAM_MODE</span><span class="o">.</span><span class="n">TV_EPISODES</span>
 
@@ -133,7 +135,8 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
         
         <span class="c1"># mock function asserts</span>
         <span class="n">writeMediaFileMock</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">fakeMediaInfoRecord</span><span class="p">)</span>
-        <span class="n">mailInterfaceInstanceMock</span><span class="o">.</span><span class="n">sendNewTorrentMail</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getName</span><span class="p">(),</span>  <span class="sa">f</span><span class="s2">&quot;Latest episode: </span><span class="si">{</span><span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">())</span>
+        <span class="n">mailInterfaceInstanceMock</span><span class="o">.</span><span class="n">pushMail</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span>
+            <span class="s2">&quot;ADDED TORRENT: fakeTorrentName Latest episode: 1 </span><span class="se">\n\n</span><span class="s2"> Magnet:magnet:?xt=urn:btih:fakeInfoHash&amp;dn=fakeTorrentName&quot;</span><span class="p">,</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">NEW_TORRENT</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -192,7 +195,7 @@ attribute so can be configured by individual tests if required.</li>
 
         <span class="c1"># config fake values</span>
         <span class="n">fakeTorrent</span> <span class="o">=</span> <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;fakeTorrentName&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">)</span>
-        <span class="n">fakeMediaInfoRecord</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeRecordName&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">fakeTorrent</span><span class="p">)</span>
+        <span class="n">fakeMediaInfoRecord</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeRecordName&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[],</span> <span class="n">fakeTorrent</span><span class="p">)</span>
         <span class="n">expectedMediaGrabId</span> <span class="o">=</span> <span class="s2">&quot;fakeRecordName--s1e1&quot;</span>
         <span class="n">activeMode</span> <span class="o">=</span> <span class="n">PROGRAM_MODE</span><span class="o">.</span><span class="n">TV_EPISODES</span>
 
@@ -206,7 +209,8 @@ attribute so can be configured by individual tests if required.</li>
         
         <span class="c1"># mock function asserts</span>
         <span class="n">writeMediaFileMock</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">fakeMediaInfoRecord</span><span class="p">)</span>
-        <span class="n">mailInterfaceInstanceMock</span><span class="o">.</span><span class="n">sendNewTorrentMail</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getName</span><span class="p">(),</span>  <span class="sa">f</span><span class="s2">&quot;Latest episode: </span><span class="si">{</span><span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">())</span>
+        <span class="n">mailInterfaceInstanceMock</span><span class="o">.</span><span class="n">pushMail</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span>
+            <span class="s2">&quot;ADDED TORRENT: fakeTorrentName Latest episode: 1 </span><span class="se">\n\n</span><span class="s2"> Magnet:magnet:?xt=urn:btih:fakeInfoHash&amp;dn=fakeTorrentName&quot;</span><span class="p">,</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">NEW_TORRENT</span><span class="p">)</span>
 </pre></div>
 
         </details>

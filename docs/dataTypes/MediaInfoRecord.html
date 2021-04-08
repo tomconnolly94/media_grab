@@ -52,6 +52,9 @@
                                 <a class="function" href="#MediaInfoRecord.getMediaSearchQueries">getMediaSearchQueries</a>
                         </li>
                         <li>
+                                <a class="function" href="#MediaInfoRecord.getBlacklistTerms">getBlacklistTerms</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#MediaInfoRecord.setTorrentRecord">setTorrentRecord</a>
                         </li>
                         <li>
@@ -92,12 +95,13 @@
 
 <span class="k">class</span> <span class="nc">MediaInfoRecord</span><span class="p">():</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showName</span><span class="p">,</span> <span class="n">latestSeasonNumber</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">,</span> <span class="n">torrentRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mediaSearchQueries</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showName</span><span class="p">,</span> <span class="n">latestSeasonNumber</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">,</span> <span class="n">blacklistTerms</span><span class="o">=</span><span class="p">[],</span> <span class="n">torrentRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mediaSearchQueries</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__showName</span> <span class="o">=</span> <span class="n">showName</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestSeasonNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">latestSeasonNumber</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">latestEpisodeNumber</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__torrentRecord</span> <span class="o">=</span> <span class="n">torrentRecord</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span> <span class="o">=</span> <span class="n">mediaSearchQueries</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__blacklistTerms</span> <span class="o">=</span> <span class="n">blacklistTerms</span>
 
     <span class="c1">########## accessor functions start ##########</span>
 
@@ -120,9 +124,13 @@
     <span class="k">def</span> <span class="nf">getLatestEpisodeNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span>
 
-    
+
     <span class="k">def</span> <span class="nf">getMediaSearchQueries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span>
+
+
+    <span class="k">def</span> <span class="nf">getBlacklistTerms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__blacklistTerms</span>
 
     <span class="c1">########## accessor functions end ##########</span>
 
@@ -152,7 +160,8 @@
             <span class="s2">&quot;typeSpecificData&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;latestSeason&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__latestSeasonNumber</span><span class="p">,</span>
                 <span class="s2">&quot;latestEpisode&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span>
-            <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;blacklistTerms&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__blacklistTerms</span>
         <span class="p">}</span>
 </pre></div>
 
@@ -172,12 +181,13 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MediaInfoRecord</span><span class="p">():</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showName</span><span class="p">,</span> <span class="n">latestSeasonNumber</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">,</span> <span class="n">torrentRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mediaSearchQueries</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showName</span><span class="p">,</span> <span class="n">latestSeasonNumber</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">,</span> <span class="n">blacklistTerms</span><span class="o">=</span><span class="p">[],</span> <span class="n">torrentRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mediaSearchQueries</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__showName</span> <span class="o">=</span> <span class="n">showName</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestSeasonNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">latestSeasonNumber</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">latestEpisodeNumber</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__torrentRecord</span> <span class="o">=</span> <span class="n">torrentRecord</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span> <span class="o">=</span> <span class="n">mediaSearchQueries</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__blacklistTerms</span> <span class="o">=</span> <span class="n">blacklistTerms</span>
 
     <span class="c1">########## accessor functions start ##########</span>
 
@@ -200,9 +210,13 @@
     <span class="k">def</span> <span class="nf">getLatestEpisodeNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span>
 
-    
+
     <span class="k">def</span> <span class="nf">getMediaSearchQueries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span>
+
+
+    <span class="k">def</span> <span class="nf">getBlacklistTerms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__blacklistTerms</span>
 
     <span class="c1">########## accessor functions end ##########</span>
 
@@ -232,7 +246,8 @@
             <span class="s2">&quot;typeSpecificData&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;latestSeason&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__latestSeasonNumber</span><span class="p">,</span>
                 <span class="s2">&quot;latestEpisode&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span>
-            <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;blacklistTerms&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__blacklistTerms</span>
         <span class="p">}</span>
 </pre></div>
 
@@ -249,18 +264,20 @@
     showName,
     latestSeasonNumber,
     latestEpisodeNumber,
+    blacklistTerms=[],
     torrentRecord=None,
     mediaSearchQueries=None
 )</span>    </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showName</span><span class="p">,</span> <span class="n">latestSeasonNumber</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">,</span> <span class="n">torrentRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mediaSearchQueries</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showName</span><span class="p">,</span> <span class="n">latestSeasonNumber</span><span class="p">,</span> <span class="n">latestEpisodeNumber</span><span class="p">,</span> <span class="n">blacklistTerms</span><span class="o">=</span><span class="p">[],</span> <span class="n">torrentRecord</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mediaSearchQueries</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__showName</span> <span class="o">=</span> <span class="n">showName</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestSeasonNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">latestSeasonNumber</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">latestEpisodeNumber</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__torrentRecord</span> <span class="o">=</span> <span class="n">torrentRecord</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__mediaSearchQueries</span> <span class="o">=</span> <span class="n">mediaSearchQueries</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__blacklistTerms</span> <span class="o">=</span> <span class="n">blacklistTerms</span>
 </pre></div>
 
         </details>
@@ -382,6 +399,25 @@
     
 
                             </div>
+                            <div id="MediaInfoRecord.getBlacklistTerms" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MediaInfoRecord.getBlacklistTerms">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">getBlacklistTerms</span><span class="signature">(self)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">getBlacklistTerms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__blacklistTerms</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
                             <div id="MediaInfoRecord.setTorrentRecord" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#MediaInfoRecord.setTorrentRecord">#&nbsp;&nbsp</a>
 
@@ -474,7 +510,8 @@
             <span class="s2">&quot;typeSpecificData&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;latestSeason&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__latestSeasonNumber</span><span class="p">,</span>
                 <span class="s2">&quot;latestEpisode&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__latestEpisodeNumber</span>
-            <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;blacklistTerms&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__blacklistTerms</span>
         <span class="p">}</span>
 </pre></div>
 
