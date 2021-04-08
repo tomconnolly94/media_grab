@@ -13,27 +13,9 @@ from dataTypes.MediaInfoRecord import MediaInfoRecord
 
 class TestLogicController(unittest.TestCase):
 
-    def test_findMediaInfoRecord(self):
-
-        relevantMediaInfoRecord = MediaInfoRecord("infoRecordFakeName1", 1, 1)
-
-        mediaInfoRecords = [
-            MediaInfoRecord("infoRecordFakeName2", 1, 1),
-            MediaInfoRecord("infoRecordFakeName3", 1, 1),
-            MediaInfoRecord("infoRecordFakeName4", 1, 1),
-            MediaInfoRecord("infoRecordFakeName5", 1, 1),
-            relevantMediaInfoRecord
-        ]
-
-        actualMediaInfoRecord = LogicController.findMediaInfoRecord(mediaInfoRecords, relevantMediaInfoRecord.getShowName())
-
-        self.assertEqual(relevantMediaInfoRecord, actualMediaInfoRecord)
-
-
     @mock.patch("logging.info")
     @mock.patch("interfaces.TPBInterface.getTorrentRecords")
-    @mock.patch("controllers.LogicController.findMediaInfoRecord")
-    def test_getMediaInfoRecordsWithTorrents(self, findMediaInfoRecordMock, getTorrentRecordsMock, loggingInfoMock):      
+    def test_getMediaInfoRecordsWithTorrents(self, getTorrentRecordsMock, loggingInfoMock):      
 
         fakeTorrentRecords = [
             TorrentRecord("fakeTorrentTitle1", "id1", "fakeInfoHash1", "4", "3"),
@@ -49,7 +31,6 @@ class TestLogicController(unittest.TestCase):
         ]
 
         # configure mocks
-        findMediaInfoRecordMock.side_effect = fakeMediaInfoRecords
         getTorrentRecordsMock.side_effect = [fakeTorrentRecords, [], fakeTorrentRecords[2:]]
 
         # expected outputs
@@ -69,7 +50,6 @@ class TestLogicController(unittest.TestCase):
             call(fakeMediaInfoRecords, "fakeMediaInfoName2"),
             call(fakeMediaInfoRecords, "fakeMediaInfoName3")
         ]
-        findMediaInfoRecordMock.has_calls(findMediaInfoRecordCalls)
 
         getTorrentRecordsCalls = [
             call(fakeMediaInfoRecords[0]),
