@@ -75,6 +75,12 @@
 
 
 <span class="k">def</span> <span class="nf">addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	addTVEpisodeQueriesToMediaInfoRecords for each mediaInfoRecord passed in, a group of queries is generated that are, when put through a torrent search engine, likely to return relevant torrent results. This group is assigned to the original object so no return value is required.</span>
+<span class="sd">	:testedWith: TestQueryGenerationController:test_addTVEpisodeQueriesToMediaInfoRecords</span>
+<span class="sd">	:param mediaInfoRecords: a list of mediaInfoRecords </span>
+<span class="sd">	:return: None</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">queryUrls</span> <span class="o">=</span> <span class="p">{}</span>
 	<span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span><span class="p">:</span>
 		<span class="n">record</span><span class="o">.</span><span class="n">setMediaSearchQueries</span><span class="p">(</span><span class="n">generateTVEpisodeQueryGroup</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getShowName</span><span class="p">(</span>
@@ -82,6 +88,14 @@
 
 
 <span class="k">def</span> <span class="nf">generateTVEpisodeQueryGroup</span><span class="p">(</span><span class="n">mediaName</span><span class="p">,</span> <span class="n">relevantSeason</span><span class="p">,</span> <span class="n">relevantEpisode</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	generateTVEpisodeQueryGroup for the input mediaName and the relevant season and episode numbers, use the query templated to generate query strings that are likely to return torrent results</span>
+<span class="sd">	:testedWith: TestQueryGenerationController:test_generateEpisodeQueryGroup</span>
+<span class="sd">	:param mediaName: the name of the media</span>
+<span class="sd">	:param relevantSeason: the season number</span>
+<span class="sd">	:param relevantEpisode: the episode number</span>
+<span class="sd">	:return: a list of query strings</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">queries</span> <span class="o">=</span> <span class="p">[]</span>
 
 	<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">template</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">episodeTemplates</span><span class="p">):</span>
@@ -108,6 +122,12 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	addTVEpisodeQueriesToMediaInfoRecords for each mediaInfoRecord passed in, a group of queries is generated that are, when put through a torrent search engine, likely to return relevant torrent results. This group is assigned to the original object so no return value is required.</span>
+<span class="sd">	:testedWith: TestQueryGenerationController:test_addTVEpisodeQueriesToMediaInfoRecords</span>
+<span class="sd">	:param mediaInfoRecords: a list of mediaInfoRecords </span>
+<span class="sd">	:return: None</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">queryUrls</span> <span class="o">=</span> <span class="p">{}</span>
 	<span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span><span class="p">:</span>
 		<span class="n">record</span><span class="o">.</span><span class="n">setMediaSearchQueries</span><span class="p">(</span><span class="n">generateTVEpisodeQueryGroup</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getShowName</span><span class="p">(</span>
@@ -116,7 +136,12 @@
 
         </details>
 
-    
+            <div class="docstring"><p>addTVEpisodeQueriesToMediaInfoRecords for each mediaInfoRecord passed in, a group of queries is generated that are, when put through a torrent search engine, likely to return relevant torrent results. This group is assigned to the original object so no return value is required.
+:testedWith: TestQueryGenerationController:test_addTVEpisodeQueriesToMediaInfoRecords
+:param mediaInfoRecords: a list of mediaInfoRecords 
+:return: None</p>
+</div>
+
 
                 </section>
                 <section id="generateTVEpisodeQueryGroup">
@@ -130,6 +155,14 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">generateTVEpisodeQueryGroup</span><span class="p">(</span><span class="n">mediaName</span><span class="p">,</span> <span class="n">relevantSeason</span><span class="p">,</span> <span class="n">relevantEpisode</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	generateTVEpisodeQueryGroup for the input mediaName and the relevant season and episode numbers, use the query templated to generate query strings that are likely to return torrent results</span>
+<span class="sd">	:testedWith: TestQueryGenerationController:test_generateEpisodeQueryGroup</span>
+<span class="sd">	:param mediaName: the name of the media</span>
+<span class="sd">	:param relevantSeason: the season number</span>
+<span class="sd">	:param relevantEpisode: the episode number</span>
+<span class="sd">	:return: a list of query strings</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">queries</span> <span class="o">=</span> <span class="p">[]</span>
 
 	<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">template</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">episodeTemplates</span><span class="p">):</span>
@@ -144,7 +177,14 @@
 
         </details>
 
-    
+            <div class="docstring"><p>generateTVEpisodeQueryGroup for the input mediaName and the relevant season and episode numbers, use the query templated to generate query strings that are likely to return torrent results
+:testedWith: TestQueryGenerationController:test_generateEpisodeQueryGroup
+:param mediaName: the name of the media
+:param relevantSeason: the season number
+:param relevantEpisode: the episode number
+:return: a list of query strings</p>
+</div>
+
 
                 </section>
     </main>

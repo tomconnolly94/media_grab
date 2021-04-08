@@ -43,6 +43,9 @@
                     <a class="function" href="#deleteDir">deleteDir</a>
             </li>
             <li>
+                    <a class="function" href="#deleteFile">deleteFile</a>
+            </li>
+            <li>
                     <a class="function" href="#recycleOrDeleteDir">recycleOrDeleteDir</a>
             </li>
     </ul>
@@ -107,6 +110,17 @@
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleted &#39;</span><span class="si">{</span><span class="n">directoryPath</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
         <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exception occurred whilst deleting residual directory `</span><span class="si">{</span><span class="n">directoryPath</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+<span class="k">def</span> <span class="nf">deleteFile</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleted &#39;</span><span class="si">{</span><span class="n">filePath</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Exception occurred whilst deleting residual file `</span><span class="si">{</span><span class="n">filePath</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 
 
@@ -240,6 +254,33 @@
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleted &#39;</span><span class="si">{</span><span class="n">directoryPath</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
         <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exception occurred whilst deleting residual directory `</span><span class="si">{</span><span class="n">directoryPath</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+        </details>
+
+    
+
+                </section>
+                <section id="deleteFile">
+                            <div class="attr function"><a class="headerlink" href="#deleteFile">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">deleteFile</span><span class="signature">(filePath)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">deleteFile</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleted &#39;</span><span class="si">{</span><span class="n">filePath</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Exception occurred whilst deleting residual file `</span><span class="si">{</span><span class="n">filePath</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 </pre></div>
 

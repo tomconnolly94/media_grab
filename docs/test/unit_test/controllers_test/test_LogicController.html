@@ -31,9 +31,6 @@
                     <a class="class" href="#TestLogicController">TestLogicController</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#TestLogicController.test_findMediaInfoRecord">test_findMediaInfoRecord</a>
-                        </li>
-                        <li>
                                 <a class="function" href="#TestLogicController.test_getMediaInfoRecordsWithTorrents">test_getMediaInfoRecordsWithTorrents</a>
                         </li>
                         <li>
@@ -75,27 +72,9 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
 
 <span class="k">class</span> <span class="nc">TestLogicController</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">test_findMediaInfoRecord</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="n">relevantMediaInfoRecord</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-
-        <span class="n">mediaInfoRecords</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName2&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName3&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName4&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName5&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">relevantMediaInfoRecord</span>
-        <span class="p">]</span>
-
-        <span class="n">actualMediaInfoRecord</span> <span class="o">=</span> <span class="n">LogicController</span><span class="o">.</span><span class="n">findMediaInfoRecord</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">relevantMediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">())</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">relevantMediaInfoRecord</span><span class="p">,</span> <span class="n">actualMediaInfoRecord</span><span class="p">)</span>
-
-
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;logging.info&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;interfaces.TPBInterface.getTorrentRecords&quot;</span><span class="p">)</span>
-    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.LogicController.findMediaInfoRecord&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">findMediaInfoRecordMock</span><span class="p">,</span> <span class="n">getTorrentRecordsMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">):</span>      
+    <span class="k">def</span> <span class="nf">test_getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getTorrentRecordsMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">):</span>      
 
         <span class="n">fakeTorrentRecords</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;fakeTorrentTitle1&quot;</span><span class="p">,</span> <span class="s2">&quot;id1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash1&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">),</span>
@@ -111,7 +90,6 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
         <span class="p">]</span>
 
         <span class="c1"># configure mocks</span>
-        <span class="n">findMediaInfoRecordMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">fakeMediaInfoRecords</span>
         <span class="n">getTorrentRecordsMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="p">[</span><span class="n">fakeTorrentRecords</span><span class="p">,</span> <span class="p">[],</span> <span class="n">fakeTorrentRecords</span><span class="p">[</span><span class="mi">2</span><span class="p">:]]</span>
 
         <span class="c1"># expected outputs</span>
@@ -131,7 +109,6 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
             <span class="n">call</span><span class="p">(</span><span class="n">fakeMediaInfoRecords</span><span class="p">,</span> <span class="s2">&quot;fakeMediaInfoName2&quot;</span><span class="p">),</span>
             <span class="n">call</span><span class="p">(</span><span class="n">fakeMediaInfoRecords</span><span class="p">,</span> <span class="s2">&quot;fakeMediaInfoName3&quot;</span><span class="p">)</span>
         <span class="p">]</span>
-        <span class="n">findMediaInfoRecordMock</span><span class="o">.</span><span class="n">has_calls</span><span class="p">(</span><span class="n">findMediaInfoRecordCalls</span><span class="p">)</span>
 
         <span class="n">getTorrentRecordsCalls</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">call</span><span class="p">(</span><span class="n">fakeMediaInfoRecords</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
@@ -244,27 +221,9 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">TestLogicController</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">test_findMediaInfoRecord</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="n">relevantMediaInfoRecord</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-
-        <span class="n">mediaInfoRecords</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName2&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName3&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName4&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName5&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">relevantMediaInfoRecord</span>
-        <span class="p">]</span>
-
-        <span class="n">actualMediaInfoRecord</span> <span class="o">=</span> <span class="n">LogicController</span><span class="o">.</span><span class="n">findMediaInfoRecord</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">relevantMediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">())</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">relevantMediaInfoRecord</span><span class="p">,</span> <span class="n">actualMediaInfoRecord</span><span class="p">)</span>
-
-
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;logging.info&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;interfaces.TPBInterface.getTorrentRecords&quot;</span><span class="p">)</span>
-    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.LogicController.findMediaInfoRecord&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">findMediaInfoRecordMock</span><span class="p">,</span> <span class="n">getTorrentRecordsMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">):</span>      
+    <span class="k">def</span> <span class="nf">test_getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getTorrentRecordsMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">):</span>      
 
         <span class="n">fakeTorrentRecords</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;fakeTorrentTitle1&quot;</span><span class="p">,</span> <span class="s2">&quot;id1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash1&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">),</span>
@@ -280,7 +239,6 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
         <span class="p">]</span>
 
         <span class="c1"># configure mocks</span>
-        <span class="n">findMediaInfoRecordMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">fakeMediaInfoRecords</span>
         <span class="n">getTorrentRecordsMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="p">[</span><span class="n">fakeTorrentRecords</span><span class="p">,</span> <span class="p">[],</span> <span class="n">fakeTorrentRecords</span><span class="p">[</span><span class="mi">2</span><span class="p">:]]</span>
 
         <span class="c1"># expected outputs</span>
@@ -300,7 +258,6 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
             <span class="n">call</span><span class="p">(</span><span class="n">fakeMediaInfoRecords</span><span class="p">,</span> <span class="s2">&quot;fakeMediaInfoName2&quot;</span><span class="p">),</span>
             <span class="n">call</span><span class="p">(</span><span class="n">fakeMediaInfoRecords</span><span class="p">,</span> <span class="s2">&quot;fakeMediaInfoName3&quot;</span><span class="p">)</span>
         <span class="p">]</span>
-        <span class="n">findMediaInfoRecordMock</span><span class="o">.</span><span class="n">has_calls</span><span class="p">(</span><span class="n">findMediaInfoRecordCalls</span><span class="p">)</span>
 
         <span class="n">getTorrentRecordsCalls</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">call</span><span class="p">(</span><span class="n">fakeMediaInfoRecords</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
@@ -428,60 +385,21 @@ attribute so can be configured by individual tests if required.</li>
 </div>
 
 
-                            <div id="TestLogicController.test_findMediaInfoRecord" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#TestLogicController.test_findMediaInfoRecord">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">test_findMediaInfoRecord</span><span class="signature">(self)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">test_findMediaInfoRecord</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="n">relevantMediaInfoRecord</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-
-        <span class="n">mediaInfoRecords</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName2&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName3&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName4&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;infoRecordFakeName5&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">relevantMediaInfoRecord</span>
-        <span class="p">]</span>
-
-        <span class="n">actualMediaInfoRecord</span> <span class="o">=</span> <span class="n">LogicController</span><span class="o">.</span><span class="n">findMediaInfoRecord</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">relevantMediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">())</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">relevantMediaInfoRecord</span><span class="p">,</span> <span class="n">actualMediaInfoRecord</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-    
-
-                            </div>
                             <div id="TestLogicController.test_getMediaInfoRecordsWithTorrents" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#TestLogicController.test_getMediaInfoRecordsWithTorrents">#&nbsp;&nbsp</a>
 
                 <div class="decorator">@mock.patch(&#39;logging.info&#39;)</div>
         <div class="decorator">@mock.patch(&#39;interfaces.TPBInterface.getTorrentRecords&#39;)</div>
-        <div class="decorator">@mock.patch(&#39;controllers.LogicController.findMediaInfoRecord&#39;)</div>
 
             <span class="def">def</span>
-            <span class="name">test_getMediaInfoRecordsWithTorrents</span><span class="signature">(
-    self,
-    findMediaInfoRecordMock,
-    getTorrentRecordsMock,
-    loggingInfoMock
-)</span>:
+            <span class="name">test_getMediaInfoRecordsWithTorrents</span><span class="signature">(self, getTorrentRecordsMock, loggingInfoMock)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;logging.info&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;interfaces.TPBInterface.getTorrentRecords&quot;</span><span class="p">)</span>
-    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.LogicController.findMediaInfoRecord&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">findMediaInfoRecordMock</span><span class="p">,</span> <span class="n">getTorrentRecordsMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">):</span>      
+    <span class="k">def</span> <span class="nf">test_getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getTorrentRecordsMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">):</span>      
 
         <span class="n">fakeTorrentRecords</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;fakeTorrentTitle1&quot;</span><span class="p">,</span> <span class="s2">&quot;id1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash1&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">),</span>
@@ -497,7 +415,6 @@ attribute so can be configured by individual tests if required.</li>
         <span class="p">]</span>
 
         <span class="c1"># configure mocks</span>
-        <span class="n">findMediaInfoRecordMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">fakeMediaInfoRecords</span>
         <span class="n">getTorrentRecordsMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="p">[</span><span class="n">fakeTorrentRecords</span><span class="p">,</span> <span class="p">[],</span> <span class="n">fakeTorrentRecords</span><span class="p">[</span><span class="mi">2</span><span class="p">:]]</span>
 
         <span class="c1"># expected outputs</span>
@@ -517,7 +434,6 @@ attribute so can be configured by individual tests if required.</li>
             <span class="n">call</span><span class="p">(</span><span class="n">fakeMediaInfoRecords</span><span class="p">,</span> <span class="s2">&quot;fakeMediaInfoName2&quot;</span><span class="p">),</span>
             <span class="n">call</span><span class="p">(</span><span class="n">fakeMediaInfoRecords</span><span class="p">,</span> <span class="s2">&quot;fakeMediaInfoName3&quot;</span><span class="p">)</span>
         <span class="p">]</span>
-        <span class="n">findMediaInfoRecordMock</span><span class="o">.</span><span class="n">has_calls</span><span class="p">(</span><span class="n">findMediaInfoRecordCalls</span><span class="p">)</span>
 
         <span class="n">getTorrentRecordsCalls</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">call</span><span class="p">(</span><span class="n">fakeMediaInfoRecords</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>

@@ -72,6 +72,9 @@
             <li>
                     <a class="function" href="#auditDumpCompleteDir">auditDumpCompleteDir</a>
             </li>
+            <li>
+                    <a class="function" href="#permanentlyDeleteExpiredItems">permanentlyDeleteExpiredItems</a>
+            </li>
     </ul>
 
 
@@ -97,6 +100,7 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
 
 <span class="c1"># internal dependencies</span>
 <span class="kn">from</span> <span class="nn">dataTypes.ProgramModeMap</span> <span class="kn">import</span> <span class="n">PROGRAM_MODE_DIRECTORY_KEY_MAP</span><span class="p">,</span> <span class="n">PROGRAM_MODE_MAP</span>
@@ -108,13 +112,10 @@
 <span class="k">def</span> <span class="nf">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    downloadWasInitiatedByMediaGrab checks if a download was initiated by mediaGrab using a regex</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab</span>
 <span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the tv show name or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;[ \w]+--s\d+e\d+&quot;</span>
         <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regexRaw</span><span class="p">,</span> <span class="n">downloadId</span><span class="p">,</span>
@@ -131,9 +132,7 @@
 <span class="k">def</span> <span class="nf">extractShowName</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    extractShowName extracts the show name from the downloadId, using a different method depending on whether the download was initiated by mediaGrab or not</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_extractShowName</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_extractShowName</span>
 <span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the tv show name or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -166,9 +165,7 @@
 <span class="k">def</span> <span class="nf">extractSeasonNumber</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    extractSeasonNumber extracts the season number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_extractSeasonNumber</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_extractSeasonNumber</span>
 <span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the season number or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -195,9 +192,7 @@
 <span class="k">def</span> <span class="nf">extractEpisodeNumber</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    extractEpisodeNumber extracts the episode number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_extractEpisodeNumber</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_extractEpisodeNumber</span>
 <span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the episode number or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -224,9 +219,7 @@
 <span class="k">def</span> <span class="nf">extractExtension</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    extractExtension extracts the extension from a file name.</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_extractExtension</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_extractExtension</span>
 <span class="sd">    :param fileName: the full name of the file</span>
 <span class="sd">    :return: the file extension or an empty string if none can be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
@@ -236,9 +229,7 @@
 <span class="k">def</span> <span class="nf">reportItemAlreadyExists</span><span class="p">(</span><span class="n">newItemLocation</span><span class="p">,</span> <span class="n">downloadName</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    reportItemAlreadyExists reports that the item already exists in the file system</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_reportItemAlreadyExists</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_reportItemAlreadyExists</span>
 <span class="sd">    :param newItemLocation: the prospective location of the finished download</span>
 <span class="sd">    :param downloadName: the original name of the download</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -249,9 +240,7 @@
 <span class="k">def</span> <span class="nf">getLargestItemInDir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    getLargestItemInDir finds the largest item inside the given directory</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_getLargestItemInDir</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_getLargestItemInDir</span>
 <span class="sd">    :param directory: the directory to be explored</span>
 <span class="sd">    :return: the largest item in the drectory or `None` if the directory is empty</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -267,10 +256,9 @@
 <span class="k">def</span> <span class="nf">requestTorrentPause</span><span class="p">(</span><span class="n">torrentName</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    requestTorrentPause requests that the torrent client pauses the activity of the torrent</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_requestTorrentPause</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_requestTorrentPause</span>
 <span class="sd">    :param torrentName: the name of the torrent to be paused</span>
+<span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">qBittorrentInterfaceInstance</span> <span class="o">=</span> <span class="n">QBittorrentInterface</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span> <span class="c1"># access singleton instance</span>
 
@@ -283,11 +271,8 @@
 
 <span class="k">def</span> <span class="nf">ensureDirStructureExists</span><span class="p">(</span><span class="n">tvShowDirPath</span><span class="p">,</span> <span class="n">seasonDirPath</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    ensureDirStructureExists explores the file system to ensure that the directory structure</span>
-<span class="sd">        required as a target for the download exists</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_ensureDirStructureExists</span>
-
+<span class="sd">    ensureDirStructureExists explores the file system to ensure that the directory structure required as a target for the download exists</span>
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_ensureDirStructureExists</span>
 <span class="sd">    :param tvShowDirPath: the name of the tv show from the download</span>
 <span class="sd">    :param seasonDirPath: the number of the season from the download</span>
 <span class="sd">    :return: the success or failure of the file system manipulation</span>
@@ -310,9 +295,7 @@
 <span class="k">def</span> <span class="nf">getTargetFile</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could be the directory that the target file is in</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_getTargetFile</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_getTargetFile</span>
 <span class="sd">    :param fileSystemItem: the file system item, it could be a directory or a file</span>
 <span class="sd">    :return: the file system item if it is a file or if it is a directory then the largest file in that directory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -331,9 +314,7 @@
 <span class="k">def</span> <span class="nf">getProspectiveFilePath</span><span class="p">(</span><span class="n">downloadId</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">extension</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    getProspectiveFilePath create the prospective file path by extracting the necessary info like the tv show name and season/episode numbers</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_getProspectiveFilepPath</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_getProspectiveFilepPath</span>
 <span class="sd">    :param downloadId: the downloadId for the downloaded item</span>
 <span class="sd">    :param mode: the mode of the program run</span>
 <span class="sd">    :param extension: the extension of the downloaded file</span>
@@ -356,10 +337,8 @@
 
 <span class="k">def</span> <span class="nf">unWrapQBittorrentWrapperDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    unWrapQBittorrentWrapperDir browses past the identifiable directory provided by qbittorrent to access the downloaded item  </span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_unWrapQBittorrentWrapperDir</span>
-
+<span class="sd">    unWrapQBittorrentWrapperDir browses past the identifiable directory provided by qbittorrent to access the downloaded item</span>
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_unWrapQBittorrentWrapperDir</span>
 <span class="sd">    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId</span>
 <span class="sd">    :return: the file system item, could be a file or directory which is the only contents of the input dir</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -375,12 +354,10 @@
 
 <span class="k">def</span> <span class="nf">auditFileSystemItemForEpisode</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    auditMediaGrabItemForEpisode collates all the operations necessary to deal with a finished </span>
-<span class="sd">        download (that was initiated by mediaGrab), move it to an organised file system location, and notifies the user</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_auditMediaGrabItemForEpisode</span>
-
+<span class="sd">    auditMediaGrabItemForEpisode collates all the operations necessary to deal with a finished download (that was initiated by mediaGrab), move it to an organised file system location, and notifies the user</span>
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_auditMediaGrabItemForEpisode</span>
 <span class="sd">    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId</span>
+<span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># capture the parent directory as the item&#39;s downloadId</span>
     <span class="n">downloadId</span> <span class="o">=</span> <span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span>
@@ -433,11 +410,9 @@
 
 <span class="k">def</span> <span class="nf">auditFileSystemItemsForEpisodes</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete</span>
-<span class="sd">        directory</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_auditFileSystemItemsForEpisodes</span>
-
+<span class="sd">    auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete directory</span>
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_auditFileSystemItemsForEpisodes</span>
+<span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># auditing is not necessary if the optional env &quot;TV_TARGET_DIR&quot; is not provided</span>
     <span class="k">if</span> <span class="s2">&quot;TV_TARGET_DIR&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
@@ -456,10 +431,46 @@
         <span class="n">auditFileSystemItemForEpisode</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">)</span>
 
 
-
 <span class="k">def</span> <span class="nf">auditDumpCompleteDir</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    auditDumpCompleteDir wrapper, entry function to this module to collate all operations necessary for download directory auditing</span>
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_auditFilesWithFileSystem</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># look for episodes</span>
     <span class="n">auditFileSystemItemsForEpisodes</span><span class="p">()</span>
+    <span class="c1"># deal with expired recycled items and logs</span>
+    <span class="n">permanentlyDeleteExpiredItems</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">permanentlyDeleteExpiredItems</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    permanentlyDeleteExpiredItems performs a sub audit of the recycle_bin directory and the log directory, in order to delete any files or directories that are deemed too old</span>
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_permanentlyDeleteExpiredItems</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># delete recycled directories older than 4 weeks</span>
+    <span class="n">recycleBinDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;RECYCLE_BIN_DIR&quot;</span><span class="p">)</span>
+    <span class="n">recycledFileSystemDirs</span> <span class="o">=</span> <span class="n">FolderInterface</span><span class="o">.</span><span class="n">getDirContents</span><span class="p">(</span>
+        <span class="n">recycleBinDir</span><span class="p">)</span>
+
+    <span class="n">dateFourWeeksAgo</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">dateOneWeekAgo</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">directoryItem</span> <span class="ow">in</span> <span class="n">recycledFileSystemDirs</span><span class="p">:</span>
+        <span class="n">fileCreationDate</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getctime</span><span class="p">(</span><span class="n">directoryItem</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">fileCreationDate</span> <span class="o">&lt;</span> <span class="n">dateFourWeeksAgo</span><span class="p">:</span>
+            <span class="n">FolderInterface</span><span class="o">.</span><span class="n">deleteDir</span><span class="p">(</span><span class="n">directoryItem</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="c1"># get log files from logs dir</span>
+    <span class="n">logFiles</span> <span class="o">=</span> <span class="n">FolderInterface</span><span class="o">.</span><span class="n">getDirContents</span><span class="p">(</span><span class="s2">&quot;logs&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">logFile</span> <span class="ow">in</span> <span class="n">logFiles</span><span class="p">:</span>
+        <span class="n">fileCreationDate</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getctime</span><span class="p">(</span><span class="n">logFile</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">fileCreationDate</span> <span class="o">&lt;</span> <span class="n">dateOneWeekAgo</span><span class="p">:</span>
+            <span class="n">FolderInterface</span><span class="o">.</span><span class="n">deleteFile</span><span class="p">(</span><span class="n">logFile</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -478,13 +489,10 @@
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">downloadWasInitiatedByMediaGrab</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    downloadWasInitiatedByMediaGrab checks if a download was initiated by mediaGrab using a regex</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab</span>
 <span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the tv show name or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="n">regexRaw</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;[ \w]+--s\d+e\d+&quot;</span>
         <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regexRaw</span><span class="p">,</span> <span class="n">downloadId</span><span class="p">,</span>
@@ -500,11 +508,9 @@
 
         </details>
 
-            <div class="docstring"><p>downloadWasInitiatedByMediaGrab checks if a download was initiated by mediaGrab using a regex</p>
-
-<p>:testedWith: testCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab</p>
-
-<p>:param downloadId: the downloadId of the download
+            <div class="docstring"><p>downloadWasInitiatedByMediaGrab checks if a download was initiated by mediaGrab using a regex
+:testedWith: TestCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab
+:param downloadId: the downloadId of the download
 :return: the tv show name or <code>None</code> if one cannot be found</p>
 </div>
 
@@ -523,9 +529,7 @@
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extractShowName</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    extractShowName extracts the show name from the downloadId, using a different method depending on whether the download was initiated by mediaGrab or not</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_extractShowName</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_extractShowName</span>
 <span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the tv show name or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -557,11 +561,9 @@
 
         </details>
 
-            <div class="docstring"><p>extractShowName extracts the show name from the downloadId, using a different method depending on whether the download was initiated by mediaGrab or not</p>
-
-<p>:testedWith: testCompletedDownloadsController:test_extractShowName</p>
-
-<p>:param downloadId: the downloadId of the download
+            <div class="docstring"><p>extractShowName extracts the show name from the downloadId, using a different method depending on whether the download was initiated by mediaGrab or not
+:testedWith: TestCompletedDownloadsController:test_extractShowName
+:param downloadId: the downloadId of the download
 :return: the tv show name or <code>None</code> if one cannot be found</p>
 </div>
 
@@ -580,9 +582,7 @@
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extractSeasonNumber</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    extractSeasonNumber extracts the season number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_extractSeasonNumber</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_extractSeasonNumber</span>
 <span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the season number or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -608,11 +608,9 @@
 
         </details>
 
-            <div class="docstring"><p>extractSeasonNumber extracts the season number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not</p>
-
-<p>:testedWith: testCompletedDownloadsController:test_extractSeasonNumber</p>
-
-<p>:param downloadId: the downloadId of the download
+            <div class="docstring"><p>extractSeasonNumber extracts the season number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not
+:testedWith: TestCompletedDownloadsController:test_extractSeasonNumber
+:param downloadId: the downloadId of the download
 :return: the season number or <code>None</code> if one cannot be found</p>
 </div>
 
@@ -631,9 +629,7 @@
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extractEpisodeNumber</span><span class="p">(</span><span class="n">downloadId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    extractEpisodeNumber extracts the episode number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_extractEpisodeNumber</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_extractEpisodeNumber</span>
 <span class="sd">    :param downloadId: the downloadId of the download</span>
 <span class="sd">    :return: the episode number or `None` if one cannot be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -659,11 +655,9 @@
 
         </details>
 
-            <div class="docstring"><p>extractEpisodeNumber extracts the episode number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not</p>
-
-<p>:testedWith: testCompletedDownloadsController:test_extractEpisodeNumber</p>
-
-<p>:param downloadId: the downloadId of the download
+            <div class="docstring"><p>extractEpisodeNumber extracts the episode number from the downloadId, using a different regex depending on whether the download was initiated by mediaGrab or not
+:testedWith: TestCompletedDownloadsController:test_extractEpisodeNumber
+:param downloadId: the downloadId of the download
 :return: the episode number or <code>None</code> if one cannot be found</p>
 </div>
 
@@ -682,9 +676,7 @@
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extractExtension</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    extractExtension extracts the extension from a file name.</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_extractExtension</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_extractExtension</span>
 <span class="sd">    :param fileName: the full name of the file</span>
 <span class="sd">    :return: the file extension or an empty string if none can be found</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
@@ -693,11 +685,9 @@
 
         </details>
 
-            <div class="docstring"><p>extractExtension extracts the extension from a file name.</p>
-
-<p>:testedWith: testCompletedDownloadsController:test_extractExtension</p>
-
-<p>:param fileName: the full name of the file
+            <div class="docstring"><p>extractExtension extracts the extension from a file name.
+:testedWith: TestCompletedDownloadsController:test_extractExtension
+:param fileName: the full name of the file
 :return: the file extension or an empty string if none can be found</p>
 </div>
 
@@ -716,9 +706,7 @@
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reportItemAlreadyExists</span><span class="p">(</span><span class="n">newItemLocation</span><span class="p">,</span> <span class="n">downloadName</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    reportItemAlreadyExists reports that the item already exists in the file system</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_reportItemAlreadyExists</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_reportItemAlreadyExists</span>
 <span class="sd">    :param newItemLocation: the prospective location of the finished download</span>
 <span class="sd">    :param downloadName: the original name of the download</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -728,11 +716,9 @@
 
         </details>
 
-            <div class="docstring"><p>reportItemAlreadyExists reports that the item already exists in the file system</p>
-
-<p>:testedWith: testCompletedDownloadsController:test_reportItemAlreadyExists</p>
-
-<p>:param newItemLocation: the prospective location of the finished download
+            <div class="docstring"><p>reportItemAlreadyExists reports that the item already exists in the file system
+:testedWith: TestCompletedDownloadsController:test_reportItemAlreadyExists
+:param newItemLocation: the prospective location of the finished download
 :param downloadName: the original name of the download</p>
 </div>
 
@@ -751,9 +737,7 @@
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getLargestItemInDir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    getLargestItemInDir finds the largest item inside the given directory</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_getLargestItemInDir</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_getLargestItemInDir</span>
 <span class="sd">    :param directory: the directory to be explored</span>
 <span class="sd">    :return: the largest item in the drectory or `None` if the directory is empty</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -768,11 +752,9 @@
 
         </details>
 
-            <div class="docstring"><p>getLargestItemInDir finds the largest item inside the given directory</p>
-
-<p>:testedWith: testCompletedDownloadsController:test_getLargestItemInDir</p>
-
-<p>:param directory: the directory to be explored
+            <div class="docstring"><p>getLargestItemInDir finds the largest item inside the given directory
+:testedWith: TestCompletedDownloadsController:test_getLargestItemInDir
+:param directory: the directory to be explored
 :return: the largest item in the drectory or <code>None</code> if the directory is empty</p>
 </div>
 
@@ -791,10 +773,9 @@
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">requestTorrentPause</span><span class="p">(</span><span class="n">torrentName</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    requestTorrentPause requests that the torrent client pauses the activity of the torrent</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_requestTorrentPause</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_requestTorrentPause</span>
 <span class="sd">    :param torrentName: the name of the torrent to be paused</span>
+<span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">qBittorrentInterfaceInstance</span> <span class="o">=</span> <span class="n">QBittorrentInterface</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span> <span class="c1"># access singleton instance</span>
 
@@ -807,11 +788,10 @@
 
         </details>
 
-            <div class="docstring"><p>requestTorrentPause requests that the torrent client pauses the activity of the torrent</p>
-
-<p>:testedWith: testCompletedDownloadsController:test_requestTorrentPause</p>
-
-<p>:param torrentName: the name of the torrent to be paused</p>
+            <div class="docstring"><p>requestTorrentPause requests that the torrent client pauses the activity of the torrent
+:testedWith: TestCompletedDownloadsController:test_requestTorrentPause
+:param torrentName: the name of the torrent to be paused
+:return: None</p>
 </div>
 
 
@@ -828,11 +808,8 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ensureDirStructureExists</span><span class="p">(</span><span class="n">tvShowDirPath</span><span class="p">,</span> <span class="n">seasonDirPath</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    ensureDirStructureExists explores the file system to ensure that the directory structure</span>
-<span class="sd">        required as a target for the download exists</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_ensureDirStructureExists</span>
-
+<span class="sd">    ensureDirStructureExists explores the file system to ensure that the directory structure required as a target for the download exists</span>
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_ensureDirStructureExists</span>
 <span class="sd">    :param tvShowDirPath: the name of the tv show from the download</span>
 <span class="sd">    :param seasonDirPath: the number of the season from the download</span>
 <span class="sd">    :return: the success or failure of the file system manipulation</span>
@@ -854,12 +831,9 @@
 
         </details>
 
-            <div class="docstring"><p>ensureDirStructureExists explores the file system to ensure that the directory structure
-    required as a target for the download exists</p>
-
-<p>:testedWith: testCompletedDownloadsController:test_ensureDirStructureExists</p>
-
-<p>:param tvShowDirPath: the name of the tv show from the download
+            <div class="docstring"><p>ensureDirStructureExists explores the file system to ensure that the directory structure required as a target for the download exists
+:testedWith: TestCompletedDownloadsController:test_ensureDirStructureExists
+:param tvShowDirPath: the name of the tv show from the download
 :param seasonDirPath: the number of the season from the download
 :return: the success or failure of the file system manipulation</p>
 </div>
@@ -879,9 +853,7 @@
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getTargetFile</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could be the directory that the target file is in</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_getTargetFile</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_getTargetFile</span>
 <span class="sd">    :param fileSystemItem: the file system item, it could be a directory or a file</span>
 <span class="sd">    :return: the file system item if it is a file or if it is a directory then the largest file in that directory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -899,11 +871,9 @@
 
         </details>
 
-            <div class="docstring"><p>getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could be the directory that the target file is in</p>
-
-<p>:testedWith: testCompletedDownloadsController:test_getTargetFile</p>
-
-<p>:param fileSystemItem: the file system item, it could be a directory or a file
+            <div class="docstring"><p>getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could be the directory that the target file is in
+:testedWith: TestCompletedDownloadsController:test_getTargetFile
+:param fileSystemItem: the file system item, it could be a directory or a file
 :return: the file system item if it is a file or if it is a directory then the largest file in that directory</p>
 </div>
 
@@ -922,9 +892,7 @@
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getProspectiveFilePath</span><span class="p">(</span><span class="n">downloadId</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">extension</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    getProspectiveFilePath create the prospective file path by extracting the necessary info like the tv show name and season/episode numbers</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_getProspectiveFilepPath</span>
-
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_getProspectiveFilepPath</span>
 <span class="sd">    :param downloadId: the downloadId for the downloaded item</span>
 <span class="sd">    :param mode: the mode of the program run</span>
 <span class="sd">    :param extension: the extension of the downloaded file</span>
@@ -947,11 +915,9 @@
 
         </details>
 
-            <div class="docstring"><p>getProspectiveFilePath create the prospective file path by extracting the necessary info like the tv show name and season/episode numbers</p>
-
-<p>:testedWith: testCompletedDownloadsController:test_getProspectiveFilepPath</p>
-
-<p>:param downloadId: the downloadId for the downloaded item
+            <div class="docstring"><p>getProspectiveFilePath create the prospective file path by extracting the necessary info like the tv show name and season/episode numbers
+:testedWith: TestCompletedDownloadsController:test_getProspectiveFilepPath
+:param downloadId: the downloadId for the downloaded item
 :param mode: the mode of the program run
 :param extension: the extension of the downloaded file
 :return: the path of the file after it has been moved to its prospective location</p>
@@ -971,10 +937,8 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">unWrapQBittorrentWrapperDir</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    unWrapQBittorrentWrapperDir browses past the identifiable directory provided by qbittorrent to access the downloaded item  </span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_unWrapQBittorrentWrapperDir</span>
-
+<span class="sd">    unWrapQBittorrentWrapperDir browses past the identifiable directory provided by qbittorrent to access the downloaded item</span>
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_unWrapQBittorrentWrapperDir</span>
 <span class="sd">    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId</span>
 <span class="sd">    :return: the file system item, could be a file or directory which is the only contents of the input dir</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -990,11 +954,9 @@
 
         </details>
 
-            <div class="docstring"><p>unWrapQBittorrentWrapperDir browses past the identifiable directory provided by qbittorrent to access the downloaded item  </p>
-
-<p>:testedWith: testCompletedDownloadsController:test_unWrapQBittorrentWrapperDir</p>
-
-<p>:param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId
+            <div class="docstring"><p>unWrapQBittorrentWrapperDir browses past the identifiable directory provided by qbittorrent to access the downloaded item
+:testedWith: TestCompletedDownloadsController:test_unWrapQBittorrentWrapperDir
+:param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId
 :return: the file system item, could be a file or directory which is the only contents of the input dir</p>
 </div>
 
@@ -1012,12 +974,10 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">auditFileSystemItemForEpisode</span><span class="p">(</span><span class="n">fileSystemItem</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    auditMediaGrabItemForEpisode collates all the operations necessary to deal with a finished </span>
-<span class="sd">        download (that was initiated by mediaGrab), move it to an organised file system location, and notifies the user</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_auditMediaGrabItemForEpisode</span>
-
+<span class="sd">    auditMediaGrabItemForEpisode collates all the operations necessary to deal with a finished download (that was initiated by mediaGrab), move it to an organised file system location, and notifies the user</span>
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_auditMediaGrabItemForEpisode</span>
 <span class="sd">    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId</span>
+<span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># capture the parent directory as the item&#39;s downloadId</span>
     <span class="n">downloadId</span> <span class="o">=</span> <span class="n">fileSystemItem</span><span class="o">.</span><span class="n">name</span>
@@ -1070,12 +1030,10 @@
 
         </details>
 
-            <div class="docstring"><p>auditMediaGrabItemForEpisode collates all the operations necessary to deal with a finished 
-    download (that was initiated by mediaGrab), move it to an organised file system location, and notifies the user</p>
-
-<p>:testedWith: testCompletedDownloadsController:test_auditMediaGrabItemForEpisode</p>
-
-<p>:param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId</p>
+            <div class="docstring"><p>auditMediaGrabItemForEpisode collates all the operations necessary to deal with a finished download (that was initiated by mediaGrab), move it to an organised file system location, and notifies the user
+:testedWith: TestCompletedDownloadsController:test_auditMediaGrabItemForEpisode
+:param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId
+:return: None</p>
 </div>
 
 
@@ -1092,11 +1050,9 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">auditFileSystemItemsForEpisodes</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete</span>
-<span class="sd">        directory</span>
-
-<span class="sd">    :testedWith: testCompletedDownloadsController:test_auditFileSystemItemsForEpisodes</span>
-
+<span class="sd">    auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete directory</span>
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_auditFileSystemItemsForEpisodes</span>
+<span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># auditing is not necessary if the optional env &quot;TV_TARGET_DIR&quot; is not provided</span>
     <span class="k">if</span> <span class="s2">&quot;TV_TARGET_DIR&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
@@ -1117,10 +1073,9 @@
 
         </details>
 
-            <div class="docstring"><p>auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete
-    directory</p>
-
-<p>:testedWith: testCompletedDownloadsController:test_auditFileSystemItemsForEpisodes</p>
+            <div class="docstring"><p>auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete directory
+:testedWith: TestCompletedDownloadsController:test_auditFileSystemItemsForEpisodes
+:return: None</p>
 </div>
 
 
@@ -1136,13 +1091,73 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">auditDumpCompleteDir</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    auditDumpCompleteDir wrapper, entry function to this module to collate all operations necessary for download directory auditing</span>
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_auditFilesWithFileSystem</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># look for episodes</span>
     <span class="n">auditFileSystemItemsForEpisodes</span><span class="p">()</span>
+    <span class="c1"># deal with expired recycled items and logs</span>
+    <span class="n">permanentlyDeleteExpiredItems</span><span class="p">()</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>auditDumpCompleteDir wrapper, entry function to this module to collate all operations necessary for download directory auditing
+:testedWith: TestCompletedDownloadsController:test_auditFilesWithFileSystem
+:return: None</p>
+</div>
+
+
+                </section>
+                <section id="permanentlyDeleteExpiredItems">
+                            <div class="attr function"><a class="headerlink" href="#permanentlyDeleteExpiredItems">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">permanentlyDeleteExpiredItems</span><span class="signature">()</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">permanentlyDeleteExpiredItems</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    permanentlyDeleteExpiredItems performs a sub audit of the recycle_bin directory and the log directory, in order to delete any files or directories that are deemed too old</span>
+<span class="sd">    :testedWith: TestCompletedDownloadsController:test_permanentlyDeleteExpiredItems</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># delete recycled directories older than 4 weeks</span>
+    <span class="n">recycleBinDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;RECYCLE_BIN_DIR&quot;</span><span class="p">)</span>
+    <span class="n">recycledFileSystemDirs</span> <span class="o">=</span> <span class="n">FolderInterface</span><span class="o">.</span><span class="n">getDirContents</span><span class="p">(</span>
+        <span class="n">recycleBinDir</span><span class="p">)</span>
+
+    <span class="n">dateFourWeeksAgo</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">dateOneWeekAgo</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">directoryItem</span> <span class="ow">in</span> <span class="n">recycledFileSystemDirs</span><span class="p">:</span>
+        <span class="n">fileCreationDate</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getctime</span><span class="p">(</span><span class="n">directoryItem</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">fileCreationDate</span> <span class="o">&lt;</span> <span class="n">dateFourWeeksAgo</span><span class="p">:</span>
+            <span class="n">FolderInterface</span><span class="o">.</span><span class="n">deleteDir</span><span class="p">(</span><span class="n">directoryItem</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="c1"># get log files from logs dir</span>
+    <span class="n">logFiles</span> <span class="o">=</span> <span class="n">FolderInterface</span><span class="o">.</span><span class="n">getDirContents</span><span class="p">(</span><span class="s2">&quot;logs&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">logFile</span> <span class="ow">in</span> <span class="n">logFiles</span><span class="p">:</span>
+        <span class="n">fileCreationDate</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getctime</span><span class="p">(</span><span class="n">logFile</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">fileCreationDate</span> <span class="o">&lt;</span> <span class="n">dateOneWeekAgo</span><span class="p">:</span>
+            <span class="n">FolderInterface</span><span class="o">.</span><span class="n">deleteFile</span><span class="p">(</span><span class="n">logFile</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>permanentlyDeleteExpiredItems performs a sub audit of the recycle_bin directory and the log directory, in order to delete any files or directories that are deemed too old
+:testedWith: TestCompletedDownloadsController:test_permanentlyDeleteExpiredItems
+:return: None</p>
+</div>
+
 
                 </section>
     </main>

@@ -60,7 +60,7 @@
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">from</span> <span class="nn">requests.exceptions</span> <span class="kn">import</span> <span class="n">ChunkedEncodingError</span>
+<span class="kn">from</span> <span class="nn">requests.exceptions</span> <span class="kn">import</span> <span class="n">ChunkedEncodingError</span><span class="p">,</span> <span class="ne">ConnectionError</span>
 <span class="kn">from</span> <span class="nn">json.decoder</span> <span class="kn">import</span> <span class="n">JSONDecodeError</span>
 
 <span class="c1"># internal dependencies</span>
@@ -104,6 +104,7 @@
     
     <span class="c1"># create query url</span>
     <span class="n">queryUrl</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://apibay.org/q.php?q=</span><span class="si">{</span><span class="n">queryTerm</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># make query and load json data</span>
@@ -121,9 +122,13 @@
 
         <span class="k">return</span> <span class="n">torrentRecords</span>
 
-    <span class="k">except</span> <span class="p">(</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="n">ChunkedEncodingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
-        <span class="n">responsePrintout</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span> <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span> <span class="k">else</span> <span class="n">response</span>
-        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Problem with TPB API has occurred. Recevied: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="n">ChunkedEncodingError</span><span class="p">,</span> <span class="ne">ConnectionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+
+        <span class="n">errorString</span> <span class="o">=</span> <span class="s2">&quot;Problem with TPB API has occurred.&quot;</span>
+
+        <span class="k">if</span> <span class="n">response</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">:</span>
+            <span class="n">errorString</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; Received: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="n">errorString</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[]</span>
 </pre></div>
 
@@ -207,6 +212,7 @@
     
     <span class="c1"># create query url</span>
     <span class="n">queryUrl</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://apibay.org/q.php?q=</span><span class="si">{</span><span class="n">queryTerm</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># make query and load json data</span>
@@ -224,9 +230,13 @@
 
         <span class="k">return</span> <span class="n">torrentRecords</span>
 
-    <span class="k">except</span> <span class="p">(</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="n">ChunkedEncodingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
-        <span class="n">responsePrintout</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span> <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span> <span class="k">else</span> <span class="n">response</span>
-        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Problem with TPB API has occurred. Recevied: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="n">ChunkedEncodingError</span><span class="p">,</span> <span class="ne">ConnectionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+
+        <span class="n">errorString</span> <span class="o">=</span> <span class="s2">&quot;Problem with TPB API has occurred.&quot;</span>
+
+        <span class="k">if</span> <span class="n">response</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">:</span>
+            <span class="n">errorString</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; Received: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="n">errorString</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[]</span>
 </pre></div>
 

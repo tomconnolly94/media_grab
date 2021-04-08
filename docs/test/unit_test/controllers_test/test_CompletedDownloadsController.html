@@ -55,6 +55,9 @@
                                 <a class="function" href="#TestCompletedDownloadsController.test_extractShowNameManualDownload">test_extractShowNameManualDownload</a>
                         </li>
                         <li>
+                                <a class="function" href="#TestCompletedDownloadsController.test_extractShowNameManualDownloadFails">test_extractShowNameManualDownloadFails</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#TestCompletedDownloadsController.test_extractSeasonNumberMediaGrabDownload">test_extractSeasonNumberMediaGrabDownload</a>
                         </li>
                         <li>
@@ -99,6 +102,9 @@
                         <li>
                                 <a class="function" href="#TestCompletedDownloadsController.test_auditFilesWithFileSystem">test_auditFilesWithFileSystem</a>
                         </li>
+                        <li>
+                                <a class="function" href="#TestCompletedDownloadsController.test_permanentlyDeleteExpiredItems">test_permanentlyDeleteExpiredItems</a>
+                        </li>
                 </ul>
 
             </li>
@@ -127,6 +133,7 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
 <span class="kn">from</span> <span class="nn">unittest.mock</span> <span class="kn">import</span> <span class="n">call</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">from</span> <span class="nn">mock</span> <span class="kn">import</span> <span class="n">MagicMock</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
 
 <span class="c1"># internal dependencies</span>
 <span class="kn">from</span> <span class="nn">controllers</span> <span class="kn">import</span> <span class="n">CompletedDownloadsController</span>
@@ -235,9 +242,22 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
                 <span class="n">fakeShowName</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">expectedFakeShowName</span><span class="p">,</span> <span class="n">actualFakeShowName</span><span class="p">)</span>
 
+
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.ErrorController.reportError&quot;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;re.match&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_extractShowNameManualDownloadFails</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reMatchMock</span><span class="p">,</span> <span class="n">reportErrorMock</span><span class="p">):</span>
+
+        <span class="c1"># config fake data</span>
+        <span class="n">fakeException</span> <span class="o">=</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;fakeException&quot;</span><span class="p">)</span>
+
+        <span class="c1"># config mocks</span>
+        <span class="n">reMatchMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">fakeException</span>
+
         <span class="c1"># check empty string</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
             <span class="kc">None</span><span class="p">,</span> <span class="n">CompletedDownloadsController</span><span class="o">.</span><span class="n">extractShowName</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
+        <span class="n">reportErrorMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span>
+            <span class="s2">&quot;Exception occurred when extracting season number with regex&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">fakeException</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab&quot;</span><span class="p">)</span>
@@ -741,11 +761,12 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
         <span class="n">auditFileSystemItemForEpisodeMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span>
             <span class="n">fakeFileSystemItems</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;interfaces.QBittorrentInterface.getInstance&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;logging.info&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.CompletedDownloadsController.reportItemAlreadyExists&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.getenv&#39;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_auditFilesWithFileSystem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getEnvMock</span><span class="p">,</span> <span class="n">reportItemAlreadyExistsMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">,</span> <span class="n">qBittorrentInterfaceGetInstanceMock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_auditFilesWithFileSystem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getEnvMock</span><span class="p">,</span> <span class="n">reportItemAlreadyExistsMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">,</span> <span class="n">qBittorrentInterfaceGetInstanceMock</span><span class="p">,</span> <span class="n">permanentlyDeleteExpiredItemsMock</span><span class="p">):</span>
 
         <span class="c1"># init items</span>
         <span class="n">downloadingItems</span> <span class="o">=</span> <span class="p">[</span>
@@ -803,11 +824,47 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">fakeDumpCompleteDir</span><span class="p">))))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">fakeRecycleBinDir</span><span class="p">))))</span>
             <span class="n">loggingInfoMock</span><span class="o">.</span><span class="n">assert_called</span><span class="p">()</span>
+            <span class="n">permanentlyDeleteExpiredItemsMock</span><span class="o">.</span><span class="n">assert_called</span><span class="p">()</span>
             <span class="n">reportItemAlreadyExistsMock</span><span class="o">.</span><span class="n">assert_not_called</span><span class="p">()</span>
 
         <span class="k">finally</span><span class="p">:</span>
             <span class="c1"># clean up moved files</span>
             <span class="n">cleanUpDirs</span><span class="p">(</span><span class="n">directoriesToCleanUp</span><span class="p">,</span> <span class="n">downloadingItems</span><span class="p">)</span>
+
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;interfaces.FolderInterface.deleteFile&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;interfaces.FolderInterface.deleteDir&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.path.getctime&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;interfaces.FolderInterface.getDirContents&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_permanentlyDeleteExpiredItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getDirContentsMock</span><span class="p">,</span> <span class="n">getctimeMock</span><span class="p">,</span> <span class="n">deleteDirMock</span><span class="p">,</span> <span class="n">deleteFileMock</span><span class="p">):</span>
+
+        <span class="n">logsDir</span> <span class="o">=</span> <span class="s2">&quot;logs&quot;</span>
+
+        <span class="k">def</span> <span class="nf">getDirContents</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+
+            <span class="k">assert</span><span class="p">(</span><span class="n">directory</span> <span class="ow">in</span> <span class="p">[</span><span class="n">fakeRecycleBinDir</span><span class="p">,</span> <span class="n">logsDir</span><span class="p">])</span>
+
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="n">FakeFileSystemItem</span><span class="p">(</span><span class="s2">&quot;fakeDirName1&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;fakePath1&quot;</span><span class="p">)),</span>
+                <span class="n">FakeFileSystemItem</span><span class="p">(</span><span class="s2">&quot;fakeDirName2&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;fakePath2&quot;</span><span class="p">))</span>
+            <span class="p">]</span>
+
+        <span class="c1"># config mocks</span>
+        <span class="n">getDirContentsMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">getDirContents</span>
+        <span class="n">getctimeMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(),</span> <span class="c1"># 5 weeks old</span>
+            <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(),</span> <span class="c1"># 3 weeks old</span>
+            <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">8</span><span class="p">))</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(),</span> <span class="c1"># 8 days old</span>
+            <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(),</span> <span class="c1"># 6 days old</span>
+        <span class="p">]</span>
+        
+        <span class="c1"># run testable function</span>
+        <span class="n">CompletedDownloadsController</span><span class="o">.</span><span class="n">permanentlyDeleteExpiredItems</span><span class="p">()</span>
+
+        <span class="c1"># mock asserts</span>
+        <span class="n">deleteDirMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fakeRecycleBinDir</span><span class="p">,</span> <span class="s2">&quot;fakePath1&quot;</span><span class="p">))</span>
+        <span class="n">deleteFileMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logsDir</span><span class="p">,</span> <span class="s2">&quot;fakePath1&quot;</span><span class="p">))</span>
+
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
@@ -992,9 +1049,22 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
                 <span class="n">fakeShowName</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">expectedFakeShowName</span><span class="p">,</span> <span class="n">actualFakeShowName</span><span class="p">)</span>
 
+
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.ErrorController.reportError&quot;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;re.match&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_extractShowNameManualDownloadFails</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reMatchMock</span><span class="p">,</span> <span class="n">reportErrorMock</span><span class="p">):</span>
+
+        <span class="c1"># config fake data</span>
+        <span class="n">fakeException</span> <span class="o">=</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;fakeException&quot;</span><span class="p">)</span>
+
+        <span class="c1"># config mocks</span>
+        <span class="n">reMatchMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">fakeException</span>
+
         <span class="c1"># check empty string</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
             <span class="kc">None</span><span class="p">,</span> <span class="n">CompletedDownloadsController</span><span class="o">.</span><span class="n">extractShowName</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
+        <span class="n">reportErrorMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span>
+            <span class="s2">&quot;Exception occurred when extracting season number with regex&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">fakeException</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab&quot;</span><span class="p">)</span>
@@ -1498,11 +1568,12 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
         <span class="n">auditFileSystemItemForEpisodeMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span>
             <span class="n">fakeFileSystemItems</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;interfaces.QBittorrentInterface.getInstance&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;logging.info&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.CompletedDownloadsController.reportItemAlreadyExists&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.getenv&#39;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_auditFilesWithFileSystem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getEnvMock</span><span class="p">,</span> <span class="n">reportItemAlreadyExistsMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">,</span> <span class="n">qBittorrentInterfaceGetInstanceMock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_auditFilesWithFileSystem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getEnvMock</span><span class="p">,</span> <span class="n">reportItemAlreadyExistsMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">,</span> <span class="n">qBittorrentInterfaceGetInstanceMock</span><span class="p">,</span> <span class="n">permanentlyDeleteExpiredItemsMock</span><span class="p">):</span>
 
         <span class="c1"># init items</span>
         <span class="n">downloadingItems</span> <span class="o">=</span> <span class="p">[</span>
@@ -1560,11 +1631,46 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">fakeDumpCompleteDir</span><span class="p">))))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">fakeRecycleBinDir</span><span class="p">))))</span>
             <span class="n">loggingInfoMock</span><span class="o">.</span><span class="n">assert_called</span><span class="p">()</span>
+            <span class="n">permanentlyDeleteExpiredItemsMock</span><span class="o">.</span><span class="n">assert_called</span><span class="p">()</span>
             <span class="n">reportItemAlreadyExistsMock</span><span class="o">.</span><span class="n">assert_not_called</span><span class="p">()</span>
 
         <span class="k">finally</span><span class="p">:</span>
             <span class="c1"># clean up moved files</span>
             <span class="n">cleanUpDirs</span><span class="p">(</span><span class="n">directoriesToCleanUp</span><span class="p">,</span> <span class="n">downloadingItems</span><span class="p">)</span>
+
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;interfaces.FolderInterface.deleteFile&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;interfaces.FolderInterface.deleteDir&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.path.getctime&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;interfaces.FolderInterface.getDirContents&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_permanentlyDeleteExpiredItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getDirContentsMock</span><span class="p">,</span> <span class="n">getctimeMock</span><span class="p">,</span> <span class="n">deleteDirMock</span><span class="p">,</span> <span class="n">deleteFileMock</span><span class="p">):</span>
+
+        <span class="n">logsDir</span> <span class="o">=</span> <span class="s2">&quot;logs&quot;</span>
+
+        <span class="k">def</span> <span class="nf">getDirContents</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+
+            <span class="k">assert</span><span class="p">(</span><span class="n">directory</span> <span class="ow">in</span> <span class="p">[</span><span class="n">fakeRecycleBinDir</span><span class="p">,</span> <span class="n">logsDir</span><span class="p">])</span>
+
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="n">FakeFileSystemItem</span><span class="p">(</span><span class="s2">&quot;fakeDirName1&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;fakePath1&quot;</span><span class="p">)),</span>
+                <span class="n">FakeFileSystemItem</span><span class="p">(</span><span class="s2">&quot;fakeDirName2&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;fakePath2&quot;</span><span class="p">))</span>
+            <span class="p">]</span>
+
+        <span class="c1"># config mocks</span>
+        <span class="n">getDirContentsMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">getDirContents</span>
+        <span class="n">getctimeMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(),</span> <span class="c1"># 5 weeks old</span>
+            <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(),</span> <span class="c1"># 3 weeks old</span>
+            <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">8</span><span class="p">))</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(),</span> <span class="c1"># 8 days old</span>
+            <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(),</span> <span class="c1"># 6 days old</span>
+        <span class="p">]</span>
+        
+        <span class="c1"># run testable function</span>
+        <span class="n">CompletedDownloadsController</span><span class="o">.</span><span class="n">permanentlyDeleteExpiredItems</span><span class="p">()</span>
+
+        <span class="c1"># mock asserts</span>
+        <span class="n">deleteDirMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fakeRecycleBinDir</span><span class="p">,</span> <span class="s2">&quot;fakePath1&quot;</span><span class="p">))</span>
+        <span class="n">deleteFileMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logsDir</span><span class="p">,</span> <span class="s2">&quot;fakePath1&quot;</span><span class="p">))</span>
 </pre></div>
 
         </details>
@@ -1713,10 +1819,40 @@ attribute so can be configured by individual tests if required.</li>
             <span class="n">actualFakeShowName</span> <span class="o">=</span> <span class="n">CompletedDownloadsController</span><span class="o">.</span><span class="n">extractShowName</span><span class="p">(</span>
                 <span class="n">fakeShowName</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">expectedFakeShowName</span><span class="p">,</span> <span class="n">actualFakeShowName</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="TestCompletedDownloadsController.test_extractShowNameManualDownloadFails" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TestCompletedDownloadsController.test_extractShowNameManualDownloadFails">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@mock.patch(&#39;controllers.ErrorController.reportError&#39;)</div>
+        <div class="decorator">@mock.patch(&#39;re.match&#39;)</div>
+
+            <span class="def">def</span>
+            <span class="name">test_extractShowNameManualDownloadFails</span><span class="signature">(self, reMatchMock, reportErrorMock)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.ErrorController.reportError&quot;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;re.match&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_extractShowNameManualDownloadFails</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reMatchMock</span><span class="p">,</span> <span class="n">reportErrorMock</span><span class="p">):</span>
+
+        <span class="c1"># config fake data</span>
+        <span class="n">fakeException</span> <span class="o">=</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;fakeException&quot;</span><span class="p">)</span>
+
+        <span class="c1"># config mocks</span>
+        <span class="n">reMatchMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">fakeException</span>
 
         <span class="c1"># check empty string</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
             <span class="kc">None</span><span class="p">,</span> <span class="n">CompletedDownloadsController</span><span class="o">.</span><span class="n">extractShowName</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
+        <span class="n">reportErrorMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span>
+            <span class="s2">&quot;Exception occurred when extracting season number with regex&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">fakeException</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -2513,7 +2649,8 @@ attribute so can be configured by individual tests if required.</li>
                             <div id="TestCompletedDownloadsController.test_auditFilesWithFileSystem" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#TestCompletedDownloadsController.test_auditFilesWithFileSystem">#&nbsp;&nbsp</a>
 
-                <div class="decorator">@mock.patch(&#39;interfaces.QBittorrentInterface.getInstance&#39;)</div>
+                <div class="decorator">@mock.patch(&#39;controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems&#39;)</div>
+        <div class="decorator">@mock.patch(&#39;interfaces.QBittorrentInterface.getInstance&#39;)</div>
         <div class="decorator">@mock.patch(&#39;logging.info&#39;)</div>
         <div class="decorator">@mock.patch(&#39;controllers.CompletedDownloadsController.reportItemAlreadyExists&#39;)</div>
         <div class="decorator">@mock.patch(&#39;os.getenv&#39;)</div>
@@ -2524,17 +2661,19 @@ attribute so can be configured by individual tests if required.</li>
     getEnvMock,
     reportItemAlreadyExistsMock,
     loggingInfoMock,
-    qBittorrentInterfaceGetInstanceMock
+    qBittorrentInterfaceGetInstanceMock,
+    permanentlyDeleteExpiredItemsMock
 )</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;interfaces.QBittorrentInterface.getInstance&quot;</span><span class="p">)</span>
+            <div class="codehilite"><pre><span></span>    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems&quot;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;interfaces.QBittorrentInterface.getInstance&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;logging.info&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.CompletedDownloadsController.reportItemAlreadyExists&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.getenv&#39;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_auditFilesWithFileSystem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getEnvMock</span><span class="p">,</span> <span class="n">reportItemAlreadyExistsMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">,</span> <span class="n">qBittorrentInterfaceGetInstanceMock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_auditFilesWithFileSystem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getEnvMock</span><span class="p">,</span> <span class="n">reportItemAlreadyExistsMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">,</span> <span class="n">qBittorrentInterfaceGetInstanceMock</span><span class="p">,</span> <span class="n">permanentlyDeleteExpiredItemsMock</span><span class="p">):</span>
 
         <span class="c1"># init items</span>
         <span class="n">downloadingItems</span> <span class="o">=</span> <span class="p">[</span>
@@ -2592,11 +2731,72 @@ attribute so can be configured by individual tests if required.</li>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">fakeDumpCompleteDir</span><span class="p">))))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">fakeRecycleBinDir</span><span class="p">))))</span>
             <span class="n">loggingInfoMock</span><span class="o">.</span><span class="n">assert_called</span><span class="p">()</span>
+            <span class="n">permanentlyDeleteExpiredItemsMock</span><span class="o">.</span><span class="n">assert_called</span><span class="p">()</span>
             <span class="n">reportItemAlreadyExistsMock</span><span class="o">.</span><span class="n">assert_not_called</span><span class="p">()</span>
 
         <span class="k">finally</span><span class="p">:</span>
             <span class="c1"># clean up moved files</span>
             <span class="n">cleanUpDirs</span><span class="p">(</span><span class="n">directoriesToCleanUp</span><span class="p">,</span> <span class="n">downloadingItems</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="TestCompletedDownloadsController.test_permanentlyDeleteExpiredItems" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TestCompletedDownloadsController.test_permanentlyDeleteExpiredItems">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@mock.patch(&#39;interfaces.FolderInterface.deleteFile&#39;)</div>
+        <div class="decorator">@mock.patch(&#39;interfaces.FolderInterface.deleteDir&#39;)</div>
+        <div class="decorator">@mock.patch(&#39;os.path.getctime&#39;)</div>
+        <div class="decorator">@mock.patch(&#39;interfaces.FolderInterface.getDirContents&#39;)</div>
+
+            <span class="def">def</span>
+            <span class="name">test_permanentlyDeleteExpiredItems</span><span class="signature">(
+    self,
+    getDirContentsMock,
+    getctimeMock,
+    deleteDirMock,
+    deleteFileMock
+)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;interfaces.FolderInterface.deleteFile&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;interfaces.FolderInterface.deleteDir&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.path.getctime&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;interfaces.FolderInterface.getDirContents&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_permanentlyDeleteExpiredItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getDirContentsMock</span><span class="p">,</span> <span class="n">getctimeMock</span><span class="p">,</span> <span class="n">deleteDirMock</span><span class="p">,</span> <span class="n">deleteFileMock</span><span class="p">):</span>
+
+        <span class="n">logsDir</span> <span class="o">=</span> <span class="s2">&quot;logs&quot;</span>
+
+        <span class="k">def</span> <span class="nf">getDirContents</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+
+            <span class="k">assert</span><span class="p">(</span><span class="n">directory</span> <span class="ow">in</span> <span class="p">[</span><span class="n">fakeRecycleBinDir</span><span class="p">,</span> <span class="n">logsDir</span><span class="p">])</span>
+
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="n">FakeFileSystemItem</span><span class="p">(</span><span class="s2">&quot;fakeDirName1&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;fakePath1&quot;</span><span class="p">)),</span>
+                <span class="n">FakeFileSystemItem</span><span class="p">(</span><span class="s2">&quot;fakeDirName2&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;fakePath2&quot;</span><span class="p">))</span>
+            <span class="p">]</span>
+
+        <span class="c1"># config mocks</span>
+        <span class="n">getDirContentsMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">getDirContents</span>
+        <span class="n">getctimeMock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(),</span> <span class="c1"># 5 weeks old</span>
+            <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(),</span> <span class="c1"># 3 weeks old</span>
+            <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">8</span><span class="p">))</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(),</span> <span class="c1"># 8 days old</span>
+            <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(),</span> <span class="c1"># 6 days old</span>
+        <span class="p">]</span>
+        
+        <span class="c1"># run testable function</span>
+        <span class="n">CompletedDownloadsController</span><span class="o">.</span><span class="n">permanentlyDeleteExpiredItems</span><span class="p">()</span>
+
+        <span class="c1"># mock asserts</span>
+        <span class="n">deleteDirMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fakeRecycleBinDir</span><span class="p">,</span> <span class="s2">&quot;fakePath1&quot;</span><span class="p">))</span>
+        <span class="n">deleteFileMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logsDir</span><span class="p">,</span> <span class="s2">&quot;fakePath1&quot;</span><span class="p">))</span>
 </pre></div>
 
         </details>

@@ -31,7 +31,10 @@
                     <a class="class" href="#TestTorrentFilterController">TestTorrentFilterController</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#TestTorrentFilterController.test_filterEpisodeTorrentPageUrls">test_filterEpisodeTorrentPageUrls</a>
+                                <a class="function" href="#TestTorrentFilterController.test_createBlacklistFilterFunc">test_createBlacklistFilterFunc</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#TestTorrentFilterController.test_filterEpisodeTorrents">test_filterEpisodeTorrents</a>
                         </li>
                 </ul>
 
@@ -67,18 +70,44 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
 
 <span class="k">class</span> <span class="nc">TestTorrentFilterController</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">test_filterEpisodeTorrentPageUrls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="n">mediaData</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;Rick and morty&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_createBlacklistFilterFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># config fake data</span>
+        <span class="n">fakeBlacklistTerms</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;blacklistTerm1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;blacklistTerm2&quot;</span>
+        <span class="p">]</span>
+        <span class="n">fakeSearchableTerms</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;blacklistTerm1 file&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;blacklistTerm3 file&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="n">blacklistFilterFunc</span> <span class="o">=</span> <span class="n">TorrentFilterController</span><span class="o">.</span><span class="n">createBlacklistFilterFunc</span><span class="p">(</span><span class="n">fakeBlacklistTerms</span><span class="p">)</span>
+
+        <span class="n">filteredTerms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">blacklistFilterFunc</span><span class="p">,</span> <span class="n">fakeSearchableTerms</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">([</span><span class="n">fakeSearchableTerms</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">filteredTerms</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_filterEpisodeTorrents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">mediaData</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;Rick and morty&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;blacklistTerm&quot;</span><span class="p">])</span>
 
         <span class="n">torrentRecordsFailFilter</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="c1"># these should fail because they dont contain a season or episode reference</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.morty&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="c1"># these should fail because they dont contain an episode reference</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.Season.1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.episode.1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="c1"># these should fail because they dont contain an episode reference (even though the season number is correct)</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.Season.3&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick..and.Morty.Season.3&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="c1"># these should fail because they dont match the season and episode numbers</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S04E02.1080p.WEBRip.x264-STRiFE&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S03E03.1080p.WEBRip.x264-STRiFE&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S03E03.1080p.WEBRip.x264-STRiFE&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="c1"># these should fail because they include a term from the blacklist </span>
+            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot; Rick and Morty S03E02 1080p PT-BR Subs Tocatoon blacklistTerm&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick....and Morty S03E02 1080p PT-BR Subs TocatoonBlackListTerm&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
             <span class="c1">#TODO: These should fail but I can&#39;t figure out a torrentFilter configuration that achieves that yet</span>
             <span class="c1">#TorrentRecord(&quot;Rick.and.Morty.the.movie.S03E02.1080p.WEBRip.x264-STRiFE&quot;, &quot;fakeId&quot;, &quot;fakeInfoHash&quot;, 2),</span>
@@ -90,7 +119,7 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S03E02.720p.HDTV.x264-BATV[ettv]&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot; Rick and Morty S03E02 1080p PT-BR Subs Tocatoon &quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon &quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon &quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="p">]</span>
 
         <span class="n">filteredFailedTorrents</span> <span class="o">=</span> <span class="n">TorrentFilterController</span><span class="o">.</span><span class="n">filterEpisodeTorrents</span><span class="p">(</span><span class="n">torrentRecordsFailFilter</span><span class="p">,</span> <span class="n">mediaData</span><span class="p">)</span>
@@ -126,18 +155,44 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">TestTorrentFilterController</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">test_filterEpisodeTorrentPageUrls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="n">mediaData</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;Rick and morty&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_createBlacklistFilterFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># config fake data</span>
+        <span class="n">fakeBlacklistTerms</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;blacklistTerm1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;blacklistTerm2&quot;</span>
+        <span class="p">]</span>
+        <span class="n">fakeSearchableTerms</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;blacklistTerm1 file&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;blacklistTerm3 file&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="n">blacklistFilterFunc</span> <span class="o">=</span> <span class="n">TorrentFilterController</span><span class="o">.</span><span class="n">createBlacklistFilterFunc</span><span class="p">(</span><span class="n">fakeBlacklistTerms</span><span class="p">)</span>
+
+        <span class="n">filteredTerms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">blacklistFilterFunc</span><span class="p">,</span> <span class="n">fakeSearchableTerms</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">([</span><span class="n">fakeSearchableTerms</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">filteredTerms</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_filterEpisodeTorrents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">mediaData</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;Rick and morty&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;blacklistTerm&quot;</span><span class="p">])</span>
 
         <span class="n">torrentRecordsFailFilter</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="c1"># these should fail because they dont contain a season or episode reference</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.morty&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="c1"># these should fail because they dont contain an episode reference</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.Season.1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.episode.1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="c1"># these should fail because they dont contain an episode reference (even though the season number is correct)</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.Season.3&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick..and.Morty.Season.3&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="c1"># these should fail because they dont match the season and episode numbers</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S04E02.1080p.WEBRip.x264-STRiFE&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S03E03.1080p.WEBRip.x264-STRiFE&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S03E03.1080p.WEBRip.x264-STRiFE&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="c1"># these should fail because they include a term from the blacklist </span>
+            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot; Rick and Morty S03E02 1080p PT-BR Subs Tocatoon blacklistTerm&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick....and Morty S03E02 1080p PT-BR Subs TocatoonBlackListTerm&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
             <span class="c1">#TODO: These should fail but I can&#39;t figure out a torrentFilter configuration that achieves that yet</span>
             <span class="c1">#TorrentRecord(&quot;Rick.and.Morty.the.movie.S03E02.1080p.WEBRip.x264-STRiFE&quot;, &quot;fakeId&quot;, &quot;fakeInfoHash&quot;, 2),</span>
@@ -149,7 +204,7 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S03E02.720p.HDTV.x264-BATV[ettv]&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot; Rick and Morty S03E02 1080p PT-BR Subs Tocatoon &quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon &quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon &quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="p">]</span>
 
         <span class="n">filteredFailedTorrents</span> <span class="o">=</span> <span class="n">TorrentFilterController</span><span class="o">.</span><span class="n">filterEpisodeTorrents</span><span class="p">(</span><span class="n">torrentRecordsFailFilter</span><span class="p">,</span> <span class="n">mediaData</span><span class="p">)</span>
@@ -200,28 +255,69 @@ attribute so can be configured by individual tests if required.</li>
 </div>
 
 
-                            <div id="TestTorrentFilterController.test_filterEpisodeTorrentPageUrls" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#TestTorrentFilterController.test_filterEpisodeTorrentPageUrls">#&nbsp;&nbsp</a>
+                            <div id="TestTorrentFilterController.test_createBlacklistFilterFunc" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TestTorrentFilterController.test_createBlacklistFilterFunc">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">test_filterEpisodeTorrentPageUrls</span><span class="signature">(self)</span>:
+            <span class="name">test_createBlacklistFilterFunc</span><span class="signature">(self)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">test_filterEpisodeTorrentPageUrls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">test_createBlacklistFilterFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="n">mediaData</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;Rick and morty&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># config fake data</span>
+        <span class="n">fakeBlacklistTerms</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;blacklistTerm1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;blacklistTerm2&quot;</span>
+        <span class="p">]</span>
+        <span class="n">fakeSearchableTerms</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;blacklistTerm1 file&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;blacklistTerm3 file&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="n">blacklistFilterFunc</span> <span class="o">=</span> <span class="n">TorrentFilterController</span><span class="o">.</span><span class="n">createBlacklistFilterFunc</span><span class="p">(</span><span class="n">fakeBlacklistTerms</span><span class="p">)</span>
+
+        <span class="n">filteredTerms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">blacklistFilterFunc</span><span class="p">,</span> <span class="n">fakeSearchableTerms</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">([</span><span class="n">fakeSearchableTerms</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">filteredTerms</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="TestTorrentFilterController.test_filterEpisodeTorrents" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TestTorrentFilterController.test_filterEpisodeTorrents">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">test_filterEpisodeTorrents</span><span class="signature">(self)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">test_filterEpisodeTorrents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">mediaData</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;Rick and morty&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;blacklistTerm&quot;</span><span class="p">])</span>
 
         <span class="n">torrentRecordsFailFilter</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="c1"># these should fail because they dont contain a season or episode reference</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.morty&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="c1"># these should fail because they dont contain an episode reference</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.Season.1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.episode.1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="c1"># these should fail because they dont contain an episode reference (even though the season number is correct)</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.Season.3&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick..and.Morty.Season.3&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="c1"># these should fail because they dont match the season and episode numbers</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S04E02.1080p.WEBRip.x264-STRiFE&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S03E03.1080p.WEBRip.x264-STRiFE&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S03E03.1080p.WEBRip.x264-STRiFE&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="c1"># these should fail because they include a term from the blacklist </span>
+            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot; Rick and Morty S03E02 1080p PT-BR Subs Tocatoon blacklistTerm&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick....and Morty S03E02 1080p PT-BR Subs TocatoonBlackListTerm&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
             <span class="c1">#TODO: These should fail but I can&#39;t figure out a torrentFilter configuration that achieves that yet</span>
             <span class="c1">#TorrentRecord(&quot;Rick.and.Morty.the.movie.S03E02.1080p.WEBRip.x264-STRiFE&quot;, &quot;fakeId&quot;, &quot;fakeInfoHash&quot;, 2),</span>
@@ -233,7 +329,7 @@ attribute so can be configured by individual tests if required.</li>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S03E02.720p.HDTV.x264-BATV[ettv]&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
             <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot; Rick and Morty S03E02 1080p PT-BR Subs Tocatoon &quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon &quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon &quot;</span><span class="p">,</span> <span class="s2">&quot;fakeId&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="p">]</span>
 
         <span class="n">filteredFailedTorrents</span> <span class="o">=</span> <span class="n">TorrentFilterController</span><span class="o">.</span><span class="n">filterEpisodeTorrents</span><span class="p">(</span><span class="n">torrentRecordsFailFilter</span><span class="p">,</span> <span class="n">mediaData</span><span class="p">)</span>

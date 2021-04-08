@@ -55,7 +55,13 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">time</span>
 
+
 <span class="k">def</span> <span class="nf">initLogging</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    initLogging initialises the logging object to be used throughout the program, providing a logging file, format and date format</span>
+<span class="sd">    :testedWith: None</span>
+<span class="sd">    :return: the configured logging object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logFormat</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
     <span class="n">logDateFormat</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">-%b-%y %H:%M:%S&#39;</span>
     <span class="n">projectBaseDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
@@ -84,6 +90,11 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">initLogging</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    initLogging initialises the logging object to be used throughout the program, providing a logging file, format and date format</span>
+<span class="sd">    :testedWith: None</span>
+<span class="sd">    :return: the configured logging object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logFormat</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
     <span class="n">logDateFormat</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">-%b-%y %H:%M:%S&#39;</span>
     <span class="n">projectBaseDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
@@ -100,7 +111,11 @@
 
         </details>
 
-    
+            <div class="docstring"><p>initLogging initialises the logging object to be used throughout the program, providing a logging file, format and date format
+:testedWith: None
+:return: the configured logging object</p>
+</div>
+
 
                 </section>
     </main>

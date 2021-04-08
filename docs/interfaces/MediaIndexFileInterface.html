@@ -125,9 +125,13 @@
 		<span class="n">mediaInfoRecords</span> <span class="o">=</span> <span class="p">[]</span>
 		<span class="n">mediaInfoRecordsRaw</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">mediaIndexfile</span><span class="o">.</span><span class="n">read</span><span class="p">())[</span><span class="s2">&quot;media&quot;</span><span class="p">]</span>
 		<span class="k">for</span> <span class="n">mediaInfoRecordRaw</span> <span class="ow">in</span> <span class="n">mediaInfoRecordsRaw</span><span class="p">:</span>
+
+			<span class="n">blacklistTerms</span> <span class="o">=</span> <span class="n">mediaInfoRecordRaw</span><span class="p">[</span><span class="s2">&quot;blacklistTerms&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;blacklistTerms&quot;</span> <span class="ow">in</span> <span class="n">mediaInfoRecordRaw</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="p">[]</span>
+
 			<span class="n">mediaInfoRecords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MediaInfoRecord</span><span class="p">(</span><span class="n">mediaInfoRecordRaw</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> 
 				<span class="n">mediaInfoRecordRaw</span><span class="p">[</span><span class="s2">&quot;typeSpecificData&quot;</span><span class="p">][</span><span class="s2">&quot;latestSeason&quot;</span><span class="p">],</span> 
-				<span class="n">mediaInfoRecordRaw</span><span class="p">[</span><span class="s2">&quot;typeSpecificData&quot;</span><span class="p">][</span><span class="s2">&quot;latestEpisode&quot;</span><span class="p">]))</span>
+				<span class="n">mediaInfoRecordRaw</span><span class="p">[</span><span class="s2">&quot;typeSpecificData&quot;</span><span class="p">][</span><span class="s2">&quot;latestEpisode&quot;</span><span class="p">],</span>
+				<span class="n">blacklistTerms</span><span class="p">))</span>
 		
 		<span class="k">return</span> <span class="n">mediaInfoRecords</span>
 </pre></div>
@@ -232,9 +236,13 @@
 		<span class="n">mediaInfoRecords</span> <span class="o">=</span> <span class="p">[]</span>
 		<span class="n">mediaInfoRecordsRaw</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">mediaIndexfile</span><span class="o">.</span><span class="n">read</span><span class="p">())[</span><span class="s2">&quot;media&quot;</span><span class="p">]</span>
 		<span class="k">for</span> <span class="n">mediaInfoRecordRaw</span> <span class="ow">in</span> <span class="n">mediaInfoRecordsRaw</span><span class="p">:</span>
+
+			<span class="n">blacklistTerms</span> <span class="o">=</span> <span class="n">mediaInfoRecordRaw</span><span class="p">[</span><span class="s2">&quot;blacklistTerms&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;blacklistTerms&quot;</span> <span class="ow">in</span> <span class="n">mediaInfoRecordRaw</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="p">[]</span>
+
 			<span class="n">mediaInfoRecords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MediaInfoRecord</span><span class="p">(</span><span class="n">mediaInfoRecordRaw</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> 
 				<span class="n">mediaInfoRecordRaw</span><span class="p">[</span><span class="s2">&quot;typeSpecificData&quot;</span><span class="p">][</span><span class="s2">&quot;latestSeason&quot;</span><span class="p">],</span> 
-				<span class="n">mediaInfoRecordRaw</span><span class="p">[</span><span class="s2">&quot;typeSpecificData&quot;</span><span class="p">][</span><span class="s2">&quot;latestEpisode&quot;</span><span class="p">]))</span>
+				<span class="n">mediaInfoRecordRaw</span><span class="p">[</span><span class="s2">&quot;typeSpecificData&quot;</span><span class="p">][</span><span class="s2">&quot;latestEpisode&quot;</span><span class="p">],</span>
+				<span class="n">blacklistTerms</span><span class="p">))</span>
 		
 		<span class="k">return</span> <span class="n">mediaInfoRecords</span>
 </pre></div>
