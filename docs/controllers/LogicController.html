@@ -28,9 +28,6 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
-                    <a class="function" href="#findMediaInfoRecord">findMediaInfoRecord</a>
-            </li>
-            <li>
                     <a class="function" href="#getMediaInfoRecordsWithTorrents">getMediaInfoRecordsWithTorrents</a>
             </li>
             <li>
@@ -65,13 +62,13 @@
 <span class="kn">from</span> <span class="nn">dataTypes.ProgramMode</span> <span class="kn">import</span> <span class="n">PROGRAM_MODE</span> 
 
 
-<span class="k">def</span> <span class="nf">findMediaInfoRecord</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">mediaInfoName</span><span class="p">):</span>
-	<span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span><span class="p">:</span>
-		<span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span> <span class="o">==</span> <span class="n">mediaInfoName</span><span class="p">:</span>
-			<span class="k">return</span> <span class="n">record</span>
-
-
 <span class="k">def</span> <span class="nf">getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    getMediaInfoRecordsWithTorrents uses the TPB interface to assign a torrentRecord to each mediaInfoRecord passed in, records for which a torrent cannot be found are not returned </span>
+<span class="sd">    :testedWith: TestLogicController:test_getMediaInfoRecordsWithTorrents</span>
+<span class="sd">    :param mediaInfoRecords: the downloadId of the download</span>
+<span class="sd">    :return: mediaInfoRecords with valid torrentRecords</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mediaInfoRecordsWithTorrents</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">mediaInfoRecord</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span><span class="p">:</span>
@@ -109,7 +106,12 @@
 
 
 <span class="k">def</span> <span class="nf">runProgramLogic</span><span class="p">(</span><span class="n">mode</span><span class="p">):</span>
-
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    runProgramLogic groups the core of the top level operations of the program together</span>
+<span class="sd">    :testedWith: TestLogicController:test_runProgramLogic</span>
+<span class="sd">    :param mode: the mode of the program run, the type of media the program is focusing on</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#analyse folder to look for completed downloads</span>
     <span class="n">CompletedDownloadsController</span><span class="o">.</span><span class="n">auditDumpCompleteDir</span><span class="p">()</span>
 
@@ -149,27 +151,6 @@
         </details>
 
             </section>
-                <section id="findMediaInfoRecord">
-                            <div class="attr function"><a class="headerlink" href="#findMediaInfoRecord">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">findMediaInfoRecord</span><span class="signature">(mediaInfoRecords, mediaInfoName)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">findMediaInfoRecord</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">mediaInfoName</span><span class="p">):</span>
-	<span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span><span class="p">:</span>
-		<span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span> <span class="o">==</span> <span class="n">mediaInfoName</span><span class="p">:</span>
-			<span class="k">return</span> <span class="n">record</span>
-</pre></div>
-
-        </details>
-
-    
-
-                </section>
                 <section id="getMediaInfoRecordsWithTorrents">
                             <div class="attr function"><a class="headerlink" href="#getMediaInfoRecordsWithTorrents">#&nbsp;&nbsp</a>
 
@@ -181,6 +162,12 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getMediaInfoRecordsWithTorrents</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    getMediaInfoRecordsWithTorrents uses the TPB interface to assign a torrentRecord to each mediaInfoRecord passed in, records for which a torrent cannot be found are not returned </span>
+<span class="sd">    :testedWith: TestLogicController:test_getMediaInfoRecordsWithTorrents</span>
+<span class="sd">    :param mediaInfoRecords: the downloadId of the download</span>
+<span class="sd">    :return: mediaInfoRecords with valid torrentRecords</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mediaInfoRecordsWithTorrents</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">mediaInfoRecord</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span><span class="p">:</span>
@@ -219,7 +206,12 @@
 
         </details>
 
-    
+            <div class="docstring"><p>getMediaInfoRecordsWithTorrents uses the TPB interface to assign a torrentRecord to each mediaInfoRecord passed in, records for which a torrent cannot be found are not returned 
+:testedWith: TestLogicController:test_getMediaInfoRecordsWithTorrents
+:param mediaInfoRecords: the downloadId of the download
+:return: mediaInfoRecords with valid torrentRecords</p>
+</div>
+
 
                 </section>
                 <section id="runProgramLogic">
@@ -233,7 +225,12 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">runProgramLogic</span><span class="p">(</span><span class="n">mode</span><span class="p">):</span>
-
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    runProgramLogic groups the core of the top level operations of the program together</span>
+<span class="sd">    :testedWith: TestLogicController:test_runProgramLogic</span>
+<span class="sd">    :param mode: the mode of the program run, the type of media the program is focusing on</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#analyse folder to look for completed downloads</span>
     <span class="n">CompletedDownloadsController</span><span class="o">.</span><span class="n">auditDumpCompleteDir</span><span class="p">()</span>
 
@@ -272,7 +269,12 @@
 
         </details>
 
-    
+            <div class="docstring"><p>runProgramLogic groups the core of the top level operations of the program together
+:testedWith: TestLogicController:test_runProgramLogic
+:param mode: the mode of the program run, the type of media the program is focusing on
+:return: None</p>
+</div>
+
 
                 </section>
     </main>

@@ -31,10 +31,10 @@
                     <a class="class" href="#TestQueryGenerationController">TestQueryGenerationController</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#TestQueryGenerationController.test_generateEpisodeQueryGroup">test_generateEpisodeQueryGroup</a>
+                                <a class="function" href="#TestQueryGenerationController.test_addTVEpisodeQueriesToMediaInfoRecords">test_addTVEpisodeQueriesToMediaInfoRecords</a>
                         </li>
                         <li>
-                                <a class="function" href="#TestQueryGenerationController.test_generateTVEpisodeQueries">test_generateTVEpisodeQueries</a>
+                                <a class="function" href="#TestQueryGenerationController.test_generateEpisodeQueryGroup">test_generateEpisodeQueryGroup</a>
                         </li>
                 </ul>
 
@@ -69,6 +69,40 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
 
 <span class="k">class</span> <span class="nc">TestQueryGenerationController</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
 
+
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.QueryGenerationController.generateTVEpisodeQueryGroup&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generateTVEpisodeQueryGroupMock</span><span class="p">):</span>
+
+        <span class="c1"># config fake data</span>
+        <span class="n">fakeMediaInfoRecords</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName2&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName3&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">fakeQueries</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fakeQueryUrl1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeQueryUrl2&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeQueryUrl3&quot;</span><span class="p">]</span>
+
+        <span class="c1"># config mocks</span>
+        <span class="n">generateTVEpisodeQueryGroupMock</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">fakeQueries</span>
+
+        <span class="c1"># run testable function</span>
+        <span class="n">QueryGenerationController</span><span class="o">.</span><span class="n">addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span>
+            <span class="n">fakeMediaInfoRecords</span><span class="p">)</span>
+
+        <span class="c1"># expected values</span>
+        <span class="n">expectedQueryUrls</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;fakeMediaInfoShowName1&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
+            <span class="s2">&quot;fakeMediaInfoShowName2&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
+            <span class="s2">&quot;fakeMediaInfoShowName3&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">actualQueryUrls</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">():</span> <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getMediaSearchQueries</span><span class="p">()</span> <span class="k">for</span> <span class="n">fakeMediaInfoRecord</span> <span class="ow">in</span> <span class="n">fakeMediaInfoRecords</span>
+        <span class="p">}</span>
+
+        <span class="c1"># asserts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">expectedQueryUrls</span><span class="p">,</span> <span class="n">actualQueryUrls</span><span class="p">)</span>
+
+
     <span class="k">def</span> <span class="nf">test_generateEpisodeQueryGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">mediaInfoRecord</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;rick and morty&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -87,39 +121,6 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
         <span class="n">seasonQueryGroup</span> <span class="o">=</span> <span class="n">QueryGenerationController</span><span class="o">.</span><span class="n">generateTVEpisodeQueryGroup</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">relevantSeason</span><span class="p">,</span> <span class="n">relevantEpisode</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">expectedQueries</span><span class="p">,</span> <span class="n">seasonQueryGroup</span><span class="p">)</span>
-
-
-    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.QueryGenerationController.generateTVEpisodeQueryGroup&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_generateTVEpisodeQueries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generateTVEpisodeQueryGroupMock</span><span class="p">):</span>
-
-        <span class="c1"># config fake data</span>
-        <span class="n">fakeMediaInfoRecords</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName2&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName3&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="p">]</span>
-        <span class="n">fakeQueries</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fakeQueryUrl1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeQueryUrl2&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeQueryUrl3&quot;</span><span class="p">]</span>
-
-        <span class="c1"># config mocks</span>
-        <span class="n">generateTVEpisodeQueryGroupMock</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">fakeQueries</span>
-
-        <span class="c1"># run testable function</span>
-        <span class="n">QueryGenerationController</span><span class="o">.</span><span class="n">addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span><span class="n">fakeMediaInfoRecords</span><span class="p">)</span>
-
-        <span class="c1"># expected values</span>
-        <span class="n">expectedQueryUrls</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;fakeMediaInfoShowName1&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
-            <span class="s2">&quot;fakeMediaInfoShowName2&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
-            <span class="s2">&quot;fakeMediaInfoShowName3&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
-        <span class="p">}</span>
-
-        <span class="n">actualQueryUrls</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">():</span> <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getMediaSearchQueries</span><span class="p">()</span> <span class="k">for</span> <span class="n">fakeMediaInfoRecord</span> <span class="ow">in</span> <span class="n">fakeMediaInfoRecords</span>
-        <span class="p">}</span>
-
-        <span class="c1"># asserts</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">expectedQueryUrls</span><span class="p">,</span> <span class="n">actualQueryUrls</span><span class="p">)</span>
-
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
@@ -145,6 +146,40 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">TestQueryGenerationController</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
 
+
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.QueryGenerationController.generateTVEpisodeQueryGroup&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generateTVEpisodeQueryGroupMock</span><span class="p">):</span>
+
+        <span class="c1"># config fake data</span>
+        <span class="n">fakeMediaInfoRecords</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName2&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName3&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">fakeQueries</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fakeQueryUrl1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeQueryUrl2&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeQueryUrl3&quot;</span><span class="p">]</span>
+
+        <span class="c1"># config mocks</span>
+        <span class="n">generateTVEpisodeQueryGroupMock</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">fakeQueries</span>
+
+        <span class="c1"># run testable function</span>
+        <span class="n">QueryGenerationController</span><span class="o">.</span><span class="n">addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span>
+            <span class="n">fakeMediaInfoRecords</span><span class="p">)</span>
+
+        <span class="c1"># expected values</span>
+        <span class="n">expectedQueryUrls</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;fakeMediaInfoShowName1&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
+            <span class="s2">&quot;fakeMediaInfoShowName2&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
+            <span class="s2">&quot;fakeMediaInfoShowName3&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">actualQueryUrls</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">():</span> <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getMediaSearchQueries</span><span class="p">()</span> <span class="k">for</span> <span class="n">fakeMediaInfoRecord</span> <span class="ow">in</span> <span class="n">fakeMediaInfoRecords</span>
+        <span class="p">}</span>
+
+        <span class="c1"># asserts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">expectedQueryUrls</span><span class="p">,</span> <span class="n">actualQueryUrls</span><span class="p">)</span>
+
+
     <span class="k">def</span> <span class="nf">test_generateEpisodeQueryGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">mediaInfoRecord</span> <span class="o">=</span> <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;rick and morty&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -163,38 +198,6 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../controllers_te
         <span class="n">seasonQueryGroup</span> <span class="o">=</span> <span class="n">QueryGenerationController</span><span class="o">.</span><span class="n">generateTVEpisodeQueryGroup</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">relevantSeason</span><span class="p">,</span> <span class="n">relevantEpisode</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">expectedQueries</span><span class="p">,</span> <span class="n">seasonQueryGroup</span><span class="p">)</span>
-
-
-    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.QueryGenerationController.generateTVEpisodeQueryGroup&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_generateTVEpisodeQueries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generateTVEpisodeQueryGroupMock</span><span class="p">):</span>
-
-        <span class="c1"># config fake data</span>
-        <span class="n">fakeMediaInfoRecords</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName2&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName3&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="p">]</span>
-        <span class="n">fakeQueries</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fakeQueryUrl1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeQueryUrl2&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeQueryUrl3&quot;</span><span class="p">]</span>
-
-        <span class="c1"># config mocks</span>
-        <span class="n">generateTVEpisodeQueryGroupMock</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">fakeQueries</span>
-
-        <span class="c1"># run testable function</span>
-        <span class="n">QueryGenerationController</span><span class="o">.</span><span class="n">addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span><span class="n">fakeMediaInfoRecords</span><span class="p">)</span>
-
-        <span class="c1"># expected values</span>
-        <span class="n">expectedQueryUrls</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;fakeMediaInfoShowName1&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
-            <span class="s2">&quot;fakeMediaInfoShowName2&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
-            <span class="s2">&quot;fakeMediaInfoShowName3&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
-        <span class="p">}</span>
-
-        <span class="n">actualQueryUrls</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">():</span> <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getMediaSearchQueries</span><span class="p">()</span> <span class="k">for</span> <span class="n">fakeMediaInfoRecord</span> <span class="ow">in</span> <span class="n">fakeMediaInfoRecords</span>
-        <span class="p">}</span>
-
-        <span class="c1"># asserts</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">expectedQueryUrls</span><span class="p">,</span> <span class="n">actualQueryUrls</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -235,6 +238,55 @@ attribute so can be configured by individual tests if required.</li>
 </div>
 
 
+                            <div id="TestQueryGenerationController.test_addTVEpisodeQueriesToMediaInfoRecords" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TestQueryGenerationController.test_addTVEpisodeQueriesToMediaInfoRecords">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@mock.patch(&#39;controllers.QueryGenerationController.generateTVEpisodeQueryGroup&#39;)</div>
+
+            <span class="def">def</span>
+            <span class="name">test_addTVEpisodeQueriesToMediaInfoRecords</span><span class="signature">(self, generateTVEpisodeQueryGroupMock)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.QueryGenerationController.generateTVEpisodeQueryGroup&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generateTVEpisodeQueryGroupMock</span><span class="p">):</span>
+
+        <span class="c1"># config fake data</span>
+        <span class="n">fakeMediaInfoRecords</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName2&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName3&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">fakeQueries</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fakeQueryUrl1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeQueryUrl2&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeQueryUrl3&quot;</span><span class="p">]</span>
+
+        <span class="c1"># config mocks</span>
+        <span class="n">generateTVEpisodeQueryGroupMock</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">fakeQueries</span>
+
+        <span class="c1"># run testable function</span>
+        <span class="n">QueryGenerationController</span><span class="o">.</span><span class="n">addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span>
+            <span class="n">fakeMediaInfoRecords</span><span class="p">)</span>
+
+        <span class="c1"># expected values</span>
+        <span class="n">expectedQueryUrls</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;fakeMediaInfoShowName1&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
+            <span class="s2">&quot;fakeMediaInfoShowName2&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
+            <span class="s2">&quot;fakeMediaInfoShowName3&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">actualQueryUrls</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">():</span> <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getMediaSearchQueries</span><span class="p">()</span> <span class="k">for</span> <span class="n">fakeMediaInfoRecord</span> <span class="ow">in</span> <span class="n">fakeMediaInfoRecords</span>
+        <span class="p">}</span>
+
+        <span class="c1"># asserts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">expectedQueryUrls</span><span class="p">,</span> <span class="n">actualQueryUrls</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
                             <div id="TestQueryGenerationController.test_generateEpisodeQueryGroup" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#TestQueryGenerationController.test_generateEpisodeQueryGroup">#&nbsp;&nbsp</a>
 
@@ -263,54 +315,6 @@ attribute so can be configured by individual tests if required.</li>
         <span class="n">seasonQueryGroup</span> <span class="o">=</span> <span class="n">QueryGenerationController</span><span class="o">.</span><span class="n">generateTVEpisodeQueryGroup</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">relevantSeason</span><span class="p">,</span> <span class="n">relevantEpisode</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">expectedQueries</span><span class="p">,</span> <span class="n">seasonQueryGroup</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-    
-
-                            </div>
-                            <div id="TestQueryGenerationController.test_generateTVEpisodeQueries" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#TestQueryGenerationController.test_generateTVEpisodeQueries">#&nbsp;&nbsp</a>
-
-                <div class="decorator">@mock.patch(&#39;controllers.QueryGenerationController.generateTVEpisodeQueryGroup&#39;)</div>
-
-            <span class="def">def</span>
-            <span class="name">test_generateTVEpisodeQueries</span><span class="signature">(self, generateTVEpisodeQueryGroupMock)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;controllers.QueryGenerationController.generateTVEpisodeQueryGroup&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_generateTVEpisodeQueries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generateTVEpisodeQueryGroupMock</span><span class="p">):</span>
-
-        <span class="c1"># config fake data</span>
-        <span class="n">fakeMediaInfoRecords</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName2&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-            <span class="n">MediaInfoRecord</span><span class="p">(</span><span class="s2">&quot;fakeMediaInfoShowName3&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="p">]</span>
-        <span class="n">fakeQueries</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fakeQueryUrl1&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeQueryUrl2&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeQueryUrl3&quot;</span><span class="p">]</span>
-
-        <span class="c1"># config mocks</span>
-        <span class="n">generateTVEpisodeQueryGroupMock</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">fakeQueries</span>
-
-        <span class="c1"># run testable function</span>
-        <span class="n">QueryGenerationController</span><span class="o">.</span><span class="n">addTVEpisodeQueriesToMediaInfoRecords</span><span class="p">(</span><span class="n">fakeMediaInfoRecords</span><span class="p">)</span>
-
-        <span class="c1"># expected values</span>
-        <span class="n">expectedQueryUrls</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;fakeMediaInfoShowName1&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
-            <span class="s2">&quot;fakeMediaInfoShowName2&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
-            <span class="s2">&quot;fakeMediaInfoShowName3&quot;</span><span class="p">:</span> <span class="n">fakeQueries</span><span class="p">,</span>
-        <span class="p">}</span>
-
-        <span class="n">actualQueryUrls</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">():</span> <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getMediaSearchQueries</span><span class="p">()</span> <span class="k">for</span> <span class="n">fakeMediaInfoRecord</span> <span class="ow">in</span> <span class="n">fakeMediaInfoRecords</span>
-        <span class="p">}</span>
-
-        <span class="c1"># asserts</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">expectedQueryUrls</span><span class="p">,</span> <span class="n">actualQueryUrls</span><span class="p">)</span>
 </pre></div>
 
         </details>

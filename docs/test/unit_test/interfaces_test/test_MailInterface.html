@@ -31,10 +31,13 @@
                     <a class="class" href="#TestMailInterface">TestMailInterface</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#TestMailInterface.test_sendMailDev">test_sendMailDev</a>
+                                <a class="function" href="#TestMailInterface.test_sendMailSingleDev">test_sendMailSingleDev</a>
                         </li>
                         <li>
-                                <a class="function" href="#TestMailInterface.test_sendMailProduction">test_sendMailProduction</a>
+                                <a class="function" href="#TestMailInterface.test_sendMailSingleProduction">test_sendMailSingleProduction</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#TestMailInterface.test_sendMailMultiDev">test_sendMailMultiDev</a>
                         </li>
                 </ul>
 
@@ -65,30 +68,36 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../interfaces_tes
 
 <span class="c1"># internal dependencies</span>
 <span class="kn">from</span> <span class="nn">interfaces.MailInterface</span> <span class="kn">import</span> <span class="n">MailInterface</span>
+<span class="kn">from</span> <span class="nn">dataTypes.MailItem</span> <span class="kn">import</span> <span class="n">MailItemType</span>
+
 
 <span class="k">class</span> <span class="nc">TestMailInterface</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
 
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;smtplib.SMTP&#39;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.getenv&#39;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;logging.info&#39;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_sendMailDev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoDevMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_sendMailSingleDev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoDevMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
                 
         <span class="c1"># config inputs</span>
         <span class="n">fakeHeading</span> <span class="o">=</span> <span class="s2">&quot;fake heading&quot;</span>
         <span class="n">fakeMessage</span> <span class="o">=</span> <span class="s2">&quot;fake message&quot;</span>
 
         <span class="c1"># called testable method</span>
-        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">)</span>
-        <span class="n">mailInterface</span><span class="o">.</span><span class="n">sendMail</span><span class="p">(</span><span class="n">fakeHeading</span><span class="p">,</span> <span class="n">fakeMessage</span><span class="p">)</span>
+        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span> <span class="n">collateMail</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="n">fakeHeading</span><span class="p">,</span> <span class="n">fakeMessage</span><span class="p">)</span>
 
+        <span class="c1"># mock</span>
+        <span class="n">loggingCalls</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">call</span><span class="p">(</span><span class="s1">&#39;MailInterface:__sendMail called.&#39;</span><span class="p">),</span>
+            <span class="n">call</span><span class="p">(</span><span class="s2">&quot;Program is running in dev mode. No email has been sent.&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
         <span class="c1"># mock asserts</span>
-        <span class="n">loggingInfoDevMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="s2">&quot;Program is running in dev mode. No email has been sent.&quot;</span><span class="p">)</span>
-
+        <span class="n">loggingInfoDevMock</span><span class="o">.</span><span class="n">assert_has_calls</span><span class="p">(</span><span class="n">loggingCalls</span><span class="p">)</span>
 
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;smtplib.SMTP&#39;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.getenv&#39;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;logging.info&#39;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_sendMailProduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoProdMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_sendMailSingleProduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoProdMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
 
         <span class="c1"># config inputs</span>
         <span class="n">fakeToEmailAddress</span> <span class="o">=</span> <span class="s2">&quot;fakeToEmailAddress&quot;</span>
@@ -100,12 +109,13 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../interfaces_tes
         <span class="n">fakeMessage</span> <span class="o">=</span> <span class="s2">&quot;fake message&quot;</span>
 
         <span class="c1"># called testable method</span>
-        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">toEmailAddress</span><span class="o">=</span><span class="n">fakeToEmailAddress</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="n">envValue</span><span class="p">,</span> <span class="n">mailUsername</span><span class="o">=</span><span class="n">fakeMailUsername</span><span class="p">,</span> <span class="n">mailPassword</span><span class="o">=</span><span class="n">fakeMailPassword</span><span class="p">)</span>
+        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">toEmailAddress</span><span class="o">=</span><span class="n">fakeToEmailAddress</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="n">envValue</span><span class="p">,</span>
+                                      <span class="n">mailUsername</span><span class="o">=</span><span class="n">fakeMailUsername</span><span class="p">,</span> <span class="n">mailPassword</span><span class="o">=</span><span class="n">fakeMailPassword</span><span class="p">,</span> <span class="n">collateMail</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="n">mailInterface</span><span class="o">.</span><span class="n">sendMail</span><span class="p">(</span><span class="n">fakeHeading</span><span class="p">,</span> <span class="n">fakeMessage</span><span class="p">)</span>
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="n">fakeHeading</span><span class="p">,</span> <span class="n">fakeMessage</span><span class="p">)</span>
 
         <span class="c1"># mock asserts</span>
-        <span class="n">calls</span> <span class="o">=</span> <span class="p">[</span> <span class="n">call</span><span class="p">(</span><span class="s2">&quot;MailInterface:sendMail called.&quot;</span><span class="p">)]</span>
+        <span class="n">calls</span> <span class="o">=</span> <span class="p">[</span><span class="n">call</span><span class="p">(</span><span class="s2">&quot;MailInterface:__sendMail called.&quot;</span><span class="p">)]</span>
         <span class="n">loggingInfoProdMock</span><span class="o">.</span><span class="n">assert_has_calls</span><span class="p">(</span><span class="n">calls</span><span class="p">)</span>
 
         <span class="n">calls</span> <span class="o">=</span> <span class="p">[</span>
@@ -119,9 +129,29 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../interfaces_tes
         <span class="p">]</span>
         <span class="n">smtpMock</span><span class="o">.</span><span class="n">assert_has_calls</span><span class="p">(</span><span class="n">calls</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNotNone</span><span class="p">(</span><span class="n">mailInterface</span><span class="o">.</span><span class="n">environment</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNotNone</span><span class="p">(</span><span class="n">mailInterface</span><span class="o">.</span><span class="n">mailUsername</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNotNone</span><span class="p">(</span><span class="n">mailInterface</span><span class="o">.</span><span class="n">mailPassword</span><span class="p">)</span>
+
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;smtplib.SMTP&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.getenv&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;logging.info&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_sendMailMultiDev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoDevMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
+
+        <span class="c1"># config inputs</span>
+        <span class="n">fakeMessage</span> <span class="o">=</span> <span class="s2">&quot;fake message&quot;</span>
+
+        <span class="c1"># called testable method</span>
+        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">)</span>
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="n">fakeMessage</span><span class="p">,</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="n">fakeMessage</span><span class="p">,</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">sendAllCollatedMailItems</span><span class="p">()</span>
+
+        <span class="n">loggingCalls</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">call</span><span class="p">(</span><span class="s1">&#39;MailInterface:__sendMail called.&#39;</span><span class="p">),</span>
+            <span class="n">call</span><span class="p">(</span><span class="s2">&quot;Program is running in dev mode. No email has been sent.&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="c1"># mock asserts</span>
+        <span class="n">loggingInfoDevMock</span><span class="o">.</span><span class="n">assert_has_calls</span><span class="p">(</span><span class="n">loggingCalls</span><span class="p">)</span>
+
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
@@ -149,24 +179,28 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../interfaces_tes
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;smtplib.SMTP&#39;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.getenv&#39;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;logging.info&#39;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_sendMailDev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoDevMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_sendMailSingleDev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoDevMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
                 
         <span class="c1"># config inputs</span>
         <span class="n">fakeHeading</span> <span class="o">=</span> <span class="s2">&quot;fake heading&quot;</span>
         <span class="n">fakeMessage</span> <span class="o">=</span> <span class="s2">&quot;fake message&quot;</span>
 
         <span class="c1"># called testable method</span>
-        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">)</span>
-        <span class="n">mailInterface</span><span class="o">.</span><span class="n">sendMail</span><span class="p">(</span><span class="n">fakeHeading</span><span class="p">,</span> <span class="n">fakeMessage</span><span class="p">)</span>
+        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span> <span class="n">collateMail</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="n">fakeHeading</span><span class="p">,</span> <span class="n">fakeMessage</span><span class="p">)</span>
 
+        <span class="c1"># mock</span>
+        <span class="n">loggingCalls</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">call</span><span class="p">(</span><span class="s1">&#39;MailInterface:__sendMail called.&#39;</span><span class="p">),</span>
+            <span class="n">call</span><span class="p">(</span><span class="s2">&quot;Program is running in dev mode. No email has been sent.&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
         <span class="c1"># mock asserts</span>
-        <span class="n">loggingInfoDevMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="s2">&quot;Program is running in dev mode. No email has been sent.&quot;</span><span class="p">)</span>
-
+        <span class="n">loggingInfoDevMock</span><span class="o">.</span><span class="n">assert_has_calls</span><span class="p">(</span><span class="n">loggingCalls</span><span class="p">)</span>
 
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;smtplib.SMTP&#39;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.getenv&#39;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;logging.info&#39;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_sendMailProduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoProdMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_sendMailSingleProduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoProdMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
 
         <span class="c1"># config inputs</span>
         <span class="n">fakeToEmailAddress</span> <span class="o">=</span> <span class="s2">&quot;fakeToEmailAddress&quot;</span>
@@ -178,12 +212,13 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../interfaces_tes
         <span class="n">fakeMessage</span> <span class="o">=</span> <span class="s2">&quot;fake message&quot;</span>
 
         <span class="c1"># called testable method</span>
-        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">toEmailAddress</span><span class="o">=</span><span class="n">fakeToEmailAddress</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="n">envValue</span><span class="p">,</span> <span class="n">mailUsername</span><span class="o">=</span><span class="n">fakeMailUsername</span><span class="p">,</span> <span class="n">mailPassword</span><span class="o">=</span><span class="n">fakeMailPassword</span><span class="p">)</span>
+        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">toEmailAddress</span><span class="o">=</span><span class="n">fakeToEmailAddress</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="n">envValue</span><span class="p">,</span>
+                                      <span class="n">mailUsername</span><span class="o">=</span><span class="n">fakeMailUsername</span><span class="p">,</span> <span class="n">mailPassword</span><span class="o">=</span><span class="n">fakeMailPassword</span><span class="p">,</span> <span class="n">collateMail</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="n">mailInterface</span><span class="o">.</span><span class="n">sendMail</span><span class="p">(</span><span class="n">fakeHeading</span><span class="p">,</span> <span class="n">fakeMessage</span><span class="p">)</span>
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="n">fakeHeading</span><span class="p">,</span> <span class="n">fakeMessage</span><span class="p">)</span>
 
         <span class="c1"># mock asserts</span>
-        <span class="n">calls</span> <span class="o">=</span> <span class="p">[</span> <span class="n">call</span><span class="p">(</span><span class="s2">&quot;MailInterface:sendMail called.&quot;</span><span class="p">)]</span>
+        <span class="n">calls</span> <span class="o">=</span> <span class="p">[</span><span class="n">call</span><span class="p">(</span><span class="s2">&quot;MailInterface:__sendMail called.&quot;</span><span class="p">)]</span>
         <span class="n">loggingInfoProdMock</span><span class="o">.</span><span class="n">assert_has_calls</span><span class="p">(</span><span class="n">calls</span><span class="p">)</span>
 
         <span class="n">calls</span> <span class="o">=</span> <span class="p">[</span>
@@ -197,9 +232,28 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../interfaces_tes
         <span class="p">]</span>
         <span class="n">smtpMock</span><span class="o">.</span><span class="n">assert_has_calls</span><span class="p">(</span><span class="n">calls</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNotNone</span><span class="p">(</span><span class="n">mailInterface</span><span class="o">.</span><span class="n">environment</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNotNone</span><span class="p">(</span><span class="n">mailInterface</span><span class="o">.</span><span class="n">mailUsername</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNotNone</span><span class="p">(</span><span class="n">mailInterface</span><span class="o">.</span><span class="n">mailPassword</span><span class="p">)</span>
+
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;smtplib.SMTP&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.getenv&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;logging.info&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_sendMailMultiDev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoDevMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
+
+        <span class="c1"># config inputs</span>
+        <span class="n">fakeMessage</span> <span class="o">=</span> <span class="s2">&quot;fake message&quot;</span>
+
+        <span class="c1"># called testable method</span>
+        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">)</span>
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="n">fakeMessage</span><span class="p">,</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="n">fakeMessage</span><span class="p">,</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">sendAllCollatedMailItems</span><span class="p">()</span>
+
+        <span class="n">loggingCalls</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">call</span><span class="p">(</span><span class="s1">&#39;MailInterface:__sendMail called.&#39;</span><span class="p">),</span>
+            <span class="n">call</span><span class="p">(</span><span class="s2">&quot;Program is running in dev mode. No email has been sent.&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="c1"># mock asserts</span>
+        <span class="n">loggingInfoDevMock</span><span class="o">.</span><span class="n">assert_has_calls</span><span class="p">(</span><span class="n">loggingCalls</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -240,15 +294,15 @@ attribute so can be configured by individual tests if required.</li>
 </div>
 
 
-                            <div id="TestMailInterface.test_sendMailDev" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#TestMailInterface.test_sendMailDev">#&nbsp;&nbsp</a>
+                            <div id="TestMailInterface.test_sendMailSingleDev" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TestMailInterface.test_sendMailSingleDev">#&nbsp;&nbsp</a>
 
                 <div class="decorator">@mock.patch(&#39;smtplib.SMTP&#39;)</div>
         <div class="decorator">@mock.patch(&#39;os.getenv&#39;)</div>
         <div class="decorator">@mock.patch(&#39;logging.info&#39;)</div>
 
             <span class="def">def</span>
-            <span class="name">test_sendMailDev</span><span class="signature">(self, loggingInfoDevMock, osGetEnvMock, smtpMock)</span>:
+            <span class="name">test_sendMailSingleDev</span><span class="signature">(self, loggingInfoDevMock, osGetEnvMock, smtpMock)</span>:
     </div>
 
                 <details>
@@ -256,18 +310,23 @@ attribute so can be configured by individual tests if required.</li>
             <div class="codehilite"><pre><span></span>    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;smtplib.SMTP&#39;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.getenv&#39;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;logging.info&#39;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_sendMailDev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoDevMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_sendMailSingleDev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoDevMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
                 
         <span class="c1"># config inputs</span>
         <span class="n">fakeHeading</span> <span class="o">=</span> <span class="s2">&quot;fake heading&quot;</span>
         <span class="n">fakeMessage</span> <span class="o">=</span> <span class="s2">&quot;fake message&quot;</span>
 
         <span class="c1"># called testable method</span>
-        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">)</span>
-        <span class="n">mailInterface</span><span class="o">.</span><span class="n">sendMail</span><span class="p">(</span><span class="n">fakeHeading</span><span class="p">,</span> <span class="n">fakeMessage</span><span class="p">)</span>
+        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span> <span class="n">collateMail</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="n">fakeHeading</span><span class="p">,</span> <span class="n">fakeMessage</span><span class="p">)</span>
 
+        <span class="c1"># mock</span>
+        <span class="n">loggingCalls</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">call</span><span class="p">(</span><span class="s1">&#39;MailInterface:__sendMail called.&#39;</span><span class="p">),</span>
+            <span class="n">call</span><span class="p">(</span><span class="s2">&quot;Program is running in dev mode. No email has been sent.&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
         <span class="c1"># mock asserts</span>
-        <span class="n">loggingInfoDevMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="s2">&quot;Program is running in dev mode. No email has been sent.&quot;</span><span class="p">)</span>
+        <span class="n">loggingInfoDevMock</span><span class="o">.</span><span class="n">assert_has_calls</span><span class="p">(</span><span class="n">loggingCalls</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -275,15 +334,15 @@ attribute so can be configured by individual tests if required.</li>
     
 
                             </div>
-                            <div id="TestMailInterface.test_sendMailProduction" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#TestMailInterface.test_sendMailProduction">#&nbsp;&nbsp</a>
+                            <div id="TestMailInterface.test_sendMailSingleProduction" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TestMailInterface.test_sendMailSingleProduction">#&nbsp;&nbsp</a>
 
                 <div class="decorator">@mock.patch(&#39;smtplib.SMTP&#39;)</div>
         <div class="decorator">@mock.patch(&#39;os.getenv&#39;)</div>
         <div class="decorator">@mock.patch(&#39;logging.info&#39;)</div>
 
             <span class="def">def</span>
-            <span class="name">test_sendMailProduction</span><span class="signature">(self, loggingInfoProdMock, osGetEnvMock, smtpMock)</span>:
+            <span class="name">test_sendMailSingleProduction</span><span class="signature">(self, loggingInfoProdMock, osGetEnvMock, smtpMock)</span>:
     </div>
 
                 <details>
@@ -291,7 +350,7 @@ attribute so can be configured by individual tests if required.</li>
             <div class="codehilite"><pre><span></span>    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;smtplib.SMTP&#39;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.getenv&#39;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;logging.info&#39;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_sendMailProduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoProdMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_sendMailSingleProduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoProdMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
 
         <span class="c1"># config inputs</span>
         <span class="n">fakeToEmailAddress</span> <span class="o">=</span> <span class="s2">&quot;fakeToEmailAddress&quot;</span>
@@ -303,12 +362,13 @@ attribute so can be configured by individual tests if required.</li>
         <span class="n">fakeMessage</span> <span class="o">=</span> <span class="s2">&quot;fake message&quot;</span>
 
         <span class="c1"># called testable method</span>
-        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">toEmailAddress</span><span class="o">=</span><span class="n">fakeToEmailAddress</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="n">envValue</span><span class="p">,</span> <span class="n">mailUsername</span><span class="o">=</span><span class="n">fakeMailUsername</span><span class="p">,</span> <span class="n">mailPassword</span><span class="o">=</span><span class="n">fakeMailPassword</span><span class="p">)</span>
+        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">toEmailAddress</span><span class="o">=</span><span class="n">fakeToEmailAddress</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="n">envValue</span><span class="p">,</span>
+                                      <span class="n">mailUsername</span><span class="o">=</span><span class="n">fakeMailUsername</span><span class="p">,</span> <span class="n">mailPassword</span><span class="o">=</span><span class="n">fakeMailPassword</span><span class="p">,</span> <span class="n">collateMail</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="n">mailInterface</span><span class="o">.</span><span class="n">sendMail</span><span class="p">(</span><span class="n">fakeHeading</span><span class="p">,</span> <span class="n">fakeMessage</span><span class="p">)</span>
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="n">fakeHeading</span><span class="p">,</span> <span class="n">fakeMessage</span><span class="p">)</span>
 
         <span class="c1"># mock asserts</span>
-        <span class="n">calls</span> <span class="o">=</span> <span class="p">[</span> <span class="n">call</span><span class="p">(</span><span class="s2">&quot;MailInterface:sendMail called.&quot;</span><span class="p">)]</span>
+        <span class="n">calls</span> <span class="o">=</span> <span class="p">[</span><span class="n">call</span><span class="p">(</span><span class="s2">&quot;MailInterface:__sendMail called.&quot;</span><span class="p">)]</span>
         <span class="n">loggingInfoProdMock</span><span class="o">.</span><span class="n">assert_has_calls</span><span class="p">(</span><span class="n">calls</span><span class="p">)</span>
 
         <span class="n">calls</span> <span class="o">=</span> <span class="p">[</span>
@@ -321,10 +381,47 @@ attribute so can be configured by individual tests if required.</li>
             <span class="n">call</span><span class="p">()</span><span class="o">.</span><span class="fm">__exit__</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="p">]</span>
         <span class="n">smtpMock</span><span class="o">.</span><span class="n">assert_has_calls</span><span class="p">(</span><span class="n">calls</span><span class="p">)</span>
+</pre></div>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNotNone</span><span class="p">(</span><span class="n">mailInterface</span><span class="o">.</span><span class="n">environment</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNotNone</span><span class="p">(</span><span class="n">mailInterface</span><span class="o">.</span><span class="n">mailUsername</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNotNone</span><span class="p">(</span><span class="n">mailInterface</span><span class="o">.</span><span class="n">mailPassword</span><span class="p">)</span>
+        </details>
+
+    
+
+                            </div>
+                            <div id="TestMailInterface.test_sendMailMultiDev" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TestMailInterface.test_sendMailMultiDev">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@mock.patch(&#39;smtplib.SMTP&#39;)</div>
+        <div class="decorator">@mock.patch(&#39;os.getenv&#39;)</div>
+        <div class="decorator">@mock.patch(&#39;logging.info&#39;)</div>
+
+            <span class="def">def</span>
+            <span class="name">test_sendMailMultiDev</span><span class="signature">(self, loggingInfoDevMock, osGetEnvMock, smtpMock)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;smtplib.SMTP&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;os.getenv&#39;</span><span class="p">)</span>
+    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;logging.info&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_sendMailMultiDev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingInfoDevMock</span><span class="p">,</span> <span class="n">osGetEnvMock</span><span class="p">,</span> <span class="n">smtpMock</span><span class="p">):</span>
+
+        <span class="c1"># config inputs</span>
+        <span class="n">fakeMessage</span> <span class="o">=</span> <span class="s2">&quot;fake message&quot;</span>
+
+        <span class="c1"># called testable method</span>
+        <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">(</span><span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">)</span>
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="n">fakeMessage</span><span class="p">,</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="n">fakeMessage</span><span class="p">,</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+
+        <span class="n">mailInterface</span><span class="o">.</span><span class="n">sendAllCollatedMailItems</span><span class="p">()</span>
+
+        <span class="n">loggingCalls</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">call</span><span class="p">(</span><span class="s1">&#39;MailInterface:__sendMail called.&#39;</span><span class="p">),</span>
+            <span class="n">call</span><span class="p">(</span><span class="s2">&quot;Program is running in dev mode. No email has been sent.&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="c1"># mock asserts</span>
+        <span class="n">loggingInfoDevMock</span><span class="o">.</span><span class="n">assert_has_calls</span><span class="p">(</span><span class="n">loggingCalls</span><span class="p">)</span>
 </pre></div>
 
         </details>

@@ -37,10 +37,10 @@
                                 <a class="function" href="#MailInterface.__init__">MailInterface</a>
                         </li>
                         <li>
-                                <a class="function" href="#MailInterface.sendMail">sendMail</a>
+                                <a class="function" href="#MailInterface.pushMail">pushMail</a>
                         </li>
                         <li>
-                                <a class="function" href="#MailInterface.sendNewTorrentMail">sendNewTorrentMail</a>
+                                <a class="function" href="#MailInterface.sendAllCollatedMailItems">sendAllCollatedMailItems</a>
                         </li>
                         <li>
                                 <a class="function" href="#MailInterface.sendTestMail">sendTestMail</a>
@@ -73,6 +73,10 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
+<span class="c1"># internal dependencies</span>
+<span class="kn">from</span> <span class="nn">dataTypes.MailItem</span> <span class="kn">import</span> <span class="n">MailItem</span><span class="p">,</span> <span class="n">MailItemType</span>
+<span class="kn">from</span> <span class="nn">controllers</span> <span class="kn">import</span> <span class="n">ErrorController</span>
+
 <span class="k">global</span> <span class="n">mailInterfaceInstance</span>
 <span class="n">mailInterfaceInstance</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -83,52 +87,94 @@
         <span class="n">mailInterfaceInstance</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">mailInterfaceInstance</span>
 
+<span class="n">errorMailHeading</span> <span class="o">=</span> <span class="s2">&quot;Houston we have a problem&quot;</span>
+
+
 <span class="k">class</span> <span class="nc">MailInterface</span><span class="p">():</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterLogMessage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">toEmailAddress</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mailUsername</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mailPassword</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterLogMessage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">toEmailAddress</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mailUsername</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mailPassword</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">collateMail</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="c1"># assign class properties if they are provided, use defaults if they are not</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">enterLogMessage</span> <span class="o">=</span> <span class="n">enterLogMessage</span> <span class="k">if</span> <span class="n">enterLogMessage</span> <span class="k">else</span> <span class="s2">&quot;MailInterface:sendMail called.&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toEmailAddress</span> <span class="o">=</span> <span class="n">toEmailAddress</span> <span class="k">if</span> <span class="n">toEmailAddress</span> <span class="k">else</span> <span class="s2">&quot;tom.connolly@protonmail.com&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="n">environment</span> <span class="k">if</span> <span class="n">environment</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENVIRONMENT&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mailUsername</span> <span class="o">=</span> <span class="n">mailUsername</span> <span class="k">if</span> <span class="n">mailUsername</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MAIL_USERNAME&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mailPassword</span> <span class="o">=</span> <span class="n">mailPassword</span> <span class="k">if</span> <span class="n">mailPassword</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MAIL_PASSWORD&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__enterLogMessage</span> <span class="o">=</span> <span class="n">enterLogMessage</span> <span class="k">if</span> <span class="n">enterLogMessage</span> <span class="k">else</span> <span class="s2">&quot;MailInterface:__sendMail called.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__toEmailAddress</span> <span class="o">=</span> <span class="n">toEmailAddress</span> <span class="k">if</span> <span class="n">toEmailAddress</span> <span class="k">else</span> <span class="s2">&quot;tom.connolly@protonmail.com&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__environment</span> <span class="o">=</span> <span class="n">environment</span> <span class="k">if</span> <span class="n">environment</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENVIRONMENT&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mailUsername</span> <span class="o">=</span> <span class="n">mailUsername</span> <span class="k">if</span> <span class="n">mailUsername</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MAIL_USERNAME&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mailPassword</span> <span class="o">=</span> <span class="n">mailPassword</span> <span class="k">if</span> <span class="n">mailPassword</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MAIL_PASSWORD&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__collateMail</span> <span class="o">=</span> <span class="n">collateMail</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mailItems</span> <span class="o">=</span> <span class="p">[]</span>
 
+    <span class="c1">##### Private functions start #####</span>
 
-    <span class="k">def</span> <span class="nf">sendMail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">messageBody</span><span class="p">):</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">enterLogMessage</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__sendMail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">messageBody</span><span class="p">):</span>
 
-        <span class="c1">#only send mail when in production mode</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__enterLogMessage</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__environment</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">smtplib</span><span class="o">.</span><span class="n">SMTP</span><span class="p">(</span><span class="s1">&#39;smtp.gmail.com&#39;</span><span class="p">,</span> <span class="mi">587</span><span class="p">)</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
+                <span class="c1"># init mail server connection</span>
                 <span class="n">server</span><span class="o">.</span><span class="n">starttls</span><span class="p">()</span>
                 <span class="n">server</span><span class="o">.</span><span class="n">ehlo</span><span class="p">()</span>
 
-                <span class="c1">#Next, log in to the server                </span>
-                <span class="n">server</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mailUsername</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mailPassword</span><span class="p">)</span>
-                <span class="c1">#server.login(&#39;tomconnollyapps@gmail.com&#39;, &#39;Ring6Door9Sofa3&#39;)</span>
+                <span class="c1"># log in to the server                </span>
+                <span class="n">server</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mailUsername</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mailPassword</span><span class="p">)</span>
 
                 <span class="n">mailContent</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Subject: [Media Grab] </span><span class="si">{</span><span class="n">heading</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">messageBody</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">server</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mailUsername</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">__toEmailAddress</span><span class="p">,</span> 
+                                    <span class="n">mailContent</span><span class="p">)</span>
 
-                <span class="c1">#Send the email</span>
-                <span class="n">server</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mailUsername</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toEmailAddress</span><span class="p">,</span> <span class="n">mailContent</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">==</span> <span class="s2">&quot;dev&quot;</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Program is running in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="si">}</span><span class="s2"> mode. No email has been sent.&quot;</span><span class="p">)</span>
+                
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__environment</span> <span class="o">==</span> <span class="s2">&quot;dev&quot;</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Program is running in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__environment</span><span class="si">}</span><span class="s2"> mode. No email has been sent.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Environment mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="si">}</span><span class="s2"> is not recognised.&quot;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Environment mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__environment</span><span class="si">}</span><span class="s2"> is not recognised.&quot;</span><span class="p">)</span>
 
+    <span class="c1">##### Private functions end #####</span>
+
+    <span class="c1">##### Public functions start #####</span>
+
+    <span class="k">def</span> <span class="nf">pushMail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messageBody</span><span class="p">,</span> <span class="n">mailItemType</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__collateMail</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__mailItems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">MailItem</span><span class="p">(</span><span class="n">messageBody</span><span class="p">,</span> <span class="n">mailItemType</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sendMail</span><span class="p">(</span><span class="n">messageBody</span><span class="p">,</span> <span class="n">mailItemType</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">sendNewTorrentMail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">torrentName</span><span class="p">,</span> <span class="n">torrentExtraInfo</span><span class="p">,</span> <span class="n">torrentMagnet</span><span class="p">):</span>
-        <span class="n">messageBody</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;ADDED TORRENT: </span><span class="si">{</span><span class="n">torrentName</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">torrentExtraInfo</span><span class="si">}</span><span class="s1"> </span><span class="se">\n\n</span><span class="s1"> Magnet:</span><span class="si">{</span><span class="n">torrentMagnet</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sendMail</span><span class="p">(</span><span class="s2">&quot;A new torrent has just been added.&quot;</span><span class="p">,</span> <span class="n">messageBody</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">sendAllCollatedMailItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">errorMailMessages</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">newTorrentMailMessages</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="n">numErrorMessages</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">numNewTorrentMessages</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">messageSuffix</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n\n\n</span><span class="s2">----------------------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="k">for</span> <span class="n">mailItem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mailItems</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mailItem</span><span class="o">.</span><span class="n">getMailItemType</span><span class="p">()</span> <span class="o">==</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">:</span>
+                <span class="n">errorMailMessages</span> <span class="o">+=</span> <span class="n">mailItem</span><span class="o">.</span><span class="n">getContent</span><span class="p">()</span> <span class="o">+</span> <span class="n">messageSuffix</span>
+                <span class="n">numErrorMessages</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">mailItem</span><span class="o">.</span><span class="n">getMailItemType</span><span class="p">()</span> <span class="o">==</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">NEW_TORRENT</span><span class="p">:</span>
+                <span class="n">newTorrentMailMessages</span> <span class="o">+=</span> <span class="n">mailItem</span><span class="o">.</span><span class="n">getContent</span><span class="p">()</span> <span class="o">+</span> <span class="n">messageSuffix</span>
+                <span class="n">numNewTorrentMessages</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MailItemType: </span><span class="si">{</span><span class="n">mailItem</span><span class="o">.</span><span class="n">getMailItemType</span><span class="p">()</span><span class="si">}</span><span class="s2"> not handled!&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">numNewTorrentMessages</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">newTorrentMailMessage</span> <span class="o">=</span> <span class="s2">&quot;New torrents have just been added.&quot;</span> <span class="k">if</span> <span class="n">numNewTorrentMessages</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;A new torrent has just been added.&quot;</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sendMail</span><span class="p">(</span><span class="n">newTorrentMailMessage</span><span class="p">,</span> <span class="n">newTorrentMailMessages</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">numErrorMessages</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sendMail</span><span class="p">(</span><span class="s2">&quot;Houston we have a problem!&quot;</span><span class="p">,</span> <span class="n">errorMailMessages</span><span class="p">)</span>
 
 
     <span class="k">def</span> <span class="nf">sendTestMail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="s2">&quot;production&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sendMail</span><span class="p">(</span><span class="s2">&quot;Media Grab: Test Message&quot;</span><span class="p">,</span> <span class="s2">&quot;test message generated from running the interfaces/MailInterface.py as __main__&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__environment</span> <span class="o">=</span> <span class="s2">&quot;production&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="s2">&quot;Media Grab: Test Message&quot;</span><span class="p">,</span> <span class="s2">&quot;test message generated from running the interfaces/MailInterface.py as __main__&quot;</span><span class="p">)</span>
 
+    <span class="c1">##### Public functions end #####</span>
 
 <span class="k">if</span> <span class="vm">__name__</span><span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">()</span> 
+    <span class="n">mailInterface</span> <span class="o">=</span> <span class="n">MailInterface</span><span class="p">()</span>
+    <span class="n">mailInterface</span><span class="o">.</span><span class="n">sendTestMail</span><span class="p">()</span>
     <span class="n">mailInterface</span><span class="o">.</span><span class="n">sendTestMail</span><span class="p">()</span>
     <span class="k">pass</span>
 </pre></div>
@@ -171,46 +217,83 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MailInterface</span><span class="p">():</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterLogMessage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">toEmailAddress</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mailUsername</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mailPassword</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterLogMessage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">toEmailAddress</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mailUsername</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mailPassword</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">collateMail</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="c1"># assign class properties if they are provided, use defaults if they are not</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">enterLogMessage</span> <span class="o">=</span> <span class="n">enterLogMessage</span> <span class="k">if</span> <span class="n">enterLogMessage</span> <span class="k">else</span> <span class="s2">&quot;MailInterface:sendMail called.&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toEmailAddress</span> <span class="o">=</span> <span class="n">toEmailAddress</span> <span class="k">if</span> <span class="n">toEmailAddress</span> <span class="k">else</span> <span class="s2">&quot;tom.connolly@protonmail.com&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="n">environment</span> <span class="k">if</span> <span class="n">environment</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENVIRONMENT&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mailUsername</span> <span class="o">=</span> <span class="n">mailUsername</span> <span class="k">if</span> <span class="n">mailUsername</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MAIL_USERNAME&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mailPassword</span> <span class="o">=</span> <span class="n">mailPassword</span> <span class="k">if</span> <span class="n">mailPassword</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MAIL_PASSWORD&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__enterLogMessage</span> <span class="o">=</span> <span class="n">enterLogMessage</span> <span class="k">if</span> <span class="n">enterLogMessage</span> <span class="k">else</span> <span class="s2">&quot;MailInterface:__sendMail called.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__toEmailAddress</span> <span class="o">=</span> <span class="n">toEmailAddress</span> <span class="k">if</span> <span class="n">toEmailAddress</span> <span class="k">else</span> <span class="s2">&quot;tom.connolly@protonmail.com&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__environment</span> <span class="o">=</span> <span class="n">environment</span> <span class="k">if</span> <span class="n">environment</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENVIRONMENT&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mailUsername</span> <span class="o">=</span> <span class="n">mailUsername</span> <span class="k">if</span> <span class="n">mailUsername</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MAIL_USERNAME&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mailPassword</span> <span class="o">=</span> <span class="n">mailPassword</span> <span class="k">if</span> <span class="n">mailPassword</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MAIL_PASSWORD&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__collateMail</span> <span class="o">=</span> <span class="n">collateMail</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mailItems</span> <span class="o">=</span> <span class="p">[]</span>
 
+    <span class="c1">##### Private functions start #####</span>
 
-    <span class="k">def</span> <span class="nf">sendMail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">messageBody</span><span class="p">):</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">enterLogMessage</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__sendMail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">messageBody</span><span class="p">):</span>
 
-        <span class="c1">#only send mail when in production mode</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__enterLogMessage</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__environment</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">smtplib</span><span class="o">.</span><span class="n">SMTP</span><span class="p">(</span><span class="s1">&#39;smtp.gmail.com&#39;</span><span class="p">,</span> <span class="mi">587</span><span class="p">)</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
+                <span class="c1"># init mail server connection</span>
                 <span class="n">server</span><span class="o">.</span><span class="n">starttls</span><span class="p">()</span>
                 <span class="n">server</span><span class="o">.</span><span class="n">ehlo</span><span class="p">()</span>
 
-                <span class="c1">#Next, log in to the server                </span>
-                <span class="n">server</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mailUsername</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mailPassword</span><span class="p">)</span>
-                <span class="c1">#server.login(&#39;tomconnollyapps@gmail.com&#39;, &#39;Ring6Door9Sofa3&#39;)</span>
+                <span class="c1"># log in to the server                </span>
+                <span class="n">server</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mailUsername</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mailPassword</span><span class="p">)</span>
 
                 <span class="n">mailContent</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Subject: [Media Grab] </span><span class="si">{</span><span class="n">heading</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">messageBody</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">server</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mailUsername</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">__toEmailAddress</span><span class="p">,</span> 
+                                    <span class="n">mailContent</span><span class="p">)</span>
 
-                <span class="c1">#Send the email</span>
-                <span class="n">server</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mailUsername</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toEmailAddress</span><span class="p">,</span> <span class="n">mailContent</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">==</span> <span class="s2">&quot;dev&quot;</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Program is running in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="si">}</span><span class="s2"> mode. No email has been sent.&quot;</span><span class="p">)</span>
+                
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__environment</span> <span class="o">==</span> <span class="s2">&quot;dev&quot;</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Program is running in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__environment</span><span class="si">}</span><span class="s2"> mode. No email has been sent.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Environment mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="si">}</span><span class="s2"> is not recognised.&quot;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Environment mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__environment</span><span class="si">}</span><span class="s2"> is not recognised.&quot;</span><span class="p">)</span>
 
+    <span class="c1">##### Private functions end #####</span>
+
+    <span class="c1">##### Public functions start #####</span>
+
+    <span class="k">def</span> <span class="nf">pushMail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messageBody</span><span class="p">,</span> <span class="n">mailItemType</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__collateMail</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__mailItems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">MailItem</span><span class="p">(</span><span class="n">messageBody</span><span class="p">,</span> <span class="n">mailItemType</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sendMail</span><span class="p">(</span><span class="n">messageBody</span><span class="p">,</span> <span class="n">mailItemType</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">sendNewTorrentMail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">torrentName</span><span class="p">,</span> <span class="n">torrentExtraInfo</span><span class="p">,</span> <span class="n">torrentMagnet</span><span class="p">):</span>
-        <span class="n">messageBody</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;ADDED TORRENT: </span><span class="si">{</span><span class="n">torrentName</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">torrentExtraInfo</span><span class="si">}</span><span class="s1"> </span><span class="se">\n\n</span><span class="s1"> Magnet:</span><span class="si">{</span><span class="n">torrentMagnet</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sendMail</span><span class="p">(</span><span class="s2">&quot;A new torrent has just been added.&quot;</span><span class="p">,</span> <span class="n">messageBody</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">sendAllCollatedMailItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">errorMailMessages</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">newTorrentMailMessages</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="n">numErrorMessages</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">numNewTorrentMessages</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">messageSuffix</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n\n\n</span><span class="s2">----------------------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="k">for</span> <span class="n">mailItem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mailItems</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mailItem</span><span class="o">.</span><span class="n">getMailItemType</span><span class="p">()</span> <span class="o">==</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">:</span>
+                <span class="n">errorMailMessages</span> <span class="o">+=</span> <span class="n">mailItem</span><span class="o">.</span><span class="n">getContent</span><span class="p">()</span> <span class="o">+</span> <span class="n">messageSuffix</span>
+                <span class="n">numErrorMessages</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">mailItem</span><span class="o">.</span><span class="n">getMailItemType</span><span class="p">()</span> <span class="o">==</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">NEW_TORRENT</span><span class="p">:</span>
+                <span class="n">newTorrentMailMessages</span> <span class="o">+=</span> <span class="n">mailItem</span><span class="o">.</span><span class="n">getContent</span><span class="p">()</span> <span class="o">+</span> <span class="n">messageSuffix</span>
+                <span class="n">numNewTorrentMessages</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MailItemType: </span><span class="si">{</span><span class="n">mailItem</span><span class="o">.</span><span class="n">getMailItemType</span><span class="p">()</span><span class="si">}</span><span class="s2"> not handled!&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">numNewTorrentMessages</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">newTorrentMailMessage</span> <span class="o">=</span> <span class="s2">&quot;New torrents have just been added.&quot;</span> <span class="k">if</span> <span class="n">numNewTorrentMessages</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;A new torrent has just been added.&quot;</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sendMail</span><span class="p">(</span><span class="n">newTorrentMailMessage</span><span class="p">,</span> <span class="n">newTorrentMailMessages</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">numErrorMessages</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sendMail</span><span class="p">(</span><span class="s2">&quot;Houston we have a problem!&quot;</span><span class="p">,</span> <span class="n">errorMailMessages</span><span class="p">)</span>
 
 
     <span class="k">def</span> <span class="nf">sendTestMail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="s2">&quot;production&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sendMail</span><span class="p">(</span><span class="s2">&quot;Media Grab: Test Message&quot;</span><span class="p">,</span> <span class="s2">&quot;test message generated from running the interfaces/MailInterface.py as __main__&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__environment</span> <span class="o">=</span> <span class="s2">&quot;production&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="s2">&quot;Media Grab: Test Message&quot;</span><span class="p">,</span> <span class="s2">&quot;test message generated from running the interfaces/MailInterface.py as __main__&quot;</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -227,18 +310,21 @@
     toEmailAddress=None,
     environment=None,
     mailUsername=None,
-    mailPassword=None
+    mailPassword=None,
+    collateMail=True
 )</span>    </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterLogMessage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">toEmailAddress</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mailUsername</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mailPassword</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterLogMessage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">toEmailAddress</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mailUsername</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mailPassword</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">collateMail</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="c1"># assign class properties if they are provided, use defaults if they are not</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">enterLogMessage</span> <span class="o">=</span> <span class="n">enterLogMessage</span> <span class="k">if</span> <span class="n">enterLogMessage</span> <span class="k">else</span> <span class="s2">&quot;MailInterface:sendMail called.&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toEmailAddress</span> <span class="o">=</span> <span class="n">toEmailAddress</span> <span class="k">if</span> <span class="n">toEmailAddress</span> <span class="k">else</span> <span class="s2">&quot;tom.connolly@protonmail.com&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="n">environment</span> <span class="k">if</span> <span class="n">environment</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENVIRONMENT&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mailUsername</span> <span class="o">=</span> <span class="n">mailUsername</span> <span class="k">if</span> <span class="n">mailUsername</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MAIL_USERNAME&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mailPassword</span> <span class="o">=</span> <span class="n">mailPassword</span> <span class="k">if</span> <span class="n">mailPassword</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MAIL_PASSWORD&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__enterLogMessage</span> <span class="o">=</span> <span class="n">enterLogMessage</span> <span class="k">if</span> <span class="n">enterLogMessage</span> <span class="k">else</span> <span class="s2">&quot;MailInterface:__sendMail called.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__toEmailAddress</span> <span class="o">=</span> <span class="n">toEmailAddress</span> <span class="k">if</span> <span class="n">toEmailAddress</span> <span class="k">else</span> <span class="s2">&quot;tom.connolly@protonmail.com&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__environment</span> <span class="o">=</span> <span class="n">environment</span> <span class="k">if</span> <span class="n">environment</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENVIRONMENT&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mailUsername</span> <span class="o">=</span> <span class="n">mailUsername</span> <span class="k">if</span> <span class="n">mailUsername</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MAIL_USERNAME&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mailPassword</span> <span class="o">=</span> <span class="n">mailPassword</span> <span class="k">if</span> <span class="n">mailPassword</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MAIL_PASSWORD&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__collateMail</span> <span class="o">=</span> <span class="n">collateMail</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mailItems</span> <span class="o">=</span> <span class="p">[]</span>
 </pre></div>
 
         </details>
@@ -246,37 +332,22 @@
     
 
                             </div>
-                            <div id="MailInterface.sendMail" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#MailInterface.sendMail">#&nbsp;&nbsp</a>
+                            <div id="MailInterface.pushMail" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MailInterface.pushMail">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">sendMail</span><span class="signature">(self, heading, messageBody)</span>:
+            <span class="name">pushMail</span><span class="signature">(self, messageBody, mailItemType)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">sendMail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">messageBody</span><span class="p">):</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">enterLogMessage</span><span class="p">)</span>
-
-        <span class="c1">#only send mail when in production mode</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">smtplib</span><span class="o">.</span><span class="n">SMTP</span><span class="p">(</span><span class="s1">&#39;smtp.gmail.com&#39;</span><span class="p">,</span> <span class="mi">587</span><span class="p">)</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
-                <span class="n">server</span><span class="o">.</span><span class="n">starttls</span><span class="p">()</span>
-                <span class="n">server</span><span class="o">.</span><span class="n">ehlo</span><span class="p">()</span>
-
-                <span class="c1">#Next, log in to the server                </span>
-                <span class="n">server</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mailUsername</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mailPassword</span><span class="p">)</span>
-                <span class="c1">#server.login(&#39;tomconnollyapps@gmail.com&#39;, &#39;Ring6Door9Sofa3&#39;)</span>
-
-                <span class="n">mailContent</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Subject: [Media Grab] </span><span class="si">{</span><span class="n">heading</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">messageBody</span><span class="si">}</span><span class="s1">&#39;</span>
-
-                <span class="c1">#Send the email</span>
-                <span class="n">server</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mailUsername</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toEmailAddress</span><span class="p">,</span> <span class="n">mailContent</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">==</span> <span class="s2">&quot;dev&quot;</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Program is running in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="si">}</span><span class="s2"> mode. No email has been sent.&quot;</span><span class="p">)</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">pushMail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messageBody</span><span class="p">,</span> <span class="n">mailItemType</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__collateMail</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__mailItems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">MailItem</span><span class="p">(</span><span class="n">messageBody</span><span class="p">,</span> <span class="n">mailItemType</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Environment mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="si">}</span><span class="s2"> is not recognised.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sendMail</span><span class="p">(</span><span class="n">messageBody</span><span class="p">,</span> <span class="n">mailItemType</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -284,19 +355,41 @@
     
 
                             </div>
-                            <div id="MailInterface.sendNewTorrentMail" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#MailInterface.sendNewTorrentMail">#&nbsp;&nbsp</a>
+                            <div id="MailInterface.sendAllCollatedMailItems" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MailInterface.sendAllCollatedMailItems">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">sendNewTorrentMail</span><span class="signature">(self, torrentName, torrentExtraInfo, torrentMagnet)</span>:
+            <span class="name">sendAllCollatedMailItems</span><span class="signature">(self)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">sendNewTorrentMail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">torrentName</span><span class="p">,</span> <span class="n">torrentExtraInfo</span><span class="p">,</span> <span class="n">torrentMagnet</span><span class="p">):</span>
-        <span class="n">messageBody</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;ADDED TORRENT: </span><span class="si">{</span><span class="n">torrentName</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">torrentExtraInfo</span><span class="si">}</span><span class="s1"> </span><span class="se">\n\n</span><span class="s1"> Magnet:</span><span class="si">{</span><span class="n">torrentMagnet</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sendMail</span><span class="p">(</span><span class="s2">&quot;A new torrent has just been added.&quot;</span><span class="p">,</span> <span class="n">messageBody</span><span class="p">)</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">sendAllCollatedMailItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">errorMailMessages</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">newTorrentMailMessages</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="n">numErrorMessages</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">numNewTorrentMessages</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">messageSuffix</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n\n\n</span><span class="s2">----------------------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="k">for</span> <span class="n">mailItem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mailItems</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mailItem</span><span class="o">.</span><span class="n">getMailItemType</span><span class="p">()</span> <span class="o">==</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">:</span>
+                <span class="n">errorMailMessages</span> <span class="o">+=</span> <span class="n">mailItem</span><span class="o">.</span><span class="n">getContent</span><span class="p">()</span> <span class="o">+</span> <span class="n">messageSuffix</span>
+                <span class="n">numErrorMessages</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">mailItem</span><span class="o">.</span><span class="n">getMailItemType</span><span class="p">()</span> <span class="o">==</span> <span class="n">MailItemType</span><span class="o">.</span><span class="n">NEW_TORRENT</span><span class="p">:</span>
+                <span class="n">newTorrentMailMessages</span> <span class="o">+=</span> <span class="n">mailItem</span><span class="o">.</span><span class="n">getContent</span><span class="p">()</span> <span class="o">+</span> <span class="n">messageSuffix</span>
+                <span class="n">numNewTorrentMessages</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MailItemType: </span><span class="si">{</span><span class="n">mailItem</span><span class="o">.</span><span class="n">getMailItemType</span><span class="p">()</span><span class="si">}</span><span class="s2"> not handled!&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">numNewTorrentMessages</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">newTorrentMailMessage</span> <span class="o">=</span> <span class="s2">&quot;New torrents have just been added.&quot;</span> <span class="k">if</span> <span class="n">numNewTorrentMessages</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;A new torrent has just been added.&quot;</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sendMail</span><span class="p">(</span><span class="n">newTorrentMailMessage</span><span class="p">,</span> <span class="n">newTorrentMailMessages</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">numErrorMessages</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sendMail</span><span class="p">(</span><span class="s2">&quot;Houston we have a problem!&quot;</span><span class="p">,</span> <span class="n">errorMailMessages</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -315,8 +408,8 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">sendTestMail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="s2">&quot;production&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sendMail</span><span class="p">(</span><span class="s2">&quot;Media Grab: Test Message&quot;</span><span class="p">,</span> <span class="s2">&quot;test message generated from running the interfaces/MailInterface.py as __main__&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__environment</span> <span class="o">=</span> <span class="s2">&quot;production&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushMail</span><span class="p">(</span><span class="s2">&quot;Media Grab: Test Message&quot;</span><span class="p">,</span> <span class="s2">&quot;test message generated from running the interfaces/MailInterface.py as __main__&quot;</span><span class="p">)</span>
 </pre></div>
 
         </details>
