@@ -30,8 +30,7 @@ class TestTorrentFilterController(unittest.TestCase):
 
         self.assertEqual([fakeSearchableTerms[1]], filteredTerms)
 
-
-    def test_filterEpisodeTorrentPageUrls(self):
+    def test_filterEpisodeTorrents(self):
 
         mediaData = MediaInfoRecord("Rick and morty", 3, 2, ["blacklistTerm"])
 
