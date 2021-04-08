@@ -9,7 +9,11 @@ from dataTypes.MailItem import MailItemType
 
 
 def onSuccessfulTorrentAdd(mediaInfoRecord, mode):
-
+	"""
+	onSuccessfulTorrentAdd groups operations that should be run upon successfully initiating a download, including updating the mediaIndex.json file and sending an email
+	:testedWith: TestNewTorrentController:test_onSuccessfulTorrentAdd
+	:return: None
+	"""
 	# notify MediaIndex file
 	MediaIndexFileInterface.writeMediaFile(mediaInfoRecord)
 

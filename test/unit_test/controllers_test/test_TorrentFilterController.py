@@ -11,6 +11,26 @@ from dataTypes.TorrentRecord import TorrentRecord
 
 class TestTorrentFilterController(unittest.TestCase):
 
+
+    def test_createBlacklistFilterFunc(self):
+
+        # config fake data
+        fakeBlacklistTerms = [
+            "blacklistTerm1",
+            "blacklistTerm2"
+        ]
+        fakeSearchableTerms = [
+            "blacklistTerm1 file",
+            "blacklistTerm3 file",
+        ]
+
+        blacklistFilterFunc = TorrentFilterController.createBlacklistFilterFunc(fakeBlacklistTerms)
+
+        filteredTerms = list(filter(blacklistFilterFunc, fakeSearchableTerms))
+
+        self.assertEqual([fakeSearchableTerms[1]], filteredTerms)
+
+
     def test_filterEpisodeTorrentPageUrls(self):
 
         mediaData = MediaInfoRecord("Rick and morty", 3, 2, ["blacklistTerm"])
