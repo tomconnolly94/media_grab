@@ -14,6 +14,11 @@ mailInterfaceInstance = None
 
 # implement singleton pattern
 def getInstance():
+    """
+    getInstance creates/accesses the singleton instance of MailInterface
+    :testedWith: None - glue code
+    :return: singleton instance of MailInterface
+    """
     global mailInterfaceInstance
     if not mailInterfaceInstance:
         mailInterfaceInstance = MailInterface()
@@ -26,7 +31,18 @@ multipleNewTorrentsMessage = "New torrents have just been added."
 
 class MailInterface():
 
-    def __init__(self, enterLogMessage=None, toEmailAddress=None, environment=None, mailUsername=None, mailPassword=None, collateMail=True):
+    def __init__(self, enterLogMessage=None, toEmailAddress=None, environment=None,
+                 mailUsername=None, mailPassword=None, collateMail=True):
+        """
+        __init__ initialises all private members of the object
+        :testedWith: None - tested indirectly
+        :param enterLogMessage: optional log message to print upon entry to the sendMail message, the param is to allow overwriting for amongst other purposes, testing.
+        :param toEmailAddress: optional notification target email address, the param is to allow overwriting for amongst other purposes, testing, if not provided the value will be drawn from the .env file.
+        :param environment: optional dev/production mode for the program run, the param is to allow overwriting for amongst other purposes, testing, if not provided the value will be drawn from the .env file.
+        :param mailUsername: optional username for a mail account to send notifications from, the param is to allow overwriting for amongst other purposes, testing, if not provided the value will be drawn from the .env file.
+        :param mailPassword: optional password for the notification email account, the param is to allow overwriting for amongst other purposes, testing, if not provided the value will be drawn from the .env file.
+        :param collateMail: optional mode that allows a collation of all messages to prevent many emails being fired off for one program run, the param is to allow overwriting for amongst other purposes, testing, if not provided the value will be drawn from the .env file.
+        """
         # assign class properties if they are provided, use defaults if they are not
         self.__enterLogMessage = enterLogMessage if enterLogMessage else "MailInterface:__sendMail called."
         self.__toEmailAddress = toEmailAddress if toEmailAddress else "tom.connolly@protonmail.com"
@@ -39,8 +55,17 @@ class MailInterface():
     ##### Private functions start #####
 
     def __sendMail(self, heading, messageBody):
-
+        """
+        __sendMail sends an email containing a notification
+        :testedWith: TestMailInterface:test_sendMailSingleDev, TestMailInterface:test_sendMailSingleProduction, TestMailInterface:test_sendMailMultiDev
+        :param heading: the subject line for the email to be sent
+        :param messageBody: the message body of the email to be sent
+        :return: success/failure of the operation
+        """
         logging.info(self.__enterLogMessage)
+
+        if self.__sendingMailIsNotPossible():
+            return False
 
         if self.__environment == "production":
             with smtplib.SMTP('smtp.gmail.com', 587) as server:
@@ -55,12 +80,28 @@ class MailInterface():
                 server.sendmail(self.__mailUsername,
                                     self.__toEmailAddress, 
                                     mailContent)
+                return True
 
                 
         elif self.__environment == "dev":
             logging.info(f"Program is running in {self.__environment} mode. No email has been sent.")
+            return True
         else:
             logging.info(f"Environment mode: {self.__environment} is not recognised.")
+            return False
+
+    def __sendingMailIsNotPossible():
+        """
+        __sendingMailIsNotPossible checks that the private members required to send an email are set.
+        :testedWith: None yet
+        :return: whether it is possible to send an email with the current configuration of the MailInterface 
+        """
+        if self.__toEmailAddress and self.__mailUsername and self.__mailPassword:
+            return False
+
+        logging.info(
+            f"Sending a notification mail is not possible because at least one of the following values was not provided - toEmailAddress: {self.__toEmailAddress}, mailUsername: {self.__mailUsername}, mailPassword: {self.__mailPassword}")
+        return True
 
     ##### Private functions end #####
 
