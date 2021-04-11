@@ -99,9 +99,7 @@ def recycleOrDeleteDir(directoryPath):
     """
     recycleDir attempts to move the parent directory containing the rest of the downloaded files to the recycle_bin folder 
         so if the program made an error, the downloaded content still might be recoverable
-
     :testedWith: testCompletedDownloadsController:test_recycleDir
-
     :param fileSystemItem: the directory to be moved to the recycle bin
     :return: bool for success/failure of the move operation
     """
