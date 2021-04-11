@@ -9,7 +9,7 @@ import time
 def initLogging():
     """
     initLogging initialises the logging object to be used throughout the program, providing a logging file, format and date format
-    :testedWith: None
+    :testedWith: None - library config code
     :return: the configured logging object
     """
     logFormat = '%(asctime)s - %(levelname)s - %(message)s'
