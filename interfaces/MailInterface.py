@@ -43,7 +43,8 @@ class MailInterface():
         """
         # assign class properties if they are provided, use defaults if they are not
         self.__enterLogMessage = enterLogMessage if enterLogMessage else "MailInterface:__sendMail called."
-        self.__toEmailAddress = toEmailAddress if toEmailAddress else "tom.connolly@protonmail.com"
+        self.__toEmailAddress = toEmailAddress if toEmailAddress else os.getenv(
+            "ENVIRONMENT")
         self.__environment = environment if environment else os.getenv("ENVIRONMENT")
         self.__mailUsername = mailUsername if mailUsername else os.getenv("MAIL_USERNAME")
         self.__mailPassword = mailPassword if mailPassword else os.getenv("MAIL_PASSWORD")
@@ -88,10 +89,10 @@ class MailInterface():
             logging.info(f"Environment mode: {self.__environment} is not recognised.")
             return False
 
-    def __sendingMailIsNotPossible():
+    def __sendingMailIsNotPossible(self):
         """
         __sendingMailIsNotPossible checks that the private members required to send an email are set.
-        :testedWith: None yet
+        :testedWith: TestMailInterface:test_sendingMailIsNotPossible
         :return: whether it is possible to send an email with the current configuration of the MailInterface 
         """
         if self.__toEmailAddress and self.__mailUsername and self.__mailPassword:
@@ -106,13 +107,26 @@ class MailInterface():
     ##### Public functions start #####
 
     def pushMail(self, messageBody, mailItemType):
+        """
+        pushMail submits a message to either be emailed immediately or at the end of the program run
+        :testedWith: TestMailInterface:test_sendingMailIsNotPossible
+        :param messageBody: the text content of the message
+        :param mailItemType: the type of the message (error|info)
+        :return: the success of the mail submission
+        """
         if self.__collateMail:
             self.__mailItems.append(
                 MailItem(messageBody, mailItemType))
+            return True
         else:
-            self.__sendMail(messageBody, mailItemType)
+            return self.__sendMail(messageBody, mailItemType)
     
     def sendAllCollatedMailItems(self):
+        """
+        sendAllCollatedMailItems formats all submitted mail items into one large email and sends that email
+        :testedWith: TestMailInterface:test_sendMailMultiDev
+        :return: the success of the operation
+        """
         errorMailMessages = ""
         newTorrentMailMessages = ""
 
@@ -129,24 +143,14 @@ class MailInterface():
                 numNewTorrentMessages += 1
             else:
                 ErrorController.reportError(f"MailItemType: {mailItem.getMailItemType()} not handled!")
+                return False
         
         if numNewTorrentMessages > 0:
             newTorrentMailMessage = "New torrents have just been added." if numNewTorrentMessages > 1 else "A new torrent has just been added."
-
-            self.__sendMail(newTorrentMailMessage, newTorrentMailMessages)
+            return self.__sendMail(newTorrentMailMessage, newTorrentMailMessages)
 
         if numErrorMessages > 0:
-            self.__sendMail("Houston we have a problem!", errorMailMessages)
+            return self.__sendMail("Houston we have a problem!", errorMailMessages)
 
-
-    def sendTestMail(self):
-        self.__environment = "production"
-        self.pushMail("Media Grab: Test Message", "test message generated from running the interfaces/MailInterface.py as __main__")
 
     ##### Public functions end #####
-
-if __name__== "__main__":
-    mailInterface = MailInterface()
-    mailInterface.sendTestMail()
-    mailInterface.sendTestMail()
-    pass

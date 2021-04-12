@@ -67,7 +67,6 @@ class TestMailInterface(unittest.TestCase):
         ]
         smtpMock.assert_has_calls(calls)
 
-
     @mock.patch('smtplib.SMTP')
     @mock.patch('os.getenv')
     @mock.patch('logging.info')
@@ -88,6 +87,62 @@ class TestMailInterface(unittest.TestCase):
             call("Program is running in dev mode. No email has been sent.")
         ]
         # mock asserts
+        loggingInfoDevMock.assert_has_calls(loggingCalls)
+
+
+    @mock.patch('smtplib.SMTP')
+    @mock.patch('os.getenv')
+    @mock.patch('logging.info')
+    def test_sendingMailIsNotPossible(self, loggingInfoDevMock, osGetEnvMock, smtpMock):
+
+        # config inputs
+        fakeToEmailAddress = "fakeToEmailAddress"
+        envValue = "dev"
+        fakeMailUsername = "fakeMailUsername"
+        fakeMailPassword = "fakeMailPassword"
+
+        fakeHeading = "fake heading"
+        fakeMessage = "fake message"
+
+        # config mocks
+        osGetEnvMock.return_value = None
+
+        # called testable method - run 1 sending mail is possible
+        mailInterfaceSendingPossible = MailInterface(
+            toEmailAddress=fakeToEmailAddress, environment=envValue, mailUsername=fakeMailUsername, mailPassword=fakeMailPassword, collateMail=False)
+
+        # push messages
+        mailSendSuccess = mailInterfaceSendingPossible.pushMail(
+            fakeMessage, MailItemType.ERROR)
+
+        # define calls
+        loggingCalls = [
+            call('MailInterface:__sendMail called.'),
+            call("Program is running in dev mode. No email has been sent.")
+        ]
+
+        # asserts
+        self.assertTrue(mailSendSuccess)
+        loggingInfoDevMock.assert_has_calls(loggingCalls)
+
+        # reset mocks
+        loggingInfoDevMock.reset_mock()
+
+        # called testable method - run 2 sending mail is not possible
+        mailInterfaceSendingNotPossible = MailInterface(environment=envValue, mailUsername=fakeMailUsername, mailPassword=fakeMailPassword, collateMail=False)
+
+        # push messages
+        mailSendSuccess = mailInterfaceSendingNotPossible.pushMail(
+            fakeMessage, MailItemType.ERROR)
+
+        # define calls
+        loggingCalls = [
+            call('MailInterface:__sendMail called.'),
+            call('Sending a notification mail is not possible because at least one of the following values was not provided - toEmailAddress: None, mailUsername: fakeMailUsername, mailPassword: fakeMailPassword')
+        ]
+        
+        # asserts
+        self.assertFalse(mailSendSuccess)
         loggingInfoDevMock.assert_has_calls(loggingCalls)
 
 
