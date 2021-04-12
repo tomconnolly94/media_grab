@@ -91,7 +91,6 @@ class MailInterface():
             logging.info(f"Environment mode: {self.__environment} is not recognised.")
             return False
 
-<<<<<<< HEAD
     def __sendingMailIsNotPossible(self):
         """
         __sendingMailIsNotPossible checks that the private members required to send an email are set.
