@@ -11,9 +11,10 @@ from dataTypes.MediaInfoRecord import MediaInfoRecord
 
 class TestQBittorrentInterface(unittest.TestCase):
 
+    @mock.patch("qbittorrent.Client", autospec=True)
     @mock.patch("logging.info")
     @mock.patch("os.getenv")
-    def test_torrentDownload(self, getEnvMock, loggingInfoMock):
+    def test_torrentDownload(self, getEnvMock, loggingInfoMock, qbittorrentClientMock):
 
         # config fake values
         fakeTorrent = TorrentRecord("fakeTorrentName1", "id", "fakeInfoHash", 2)
@@ -21,10 +22,10 @@ class TestQBittorrentInterface(unittest.TestCase):
         fakeDumpCompleteDir = "/fake/dump/complete/dir"
 
         # create testable object and override the qb member
-        getEnvMock.return_value = None # this prevents the qbittorrent client fromr eaching out to a server
+        getEnvMock.return_value = "fakey" # this prevents the qbittorrent client from reaching out to a server
         qBittorrentInterface = QBittorrentInterface(fakeDumpCompleteDir)
-        qBittorrentInterface.qb = MagicMock()
-        qBittorrentInterface.qb.download_from_link.return_value = "Ok."
+        qbittorrentClientInstance = qbittorrentClientMock.return_value
+        qbittorrentClientInstance.download_from_link.return_value = "Ok."
 
         # call testable function
         torrentInitSuccess = qBittorrentInterface.initTorrentDownload(fakeMediaInfoRecord)
@@ -32,7 +33,8 @@ class TestQBittorrentInterface(unittest.TestCase):
         # asserts
         self.assertTrue(torrentInitSuccess)
         expectedDownloadPath = os.path.join(fakeDumpCompleteDir, fakeMediaInfoRecord.getMediaGrabId())
-        qBittorrentInterface.qb.download_from_link.assert_called_with(fakeTorrent.getMagnet(), savepath=expectedDownloadPath)
+        qbittorrentClientMock.download_from_link.assert_called_with(
+            fakeTorrent.getMagnet(), savepath=expectedDownloadPath)
         loggingInfoMock.assert_called_with(f"Torrent added: {fakeTorrent.getName()}")
 
 
