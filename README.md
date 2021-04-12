@@ -1,6 +1,8 @@
 Media Grab
 ========
 
+### The Idea ###
+
 
 ### The Idea ###
 
