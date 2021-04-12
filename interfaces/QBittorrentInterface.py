@@ -11,7 +11,14 @@ from controllers import ErrorController
 qBittorrentInterfaceInstance = None
 
 # implement singleton pattern
+
+
 def getInstance():
+    """
+    getInstance creates/accesses the singleton instance of QBittorrentInterface
+    :testedWith: None - glue code
+    :return: singleton instance of MailInterface
+    """
     global qBittorrentInterfaceInstance
     if not qBittorrentInterfaceInstance:
         qBittorrentInterfaceInstance = QBittorrentInterface()
@@ -20,12 +27,16 @@ def getInstance():
 
 class QBittorrentInterface():
 
-
-    def __init__(self, dumpCompleteDir=None):
+    def __init__(self, dumpCompleteDir=None, qbittorrentClient=None):
+        """
+        __init__ initialises a QBittorrentInterface object, creating a client object
+        :testedWith: TestCompletedDownloadsController:test_auditFilesWithFileSystem
+        :return: None
+        """
         qbtUrl = os.getenv('QBT_URL')
 
         if qbtUrl:
-            self.qb = Client(qbtUrl, verify=False)
+            self.__qb = Client(qbtUrl, verify=False)
             
         self.dumpCompleteDir = dumpCompleteDir if dumpCompleteDir else os.getenv("DUMP_COMPLETE_DIR")
 
@@ -35,7 +46,7 @@ class QBittorrentInterface():
         torrentRecord = mediaInfoRecord.getTorrentRecord()
         
         try:
-            qbittorrentResponse = self.qb.download_from_link(torrentRecord.getMagnet(), savepath=downloadPath)
+            qbittorrentResponse = self.__qb.download_from_link(torrentRecord.getMagnet(), savepath=downloadPath)
             if qbittorrentResponse == "Ok.":
                 logging.info(f"Torrent added: {torrentRecord.getName()}")
                 return True
@@ -46,10 +57,10 @@ class QBittorrentInterface():
 
 
     def pauseTorrent(self, torrentName):
-        torrents = self.qb.torrents()
+        torrents = self.__qb.torrents()
 
         for torrent in torrents:
             if torrent["name"] == torrentName:
-                self.qb.pause(torrent["hash"])
+                self.__qb.pause(torrent["hash"])
                 return True
         return False
