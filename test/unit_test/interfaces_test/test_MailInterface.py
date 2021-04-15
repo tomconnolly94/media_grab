@@ -7,6 +7,7 @@ import os
 # internal dependencies
 from interfaces.MailInterface import MailInterface
 from dataTypes.MailItem import MailItemType
+from interfaces.MailInterface import errorMailHeading, singleNewTorrentMessage
 
 
 class TestMailInterface(unittest.TestCase):
@@ -17,12 +18,11 @@ class TestMailInterface(unittest.TestCase):
     def test_sendMailSingleDev(self, loggingInfoDevMock, osGetEnvMock, smtpMock):
                 
         # config inputs
-        fakeHeading = "fake heading"
         fakeMessage = "fake message"
 
         # called testable method
         mailInterface = MailInterface(environment="dev", collateMail=False)
-        mailInterface.pushMail(fakeHeading, fakeMessage)
+        mailInterface.pushMail(fakeMessage, MailItemType.NEW_TORRENT)
 
         # mock
         loggingCalls = [
@@ -42,15 +42,13 @@ class TestMailInterface(unittest.TestCase):
         envValue = "production"
         fakeMailUsername = "fakeMailUsername"
         fakeMailPassword = "fakeMailPassword"
-
-        fakeHeading = "fake heading"
         fakeMessage = "fake message"
 
         # called testable method
         mailInterface = MailInterface(toEmailAddress=fakeToEmailAddress, environment=envValue,
                                       mailUsername=fakeMailUsername, mailPassword=fakeMailPassword, collateMail=False)
 
-        mailInterface.pushMail(fakeHeading, fakeMessage)
+        mailInterface.pushMail(fakeMessage, MailItemType.NEW_TORRENT)
 
         # mock asserts
         calls = [call("MailInterface:__sendMail called.")]
@@ -62,7 +60,8 @@ class TestMailInterface(unittest.TestCase):
             call().__enter__().starttls(),
             call().__enter__().ehlo(),
             call().__enter__().login(fakeMailUsername, fakeMailPassword),
-            call().__enter__().sendmail(fakeMailUsername, fakeToEmailAddress, f'Subject: [Media Grab] {fakeHeading}\n\n{fakeMessage}'),
+            call().__enter__().sendmail(fakeMailUsername, fakeToEmailAddress,
+                                        f'Subject: [Media Grab] {singleNewTorrentMessage}\n\n{fakeMessage}'),
             call().__exit__(None, None, None)
         ]
         smtpMock.assert_has_calls(calls)

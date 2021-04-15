@@ -66,5 +66,5 @@ class TestErrorController(unittest.TestCase):
         getframeinfoMock.assert_called_with(fakeFrame)
         expectedErrorMessage = f"{fakeFileName}:{fakeFunction}():{fakeLineNo} - {fakeErrorMessage}"
         loggingErrorMock.assert_called_with(expectedErrorMessage, exc_info=True)
-        mailInterfaceInstanceMock.pushMail.assert_called_with(MailItemType.ERROR, "fakeFilename:fakeFunction():fakeLineNo - fakeErrorMessage\n\n More logs can be found in: fakeBaseFilename")
+        mailInterfaceInstanceMock.pushMail.assert_called_with("fakeFilename:fakeFunction():fakeLineNo - fakeErrorMessage\n\n More logs can be found in: fakeBaseFilename", MailItemType.ERROR)
 

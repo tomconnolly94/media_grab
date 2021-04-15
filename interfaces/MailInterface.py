@@ -20,6 +20,8 @@ def getInstance():
     return mailInterfaceInstance
 
 errorMailHeading = "Houston we have a problem"
+singleNewTorrentMessage = "A new torrent has just been added."
+multipleNewTorrentsMessage = "New torrents have just been added."
 
 
 class MailInterface():
@@ -69,7 +71,7 @@ class MailInterface():
             self.__mailItems.append(
                 MailItem(messageBody, mailItemType))
         else:
-            self.__sendMail(messageBody, mailItemType)
+            self.__sendMail(singleNewTorrentMessage, messageBody)
     
     def sendAllCollatedMailItems(self):
         errorMailMessages = ""
@@ -90,22 +92,22 @@ class MailInterface():
                 ErrorController.reportError(f"MailItemType: {mailItem.getMailItemType()} not handled!")
         
         if numNewTorrentMessages > 0:
-            newTorrentMailMessage = "New torrents have just been added." if numNewTorrentMessages > 1 else "A new torrent has just been added."
+            newTorrentMailMessage = multipleNewTorrentsMessage if numNewTorrentMessages > 1 else singleNewTorrentMessage
 
             self.__sendMail(newTorrentMailMessage, newTorrentMailMessages)
 
         if numErrorMessages > 0:
-            self.__sendMail("Houston we have a problem!", errorMailMessages)
-
-
-    def sendTestMail(self):
-        self.__environment = "production"
-        self.pushMail("Media Grab: Test Message", "test message generated from running the interfaces/MailInterface.py as __main__")
+            self.__sendMail(errorMailHeading, errorMailMessages)
 
     ##### Public functions end #####
 
 if __name__== "__main__":
-    mailInterface = MailInterface()
-    mailInterface.sendTestMail()
-    mailInterface.sendTestMail()
+    mailInterface = MailInterface(enterLogMessage="test sendMail entered", toEmailAddress="tom.connolly@protonmail.com",
+                                  environment="production", mailUsername="app.dev.notifications.tc@gmail.com", mailPassword="NKa1q6&zCf^@7$wq", collateMail=True)
+
+    mailInterface.pushMail(
+        "test message generated from running the interfaces/MailInterface.py as __main__", MailItemType.ERROR)
+    mailInterface.pushMail(
+        "test message generated from running the interfaces/MailInterface.py as __main__", MailItemType.ERROR)
+    mailInterface.sendAllCollatedMailItems()
     pass

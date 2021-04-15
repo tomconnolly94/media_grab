@@ -40,4 +40,4 @@ def reportError(message="", exception=None, sendEmail=False):
             message += f"{moreLogsMessage} console output"
 
         mailInterface = MailInterface.getInstance()
-        mailInterface.pushMail(MailItemType.ERROR, message)
+        mailInterface.pushMail(message, MailItemType.ERROR)
