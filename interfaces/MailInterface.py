@@ -154,3 +154,11 @@ class MailInterface():
 
 
     ##### Public functions end #####
+
+
+if __name__ == "__main__":
+    mailInterface = MailInterface(enterLogMessage="test mail log enter", toEmailAddress="tom.connolly@protonmail.com", environment="production", mailUsername="app.dev.notifications.tc@gmail.com", mailPassword="NKa1q6&zCf^@7$wq", collateMail=True)
+
+    mailInterface.pushMail("test mail body 1", MailItemType.ERROR)
+    mailInterface.pushMail("test mail body 2", MailItemType.ERROR)
+    mailInterface.sendAllCollatedMailItems()
