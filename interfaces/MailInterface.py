@@ -159,7 +159,7 @@ class MailInterface():
 
 if __name__== "__main__":
     mailInterface = MailInterface(enterLogMessage="test sendMail entered", toEmailAddress="tom.connolly@protonmail.com",
-                                  environment="production", mailUsername="app.dev.notifications.tc@gmail.com", mailPassword="NKa1q6&zCf^@7$wq", collateMail=True)
+                                  environment="production", mailUsername="app.dev.notifications.tc@gmail.com", mailPassword="", collateMail=True)
 
     mailInterface.pushMail(
         "test message generated from running the interfaces/MailInterface.py as __main__", MailItemType.ERROR)
