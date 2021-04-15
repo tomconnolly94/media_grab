@@ -13,13 +13,13 @@ writeFile = True
 
 
 def incrementEpisode(mediaInfoRecords, queryMediaInfoRecord):
-    """
-    incrementEpisode takes a set of mediaInfoRecords finds the one that matches the queryMediaInfoRecord and updates the episode number, incrementing to the first episode of a new season if theMovieDatabaseInterface suggests that is necessary
-    :testedWith: TestMediaIndexFileInterface:test_incrementEpisode
+	"""
+	incrementEpisode takes a set of mediaInfoRecords finds the one that matches the queryMediaInfoRecord and updates the episode number, incrementing to the first episode of a new season if theMovieDatabaseInterface suggests that is necessary
+	:testedWith: TestMediaIndexFileInterface:test_incrementEpisode
 	:param mediaInfoRecords: the set of MediaInfoRecord's, one of which should be updated
 	:param queryMediaInfoRecord: the relevant MediaInfoRecord that corresponds to the record that should be updated
-    :return: None if the queryMediaInfoRecord could not be found, the set of updated mediaInfoRecords if it can
-    """
+	:return: None if the queryMediaInfoRecord could not be found, the set of updated mediaInfoRecords if it can
+	"""
 	theMovieDatabaseInterface = TheMovieDatabaseInterface.getInstance()
 
 	for mediaInfoRecord in mediaInfoRecords:
@@ -31,7 +31,7 @@ def incrementEpisode(mediaInfoRecords, queryMediaInfoRecord):
 			if maxNumberOfEpisodes and (mediaInfoRecord.getLatestEpisodeNumber() + 1) > maxNumberOfEpisodes:
 				# set data to next season first episode
 				mediaInfoRecord.setLatestSeasonNumber(
-				    queryMediaInfoRecord.getLatestSeasonNumber() + 1)
+					queryMediaInfoRecord.getLatestSeasonNumber() + 1)
 				mediaInfoRecord.setLatestEpisodeNumber(1)
 
 				currentLatestEpisodeValue = mediaInfoRecord.getLatestEpisodeNumber()
@@ -49,14 +49,14 @@ def incrementEpisode(mediaInfoRecords, queryMediaInfoRecord):
 
 
 def writeMediaFile(queryMediaInfoRecord):
-    """
-    writeMediaFile opens the MediaIndex.json file and loads the content into a list of MediaInfoRecord objects it then increments the episode/season number for the record provided in queryMediaInfoRecord
-    :testedWith: None IO/glue code which does not require testing
+	"""
+	writeMediaFile opens the MediaIndex.json file and loads the content into a list of MediaInfoRecord objects it then increments the episode/season number for the record provided in queryMediaInfoRecord
+	:testedWith: None IO/glue code which does not require testing
 	:param queryMediaInfoRecord: the mediaInfoRecord that requires updating
-    :return: the success/failure of the operation
-    """
+	:return: the success/failure of the operation
+	"""
 	mediaInfoRecords = loadMediaFile()
-	
+
 	updatedMediaInfoRecords = incrementEpisode(
 	    mediaInfoRecords, queryMediaInfoRecord)
 
@@ -75,11 +75,11 @@ def writeMediaFile(queryMediaInfoRecord):
     
 
 def loadMediaFile():
-    """
-    loadMediaFile opens the MediaIndex.json file and loads the content into a list of MediaInfoRecord objects
-    :testedWith: None IO/glue code which does not require testing
-    :return: a list of MediaInfoRecord's loaded from the MediaIndex.json
-    """
+	"""
+	loadMediaFile opens the MediaIndex.json file and loads the content into a list of MediaInfoRecord objects
+	:testedWith: None IO/glue code which does not require testing
+	:return: a list of MediaInfoRecord's loaded from the MediaIndex.json
+	"""
 	mediaIndexFileLocation = os.getenv("MEDIA_FILE")
 	logging.info(f"MediaIndex File: {mediaIndexFileLocation}")
 	with open(mediaIndexFileLocation, "r") as mediaIndexfile:
