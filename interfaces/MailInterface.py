@@ -121,7 +121,7 @@ class MailInterface():
                 MailItem(messageBody, mailItemType))
             return True
         else:
-            self.__sendMail(singleNewTorrentMessage, messageBody)
+            return self.__sendMail(singleNewTorrentMessage, messageBody)
     
     def sendAllCollatedMailItems(self):
         """
