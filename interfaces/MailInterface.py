@@ -56,7 +56,7 @@ class MailInterface():
                                     self.__toEmailAddress, 
                                     mailContent)
 
-                
+
         elif self.__environment == "dev":
             logging.info(f"Program is running in {self.__environment} mode. No email has been sent.")
         else:
@@ -72,7 +72,7 @@ class MailInterface():
                 MailItem(messageBody, mailItemType))
         else:
             self.__sendMail(singleNewTorrentMessage, messageBody)
-    
+
     def sendAllCollatedMailItems(self):
         errorMailMessages = ""
         newTorrentMailMessages = ""
@@ -90,9 +90,9 @@ class MailInterface():
                 numNewTorrentMessages += 1
             else:
                 ErrorController.reportError(f"MailItemType: {mailItem.getMailItemType()} not handled!")
-        
+
         if numNewTorrentMessages > 0:
-            firstTorrentNameSlice = f"{newTorrentMailMessages[0][:40]}..."
+            firstTorrentNameChunk = f"{newTorrentMailMessages[0][:40]}..."
             multiTorrentMessage = f"{multipleNewTorrentsMessage} - {firstTorrentNameChunk}"
             singleTorrentMessage = f"{singleNewTorrentMessage} - {firstTorrentNameChunk}"
 
