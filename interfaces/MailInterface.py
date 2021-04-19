@@ -92,7 +92,11 @@ class MailInterface():
                 ErrorController.reportError(f"MailItemType: {mailItem.getMailItemType()} not handled!")
         
         if numNewTorrentMessages > 0:
-            newTorrentMailMessage = multipleNewTorrentsMessage if numNewTorrentMessages > 1 else singleNewTorrentMessage
+            firstTorrentNameSlice = f"{newTorrentMailMessages[0][:40]}..."
+            multiTorrentMessage = f"{multipleNewTorrentsMessage} - {firstTorrentNameChunk}"
+            singleTorrentMessage = f"{singleNewTorrentMessage} - {firstTorrentNameChunk}"
+
+            newTorrentMailMessage = multiTorrentMessage if numNewTorrentMessages > 1 else singleTorrentMessage
 
             self.__sendMail(newTorrentMailMessage, newTorrentMailMessages)
 
