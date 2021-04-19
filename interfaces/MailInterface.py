@@ -92,7 +92,7 @@ class MailInterface():
                 ErrorController.reportError(f"MailItemType: {mailItem.getMailItemType()} not handled!")
 
         if numNewTorrentMessages > 0:
-            firstTorrentNameChunk = f"{newTorrentMailMessages[0][:40]}..."
+            firstTorrentNameChunk = f"{newTorrentMailMessages[:40]}..."
             multiTorrentMessage = f"{multipleNewTorrentsMessage} - {firstTorrentNameChunk}"
             singleTorrentMessage = f"{singleNewTorrentMessage} - {firstTorrentNameChunk}"
 
@@ -110,7 +110,7 @@ if __name__== "__main__":
                                   environment="production", mailUsername="app.dev.notifications.tc@gmail.com", mailPassword="NKa1q6&zCf^@7$wq", collateMail=True)
 
     mailInterface.pushMail(
-        "test message generated from running the interfaces/MailInterface.py as __main__", MailItemType.ERROR)
+        "test message generated from running the interfaces/MailInterface.py as __main__", MailItemType.NEW_TORRENT)
     mailInterface.pushMail(
         "test message generated from running the interfaces/MailInterface.py as __main__", MailItemType.ERROR)
     mailInterface.sendAllCollatedMailItems()
