@@ -13,7 +13,7 @@ class TestQBittorrentInterface(unittest.TestCase):
 
     @mock.patch("logging.info")
     @mock.patch("os.getenv")
-    def test_torrentDownload(self, getEnvMock, loggingInfoMock):
+    def test_initTorrentDownload(self, getEnvMock, loggingInfoMock):
 
         # config fake values
         fakeTorrent = TorrentRecord("fakeTorrentName1", "id", "fakeInfoHash", 2)
