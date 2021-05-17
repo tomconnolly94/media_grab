@@ -35,6 +35,7 @@ class QBittorrentInterface():
         """
         qbtUrl = os.getenv('QBT_URL')
 
+
         if qbtUrl:
             self.__qb = Client(qbtUrl, verify=False)
             
@@ -64,3 +65,6 @@ class QBittorrentInterface():
                 self.__qb.pause(torrent["hash"])
                 return True
         return False
+
+    def overrideQBObject(self, overrideValue):
+        self.__qb = overrideValue
