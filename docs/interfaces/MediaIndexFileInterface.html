@@ -68,19 +68,26 @@
 <span class="n">writeFile</span> <span class="o">=</span> <span class="kc">True</span>
 
 
-<span class="k">def</span> <span class="nf">incrementEpisode</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">queryRecord</span><span class="p">):</span>
-
+<span class="k">def</span> <span class="nf">incrementEpisode</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">queryMediaInfoRecord</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	incrementEpisode takes a set of mediaInfoRecords finds the one that matches the queryMediaInfoRecord and updates the episode number, incrementing to the first episode of a new season if theMovieDatabaseInterface suggests that is necessary</span>
+<span class="sd">	:testedWith: TestMediaIndexFileInterface:test_incrementEpisode</span>
+<span class="sd">	:param mediaInfoRecords: the set of MediaInfoRecord&#39;s, one of which should be updated</span>
+<span class="sd">	:param queryMediaInfoRecord: the relevant MediaInfoRecord that corresponds to the record that should be updated</span>
+<span class="sd">	:return: None if the queryMediaInfoRecord could not be found, the set of updated mediaInfoRecords if it can</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">theMovieDatabaseInterface</span> <span class="o">=</span> <span class="n">TheMovieDatabaseInterface</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span>
 
 	<span class="k">for</span> <span class="n">mediaInfoRecord</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span><span class="p">:</span>
-		<span class="k">if</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span> <span class="o">==</span> <span class="n">queryRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">():</span>
+		<span class="k">if</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span> <span class="o">==</span> <span class="n">queryMediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">():</span>
 			<span class="n">maxNumberOfEpisodes</span> <span class="o">=</span> <span class="n">theMovieDatabaseInterface</span><span class="o">.</span><span class="n">getShowEpisodeCount</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">(),</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">())</span>
 			<span class="n">prevEpisodeValue</span> <span class="o">=</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">()</span>
 			<span class="n">prevSeasonValue</span> <span class="o">=</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">()</span>
 
 			<span class="k">if</span> <span class="n">maxNumberOfEpisodes</span> <span class="ow">and</span> <span class="p">(</span><span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxNumberOfEpisodes</span><span class="p">:</span>
 				<span class="c1"># set data to next season first episode</span>
-				<span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">setLatestSeasonNumber</span><span class="p">(</span><span class="n">queryRecord</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+				<span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">setLatestSeasonNumber</span><span class="p">(</span>
+					<span class="n">queryMediaInfoRecord</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 				<span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">setLatestEpisodeNumber</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 				<span class="n">currentLatestEpisodeValue</span> <span class="o">=</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">()</span>
@@ -97,14 +104,20 @@
 	<span class="k">return</span> <span class="kc">None</span>
 
 
-<span class="k">def</span> <span class="nf">writeMediaFile</span><span class="p">(</span><span class="n">queryRecord</span><span class="p">):</span>
-	
+<span class="k">def</span> <span class="nf">writeMediaFile</span><span class="p">(</span><span class="n">queryMediaInfoRecord</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	writeMediaFile opens the MediaIndex.json file and loads the content into a list of MediaInfoRecord objects it then increments the episode/season number for the record provided in queryMediaInfoRecord</span>
+<span class="sd">	:testedWith: None IO/glue code which does not require testing</span>
+<span class="sd">	:param queryMediaInfoRecord: the mediaInfoRecord that requires updating</span>
+<span class="sd">	:return: the success/failure of the operation</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">mediaInfoRecords</span> <span class="o">=</span> <span class="n">loadMediaFile</span><span class="p">()</span>
-	
-	<span class="n">updatedMediaInfoRecords</span> <span class="o">=</span> <span class="n">incrementEpisode</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">queryRecord</span><span class="p">)</span>
+
+	<span class="n">updatedMediaInfoRecords</span> <span class="o">=</span> <span class="n">incrementEpisode</span><span class="p">(</span>
+	    <span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">queryMediaInfoRecord</span><span class="p">)</span>
 
 	<span class="k">if</span> <span class="ow">not</span> <span class="n">updatedMediaInfoRecords</span><span class="p">:</span>
-		<span class="k">return</span>
+		<span class="k">return</span> <span class="kc">False</span>
 
 	<span class="n">updatedMediaInfoRecordsAsDict</span> <span class="o">=</span> <span class="p">[</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">toDict</span><span class="p">()</span> <span class="k">for</span> <span class="n">mediaInfoRecord</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span> <span class="p">]</span>
 
@@ -114,10 +127,15 @@
 		<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MEDIA_FILE&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mediaFileTarget</span><span class="p">:</span>
 			<span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">media</span><span class="p">,</span> <span class="n">mediaFileTarget</span><span class="p">)</span>
 
-	<span class="k">return</span>
+	<span class="k">return</span> <span class="kc">True</span>
     
 
 <span class="k">def</span> <span class="nf">loadMediaFile</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	loadMediaFile opens the MediaIndex.json file and loads the content into a list of MediaInfoRecord objects</span>
+<span class="sd">	:testedWith: None IO/glue code which does not require testing</span>
+<span class="sd">	:return: a list of MediaInfoRecord&#39;s loaded from the MediaIndex.json</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">mediaIndexFileLocation</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MEDIA_FILE&quot;</span><span class="p">)</span>
 	<span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MediaIndex File: </span><span class="si">{</span><span class="n">mediaIndexFileLocation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 	<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">mediaIndexFileLocation</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mediaIndexfile</span><span class="p">:</span>
@@ -144,24 +162,31 @@
 
         
             <span class="def">def</span>
-            <span class="name">incrementEpisode</span><span class="signature">(mediaInfoRecords, queryRecord)</span>:
+            <span class="name">incrementEpisode</span><span class="signature">(mediaInfoRecords, queryMediaInfoRecord)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">incrementEpisode</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">queryRecord</span><span class="p">):</span>
-
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">incrementEpisode</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">queryMediaInfoRecord</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	incrementEpisode takes a set of mediaInfoRecords finds the one that matches the queryMediaInfoRecord and updates the episode number, incrementing to the first episode of a new season if theMovieDatabaseInterface suggests that is necessary</span>
+<span class="sd">	:testedWith: TestMediaIndexFileInterface:test_incrementEpisode</span>
+<span class="sd">	:param mediaInfoRecords: the set of MediaInfoRecord&#39;s, one of which should be updated</span>
+<span class="sd">	:param queryMediaInfoRecord: the relevant MediaInfoRecord that corresponds to the record that should be updated</span>
+<span class="sd">	:return: None if the queryMediaInfoRecord could not be found, the set of updated mediaInfoRecords if it can</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">theMovieDatabaseInterface</span> <span class="o">=</span> <span class="n">TheMovieDatabaseInterface</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span>
 
 	<span class="k">for</span> <span class="n">mediaInfoRecord</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span><span class="p">:</span>
-		<span class="k">if</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span> <span class="o">==</span> <span class="n">queryRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">():</span>
+		<span class="k">if</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span> <span class="o">==</span> <span class="n">queryMediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">():</span>
 			<span class="n">maxNumberOfEpisodes</span> <span class="o">=</span> <span class="n">theMovieDatabaseInterface</span><span class="o">.</span><span class="n">getShowEpisodeCount</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">(),</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">())</span>
 			<span class="n">prevEpisodeValue</span> <span class="o">=</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">()</span>
 			<span class="n">prevSeasonValue</span> <span class="o">=</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">()</span>
 
 			<span class="k">if</span> <span class="n">maxNumberOfEpisodes</span> <span class="ow">and</span> <span class="p">(</span><span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxNumberOfEpisodes</span><span class="p">:</span>
 				<span class="c1"># set data to next season first episode</span>
-				<span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">setLatestSeasonNumber</span><span class="p">(</span><span class="n">queryRecord</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+				<span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">setLatestSeasonNumber</span><span class="p">(</span>
+					<span class="n">queryMediaInfoRecord</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 				<span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">setLatestEpisodeNumber</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 				<span class="n">currentLatestEpisodeValue</span> <span class="o">=</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">()</span>
@@ -180,7 +205,13 @@
 
         </details>
 
-    
+            <div class="docstring"><p>incrementEpisode takes a set of mediaInfoRecords finds the one that matches the queryMediaInfoRecord and updates the episode number, incrementing to the first episode of a new season if theMovieDatabaseInterface suggests that is necessary
+:testedWith: TestMediaIndexFileInterface:test_incrementEpisode
+:param mediaInfoRecords: the set of MediaInfoRecord's, one of which should be updated
+:param queryMediaInfoRecord: the relevant MediaInfoRecord that corresponds to the record that should be updated
+:return: None if the queryMediaInfoRecord could not be found, the set of updated mediaInfoRecords if it can</p>
+</div>
+
 
                 </section>
                 <section id="writeMediaFile">
@@ -188,19 +219,25 @@
 
         
             <span class="def">def</span>
-            <span class="name">writeMediaFile</span><span class="signature">(queryRecord)</span>:
+            <span class="name">writeMediaFile</span><span class="signature">(queryMediaInfoRecord)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">writeMediaFile</span><span class="p">(</span><span class="n">queryRecord</span><span class="p">):</span>
-	
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">writeMediaFile</span><span class="p">(</span><span class="n">queryMediaInfoRecord</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	writeMediaFile opens the MediaIndex.json file and loads the content into a list of MediaInfoRecord objects it then increments the episode/season number for the record provided in queryMediaInfoRecord</span>
+<span class="sd">	:testedWith: None IO/glue code which does not require testing</span>
+<span class="sd">	:param queryMediaInfoRecord: the mediaInfoRecord that requires updating</span>
+<span class="sd">	:return: the success/failure of the operation</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">mediaInfoRecords</span> <span class="o">=</span> <span class="n">loadMediaFile</span><span class="p">()</span>
-	
-	<span class="n">updatedMediaInfoRecords</span> <span class="o">=</span> <span class="n">incrementEpisode</span><span class="p">(</span><span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">queryRecord</span><span class="p">)</span>
+
+	<span class="n">updatedMediaInfoRecords</span> <span class="o">=</span> <span class="n">incrementEpisode</span><span class="p">(</span>
+	    <span class="n">mediaInfoRecords</span><span class="p">,</span> <span class="n">queryMediaInfoRecord</span><span class="p">)</span>
 
 	<span class="k">if</span> <span class="ow">not</span> <span class="n">updatedMediaInfoRecords</span><span class="p">:</span>
-		<span class="k">return</span>
+		<span class="k">return</span> <span class="kc">False</span>
 
 	<span class="n">updatedMediaInfoRecordsAsDict</span> <span class="o">=</span> <span class="p">[</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">toDict</span><span class="p">()</span> <span class="k">for</span> <span class="n">mediaInfoRecord</span> <span class="ow">in</span> <span class="n">mediaInfoRecords</span> <span class="p">]</span>
 
@@ -210,12 +247,17 @@
 		<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MEDIA_FILE&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mediaFileTarget</span><span class="p">:</span>
 			<span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">media</span><span class="p">,</span> <span class="n">mediaFileTarget</span><span class="p">)</span>
 
-	<span class="k">return</span>
+	<span class="k">return</span> <span class="kc">True</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>writeMediaFile opens the MediaIndex.json file and loads the content into a list of MediaInfoRecord objects it then increments the episode/season number for the record provided in queryMediaInfoRecord
+:testedWith: None IO/glue code which does not require testing
+:param queryMediaInfoRecord: the mediaInfoRecord that requires updating
+:return: the success/failure of the operation</p>
+</div>
+
 
                 </section>
                 <section id="loadMediaFile">
@@ -229,6 +271,11 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">loadMediaFile</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	loadMediaFile opens the MediaIndex.json file and loads the content into a list of MediaInfoRecord objects</span>
+<span class="sd">	:testedWith: None IO/glue code which does not require testing</span>
+<span class="sd">	:return: a list of MediaInfoRecord&#39;s loaded from the MediaIndex.json</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">mediaIndexFileLocation</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MEDIA_FILE&quot;</span><span class="p">)</span>
 	<span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MediaIndex File: </span><span class="si">{</span><span class="n">mediaIndexFileLocation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 	<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">mediaIndexFileLocation</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mediaIndexfile</span><span class="p">:</span>
@@ -249,7 +296,11 @@
 
         </details>
 
-    
+            <div class="docstring"><p>loadMediaFile opens the MediaIndex.json file and loads the content into a list of MediaInfoRecord objects
+:testedWith: None IO/glue code which does not require testing
+:return: a list of MediaInfoRecord's loaded from the MediaIndex.json</p>
+</div>
+
 
                 </section>
     </main>

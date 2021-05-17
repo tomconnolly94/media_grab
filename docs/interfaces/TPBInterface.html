@@ -34,6 +34,9 @@
                     <a class="function" href="#getTorrentRecords">getTorrentRecords</a>
             </li>
             <li>
+                    <a class="function" href="#reportAPIError">reportAPIError</a>
+            </li>
+            <li>
                     <a class="function" href="#queryAPI">queryAPI</a>
             </li>
     </ul>
@@ -67,13 +70,24 @@
 <span class="kn">from</span> <span class="nn">controllers</span> <span class="kn">import</span> <span class="n">TorrentFilterController</span><span class="p">,</span> <span class="n">ErrorController</span>
 <span class="kn">from</span> <span class="nn">dataTypes.TorrentRecord</span> <span class="kn">import</span> <span class="n">TorrentRecord</span>
 
+
 <span class="k">def</span> <span class="nf">sortTorrents</span><span class="p">(</span><span class="n">torrents</span><span class="p">):</span>
-    <span class="c1"># order torrents by number of seeders</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    sortTorrents sorts a list of torrentRecord object based on whom has the most seeders</span>
+<span class="sd">    :param torrents: list of torrents</span>
+<span class="sd">    :testedWith: TestTPBInterface:test_getTorrentRecords</span>
+<span class="sd">    :return: sorted list of torrents</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">torrents</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">torrent</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">torrent</span><span class="o">.</span><span class="n">getSeeders</span><span class="p">())</span>
 
 
 <span class="k">def</span> <span class="nf">getTorrentRecords</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="p">):</span>
-
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    getTorrentRecords attempts to find a torrentRecord for the mediaInfoRecord passed in </span>
+<span class="sd">    :param mediaInfoRecord: mediaInfoRecord for which torrent records should be found</span>
+<span class="sd">    :testedWith: TestTPBInterface:test_getTorrentRecords</span>
+<span class="sd">    :return: sorted and filtered list of torrents</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># make query for the mediaInfoRecord, if none are found, try the next query format</span>
     <span class="k">for</span> <span class="n">queryStr</span> <span class="ow">in</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getMediaSearchQueries</span><span class="p">():</span>
         <span class="n">torrentRecords</span> <span class="o">=</span> <span class="n">queryAPI</span><span class="p">(</span><span class="n">queryStr</span><span class="p">)</span>
@@ -100,8 +114,31 @@
     <span class="k">return</span> <span class="kc">None</span>
 
 
+<span class="k">def</span> <span class="nf">reportAPIError</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="p">,</span> <span class="n">extraErrorMessage</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    reportAPIError reports an APIError offering configuration options in the reporting</span>
+<span class="sd">    :param response: the response from the http request</span>
+<span class="sd">    :param exception: the python exception that was thrown</span>
+<span class="sd">    :param sendEmail: bool, whether to send an email for the error</span>
+<span class="sd">    :param extraErrorMessage: any extra error info that should be added to the error reports</span>
+<span class="sd">    :testedWith: None yet, must be tested</span>
+<span class="sd">    :return: empty list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">errorString</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Problem with TPB API has occurred. </span><span class="si">{</span><span class="n">extraErrorMessage</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="k">if</span> <span class="n">response</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">:</span>
+        <span class="n">errorString</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; Received: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="n">errorString</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[]</span>
+
+
 <span class="k">def</span> <span class="nf">queryAPI</span><span class="p">(</span><span class="n">queryTerm</span><span class="p">):</span>
-    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    queryAPI queries the torrent api with the queryTerm passed in</span>
+<span class="sd">    :param queryTerm: the text to be queried for</span>
+<span class="sd">    :testedWith: None yet, must be tested</span>
+<span class="sd">    :return: all matching torrents as torrentRecords</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># create query url</span>
     <span class="n">queryUrl</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://apibay.org/q.php?q=</span><span class="si">{</span><span class="n">queryTerm</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
@@ -122,14 +159,12 @@
 
         <span class="k">return</span> <span class="n">torrentRecords</span>
 
-    <span class="k">except</span> <span class="p">(</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="n">ChunkedEncodingError</span><span class="p">,</span> <span class="ne">ConnectionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">ChunkedEncodingError</span><span class="p">,</span> <span class="n">JSONDecodeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">reportAPIError</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">errorString</span> <span class="o">=</span> <span class="s2">&quot;Problem with TPB API has occurred.&quot;</span>
-
-        <span class="k">if</span> <span class="n">response</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">:</span>
-            <span class="n">errorString</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; Received: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="n">errorString</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ConnectionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="n">extraErrorString</span> <span class="o">=</span> <span class="s2">&quot;Torrent API seems down at the moment.&quot;</span>
+        <span class="k">return</span> <span class="n">reportAPIError</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">extraErrorString</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -146,13 +181,23 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">sortTorrents</span><span class="p">(</span><span class="n">torrents</span><span class="p">):</span>
-    <span class="c1"># order torrents by number of seeders</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    sortTorrents sorts a list of torrentRecord object based on whom has the most seeders</span>
+<span class="sd">    :param torrents: list of torrents</span>
+<span class="sd">    :testedWith: TestTPBInterface:test_getTorrentRecords</span>
+<span class="sd">    :return: sorted list of torrents</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">torrents</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">torrent</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">torrent</span><span class="o">.</span><span class="n">getSeeders</span><span class="p">())</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>sortTorrents sorts a list of torrentRecord object based on whom has the most seeders
+:param torrents: list of torrents
+:testedWith: TestTPBInterface:test_getTorrentRecords
+:return: sorted list of torrents</p>
+</div>
+
 
                 </section>
                 <section id="getTorrentRecords">
@@ -166,7 +211,12 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getTorrentRecords</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="p">):</span>
-
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    getTorrentRecords attempts to find a torrentRecord for the mediaInfoRecord passed in </span>
+<span class="sd">    :param mediaInfoRecord: mediaInfoRecord for which torrent records should be found</span>
+<span class="sd">    :testedWith: TestTPBInterface:test_getTorrentRecords</span>
+<span class="sd">    :return: sorted and filtered list of torrents</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># make query for the mediaInfoRecord, if none are found, try the next query format</span>
     <span class="k">for</span> <span class="n">queryStr</span> <span class="ow">in</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getMediaSearchQueries</span><span class="p">():</span>
         <span class="n">torrentRecords</span> <span class="o">=</span> <span class="n">queryAPI</span><span class="p">(</span><span class="n">queryStr</span><span class="p">)</span>
@@ -195,7 +245,53 @@
 
         </details>
 
-    
+            <div class="docstring"><p>getTorrentRecords attempts to find a torrentRecord for the mediaInfoRecord passed in 
+:param mediaInfoRecord: mediaInfoRecord for which torrent records should be found
+:testedWith: TestTPBInterface:test_getTorrentRecords
+:return: sorted and filtered list of torrents</p>
+</div>
+
+
+                </section>
+                <section id="reportAPIError">
+                            <div class="attr function"><a class="headerlink" href="#reportAPIError">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">reportAPIError</span><span class="signature">(response, exception, sendEmail, extraErrorMessage=&#39;&#39;)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reportAPIError</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="p">,</span> <span class="n">extraErrorMessage</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    reportAPIError reports an APIError offering configuration options in the reporting</span>
+<span class="sd">    :param response: the response from the http request</span>
+<span class="sd">    :param exception: the python exception that was thrown</span>
+<span class="sd">    :param sendEmail: bool, whether to send an email for the error</span>
+<span class="sd">    :param extraErrorMessage: any extra error info that should be added to the error reports</span>
+<span class="sd">    :testedWith: None yet, must be tested</span>
+<span class="sd">    :return: empty list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">errorString</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Problem with TPB API has occurred. </span><span class="si">{</span><span class="n">extraErrorMessage</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="k">if</span> <span class="n">response</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">:</span>
+        <span class="n">errorString</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; Received: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="n">errorString</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[]</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>reportAPIError reports an APIError offering configuration options in the reporting
+:param response: the response from the http request
+:param exception: the python exception that was thrown
+:param sendEmail: bool, whether to send an email for the error
+:param extraErrorMessage: any extra error info that should be added to the error reports
+:testedWith: None yet, must be tested
+:return: empty list</p>
+</div>
+
 
                 </section>
                 <section id="queryAPI">
@@ -209,7 +305,12 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">queryAPI</span><span class="p">(</span><span class="n">queryTerm</span><span class="p">):</span>
-    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    queryAPI queries the torrent api with the queryTerm passed in</span>
+<span class="sd">    :param queryTerm: the text to be queried for</span>
+<span class="sd">    :testedWith: None yet, must be tested</span>
+<span class="sd">    :return: all matching torrents as torrentRecords</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># create query url</span>
     <span class="n">queryUrl</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://apibay.org/q.php?q=</span><span class="si">{</span><span class="n">queryTerm</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
@@ -230,19 +331,22 @@
 
         <span class="k">return</span> <span class="n">torrentRecords</span>
 
-    <span class="k">except</span> <span class="p">(</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="n">ChunkedEncodingError</span><span class="p">,</span> <span class="ne">ConnectionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">ChunkedEncodingError</span><span class="p">,</span> <span class="n">JSONDecodeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">reportAPIError</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">errorString</span> <span class="o">=</span> <span class="s2">&quot;Problem with TPB API has occurred.&quot;</span>
-
-        <span class="k">if</span> <span class="n">response</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">:</span>
-            <span class="n">errorString</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; Received: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="n">errorString</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ConnectionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="n">extraErrorString</span> <span class="o">=</span> <span class="s2">&quot;Torrent API seems down at the moment.&quot;</span>
+        <span class="k">return</span> <span class="n">reportAPIError</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">extraErrorString</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>queryAPI queries the torrent api with the queryTerm passed in
+:param queryTerm: the text to be queried for
+:testedWith: None yet, must be tested
+:return: all matching torrents as torrentRecords</p>
+</div>
+
 
                 </section>
     </main>

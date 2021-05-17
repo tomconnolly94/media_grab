@@ -31,7 +31,7 @@
                     <a class="class" href="#TestQBittorrentInterface">TestQBittorrentInterface</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#TestQBittorrentInterface.test_torrentDownload">test_torrentDownload</a>
+                                <a class="function" href="#TestQBittorrentInterface.test_initTorrentDownload">test_initTorrentDownload</a>
                         </li>
                 </ul>
 
@@ -69,7 +69,7 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../interfaces_tes
 
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;logging.info&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;os.getenv&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_torrentDownload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getEnvMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_initTorrentDownload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getEnvMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">):</span>
 
         <span class="c1"># config fake values</span>
         <span class="n">fakeTorrent</span> <span class="o">=</span> <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;fakeTorrentName1&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -77,10 +77,11 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../interfaces_tes
         <span class="n">fakeDumpCompleteDir</span> <span class="o">=</span> <span class="s2">&quot;/fake/dump/complete/dir&quot;</span>
 
         <span class="c1"># create testable object and override the qb member</span>
-        <span class="n">getEnvMock</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># this prevents the qbittorrent client fromr eaching out to a server</span>
+        <span class="n">getEnvMock</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># this prevents the qbittorrent client from reaching out to a server</span>
         <span class="n">qBittorrentInterface</span> <span class="o">=</span> <span class="n">QBittorrentInterface</span><span class="p">(</span><span class="n">fakeDumpCompleteDir</span><span class="p">)</span>
-        <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">qb</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
-        <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">download_from_link</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s2">&quot;Ok.&quot;</span>
+        <span class="n">fakeQBObject</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">fakeQBObject</span><span class="o">.</span><span class="n">download_from_link</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s2">&quot;Ok.&quot;</span>
+        <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">overrideQBObject</span><span class="p">(</span><span class="n">fakeQBObject</span><span class="p">)</span>
 
         <span class="c1"># call testable function</span>
         <span class="n">torrentInitSuccess</span> <span class="o">=</span> <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">initTorrentDownload</span><span class="p">(</span><span class="n">fakeMediaInfoRecord</span><span class="p">)</span>
@@ -88,7 +89,8 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../interfaces_tes
         <span class="c1"># asserts</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">torrentInitSuccess</span><span class="p">)</span>
         <span class="n">expectedDownloadPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fakeDumpCompleteDir</span><span class="p">,</span> <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getMediaGrabId</span><span class="p">())</span>
-        <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">download_from_link</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">(),</span> <span class="n">savepath</span><span class="o">=</span><span class="n">expectedDownloadPath</span><span class="p">)</span>
+        <span class="n">fakeQBObject</span><span class="o">.</span><span class="n">download_from_link</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span>
+            <span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">(),</span> <span class="n">savepath</span><span class="o">=</span><span class="n">expectedDownloadPath</span><span class="p">)</span>
         <span class="n">loggingInfoMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Torrent added: </span><span class="si">{</span><span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 
@@ -117,7 +119,7 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../interfaces_tes
 
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;logging.info&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;os.getenv&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_torrentDownload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getEnvMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_initTorrentDownload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getEnvMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">):</span>
 
         <span class="c1"># config fake values</span>
         <span class="n">fakeTorrent</span> <span class="o">=</span> <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;fakeTorrentName1&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -125,10 +127,11 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../interfaces_tes
         <span class="n">fakeDumpCompleteDir</span> <span class="o">=</span> <span class="s2">&quot;/fake/dump/complete/dir&quot;</span>
 
         <span class="c1"># create testable object and override the qb member</span>
-        <span class="n">getEnvMock</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># this prevents the qbittorrent client fromr eaching out to a server</span>
+        <span class="n">getEnvMock</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># this prevents the qbittorrent client from reaching out to a server</span>
         <span class="n">qBittorrentInterface</span> <span class="o">=</span> <span class="n">QBittorrentInterface</span><span class="p">(</span><span class="n">fakeDumpCompleteDir</span><span class="p">)</span>
-        <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">qb</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
-        <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">download_from_link</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s2">&quot;Ok.&quot;</span>
+        <span class="n">fakeQBObject</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">fakeQBObject</span><span class="o">.</span><span class="n">download_from_link</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s2">&quot;Ok.&quot;</span>
+        <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">overrideQBObject</span><span class="p">(</span><span class="n">fakeQBObject</span><span class="p">)</span>
 
         <span class="c1"># call testable function</span>
         <span class="n">torrentInitSuccess</span> <span class="o">=</span> <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">initTorrentDownload</span><span class="p">(</span><span class="n">fakeMediaInfoRecord</span><span class="p">)</span>
@@ -136,7 +139,8 @@ test.<a href="./../../unit_test.html">unit_test</a>.<a href="./../interfaces_tes
         <span class="c1"># asserts</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">torrentInitSuccess</span><span class="p">)</span>
         <span class="n">expectedDownloadPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fakeDumpCompleteDir</span><span class="p">,</span> <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getMediaGrabId</span><span class="p">())</span>
-        <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">download_from_link</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">(),</span> <span class="n">savepath</span><span class="o">=</span><span class="n">expectedDownloadPath</span><span class="p">)</span>
+        <span class="n">fakeQBObject</span><span class="o">.</span><span class="n">download_from_link</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span>
+            <span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">(),</span> <span class="n">savepath</span><span class="o">=</span><span class="n">expectedDownloadPath</span><span class="p">)</span>
         <span class="n">loggingInfoMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Torrent added: </span><span class="si">{</span><span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 
@@ -178,21 +182,21 @@ attribute so can be configured by individual tests if required.</li>
 </div>
 
 
-                            <div id="TestQBittorrentInterface.test_torrentDownload" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#TestQBittorrentInterface.test_torrentDownload">#&nbsp;&nbsp</a>
+                            <div id="TestQBittorrentInterface.test_initTorrentDownload" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TestQBittorrentInterface.test_initTorrentDownload">#&nbsp;&nbsp</a>
 
                 <div class="decorator">@mock.patch(&#39;logging.info&#39;)</div>
         <div class="decorator">@mock.patch(&#39;os.getenv&#39;)</div>
 
             <span class="def">def</span>
-            <span class="name">test_torrentDownload</span><span class="signature">(self, getEnvMock, loggingInfoMock)</span>:
+            <span class="name">test_initTorrentDownload</span><span class="signature">(self, getEnvMock, loggingInfoMock)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;logging.info&quot;</span><span class="p">)</span>
     <span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s2">&quot;os.getenv&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">test_torrentDownload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getEnvMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_initTorrentDownload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getEnvMock</span><span class="p">,</span> <span class="n">loggingInfoMock</span><span class="p">):</span>
 
         <span class="c1"># config fake values</span>
         <span class="n">fakeTorrent</span> <span class="o">=</span> <span class="n">TorrentRecord</span><span class="p">(</span><span class="s2">&quot;fakeTorrentName1&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;fakeInfoHash&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -200,10 +204,11 @@ attribute so can be configured by individual tests if required.</li>
         <span class="n">fakeDumpCompleteDir</span> <span class="o">=</span> <span class="s2">&quot;/fake/dump/complete/dir&quot;</span>
 
         <span class="c1"># create testable object and override the qb member</span>
-        <span class="n">getEnvMock</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># this prevents the qbittorrent client fromr eaching out to a server</span>
+        <span class="n">getEnvMock</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># this prevents the qbittorrent client from reaching out to a server</span>
         <span class="n">qBittorrentInterface</span> <span class="o">=</span> <span class="n">QBittorrentInterface</span><span class="p">(</span><span class="n">fakeDumpCompleteDir</span><span class="p">)</span>
-        <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">qb</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
-        <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">download_from_link</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s2">&quot;Ok.&quot;</span>
+        <span class="n">fakeQBObject</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">fakeQBObject</span><span class="o">.</span><span class="n">download_from_link</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s2">&quot;Ok.&quot;</span>
+        <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">overrideQBObject</span><span class="p">(</span><span class="n">fakeQBObject</span><span class="p">)</span>
 
         <span class="c1"># call testable function</span>
         <span class="n">torrentInitSuccess</span> <span class="o">=</span> <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">initTorrentDownload</span><span class="p">(</span><span class="n">fakeMediaInfoRecord</span><span class="p">)</span>
@@ -211,7 +216,8 @@ attribute so can be configured by individual tests if required.</li>
         <span class="c1"># asserts</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">torrentInitSuccess</span><span class="p">)</span>
         <span class="n">expectedDownloadPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fakeDumpCompleteDir</span><span class="p">,</span> <span class="n">fakeMediaInfoRecord</span><span class="o">.</span><span class="n">getMediaGrabId</span><span class="p">())</span>
-        <span class="n">qBittorrentInterface</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">download_from_link</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">(),</span> <span class="n">savepath</span><span class="o">=</span><span class="n">expectedDownloadPath</span><span class="p">)</span>
+        <span class="n">fakeQBObject</span><span class="o">.</span><span class="n">download_from_link</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span>
+            <span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">(),</span> <span class="n">savepath</span><span class="o">=</span><span class="n">expectedDownloadPath</span><span class="p">)</span>
         <span class="n">loggingInfoMock</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Torrent added: </span><span class="si">{</span><span class="n">fakeTorrent</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 
