@@ -44,6 +44,16 @@ def getTorrentRecords(mediaInfoRecord):
     return None
 
 
+def reportAPIError(response, exception, sendEmail, extraErrorMessage=""):
+
+    errorString = f"Problem with TPB API has occurred. {extraErrorMessage} \n"
+
+    if response and response.content:
+        errorString += f" Received: {response.content}"
+    ErrorController.reportError(errorString, exception, sendEmail)
+    return []
+
+
 def queryAPI(queryTerm):
     
     # create query url
@@ -66,11 +76,10 @@ def queryAPI(queryTerm):
 
         return torrentRecords
 
-    except (JSONDecodeError, ChunkedEncodingError, ConnectionError) as exception:
+    except (ChunkedEncodingError, JSONDecodeError) as exception:
+        return reportAPIError(response, exception, True)
 
-        errorString = "Problem with TPB API has occurred."
+    except (ConnectionError) as exception:
+        extraErrorString = "Torrent API seems down at the moment."
+        return reportAPIError(response, exception, False, extraErrorString)
 
-        if response and response.content:
-            errorString += f" Received: {response.content}"
-        ErrorController.reportError(errorString, exception, True)
-        return []
