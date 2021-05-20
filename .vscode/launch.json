@@ -11,9 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "python": "/home/tom/projects/media_grab/venv-dev/bin/python3.8",
-            "args": [
-                "-m", "tv-episodes"
-            ],
+            "args": [],
             "env": {"PYTHONPATH": "${workspaceRoot}"},
             "envFile": "${workspaceRoot}/.env",
             "justMyCode": false

@@ -10,6 +10,40 @@ from dataTypes.MediaInfoRecord import MediaInfoRecord
 
 class TestQueryGenerationController(unittest.TestCase):
 
+
+    @mock.patch("controllers.QueryGenerationController.generateTVEpisodeQueryGroup")
+    def test_addTVEpisodeQueriesToMediaInfoRecords(self, generateTVEpisodeQueryGroupMock):
+
+        # config fake data
+        fakeMediaInfoRecords = [
+            MediaInfoRecord("fakeMediaInfoShowName1", 1, 2),
+            MediaInfoRecord("fakeMediaInfoShowName2", 3, 4),
+            MediaInfoRecord("fakeMediaInfoShowName3", 5, 6)
+        ]
+        fakeQueries = ["fakeQueryUrl1", "fakeQueryUrl2", "fakeQueryUrl3"]
+
+        # config mocks
+        generateTVEpisodeQueryGroupMock.return_value = fakeQueries
+
+        # run testable function
+        QueryGenerationController.addTVEpisodeQueriesToMediaInfoRecords(
+            fakeMediaInfoRecords)
+
+        # expected values
+        expectedQueryUrls = {
+            "fakeMediaInfoShowName1": fakeQueries,
+            "fakeMediaInfoShowName2": fakeQueries,
+            "fakeMediaInfoShowName3": fakeQueries,
+        }
+
+        actualQueryUrls = {
+            fakeMediaInfoRecord.getShowName(): fakeMediaInfoRecord.getMediaSearchQueries() for fakeMediaInfoRecord in fakeMediaInfoRecords
+        }
+
+        # asserts
+        self.assertEqual(expectedQueryUrls, actualQueryUrls)
+
+
     def test_generateEpisodeQueryGroup(self):
 
         mediaInfoRecord = MediaInfoRecord("rick and morty", 1, 1)
@@ -28,39 +62,6 @@ class TestQueryGenerationController(unittest.TestCase):
         seasonQueryGroup = QueryGenerationController.generateTVEpisodeQueryGroup(name, relevantSeason, relevantEpisode)
 
         self.assertEqual(expectedQueries, seasonQueryGroup)
-
-
-    @mock.patch("controllers.QueryGenerationController.generateTVEpisodeQueryGroup")
-    def test_generateTVEpisodeQueries(self, generateTVEpisodeQueryGroupMock):
-
-        # config fake data
-        fakeMediaInfoRecords = [
-            MediaInfoRecord("fakeMediaInfoShowName1", 1, 2),
-            MediaInfoRecord("fakeMediaInfoShowName2", 3, 4),
-            MediaInfoRecord("fakeMediaInfoShowName3", 5, 6)
-        ]
-        fakeQueries = ["fakeQueryUrl1", "fakeQueryUrl2", "fakeQueryUrl3"]
-
-        # config mocks
-        generateTVEpisodeQueryGroupMock.return_value = fakeQueries
-
-        # run testable function
-        QueryGenerationController.addTVEpisodeQueriesToMediaInfoRecords(fakeMediaInfoRecords)
-
-        # expected values
-        expectedQueryUrls = {
-            "fakeMediaInfoShowName1": fakeQueries,
-            "fakeMediaInfoShowName2": fakeQueries,
-            "fakeMediaInfoShowName3": fakeQueries,
-        }
-
-        actualQueryUrls = {
-            fakeMediaInfoRecord.getShowName(): fakeMediaInfoRecord.getMediaSearchQueries() for fakeMediaInfoRecord in fakeMediaInfoRecords
-        }
-
-        # asserts
-        self.assertEqual(expectedQueryUrls, actualQueryUrls)
-
 
 
 if __name__ == '__main__':

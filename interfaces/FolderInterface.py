@@ -10,33 +10,65 @@ import shutil
 from dataTypes.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
 from controllers import ErrorController
 
-def createDirectory(newDirectoryName):
+
+def createDirectory(newDirectoryPath):
+    """
+    createDirectory attempts to create a directory using the absolute path passed in as a param
+    :testedWith: None - too small to be necessary
+    :param newDirectoryPath: absolute path of new directory
+    :return: bool signalling the success of the operation
+    """
     try:
-        os.mkdir(newDirectoryName)
+        os.mkdir(newDirectoryPath)
         # log action
-        logging.info(f"Created directory: {newDirectoryName}")
+        logging.info(f"Created directory: {newDirectoryPath}")
         return True
-    except:
+    except FileExistsError:
         return False
 
 
-def directoryExists(dirName):
-    return os.path.isdir(dirName)
+def directoryExists(dirPath):
+    """
+    directoryExists checks if directory exists using the absolute path passed in as a param
+    :testedWith: None - too small to be necessary
+    :param newDirectoryPath: absolute path of directory
+    :return: bool signalling whet
+    """
+    return os.path.isdir(dirPath)
 
 
-def fileExists(fileName):
-    return os.path.isfile(fileName)
+def fileExists(filePath):
+    """
+    fileExists checks if file exists using the absolute path passed in as a param
+    :testedWith: None - too small to be necessary
+    :param newDirectoryPath: absolute path of file
+    :return: bool signalling the success of the operation
+    """
+    return os.path.isfile(filePath)
 
 
-def getDirContents(directory):
+def getDirContents(directoryPath):
+    """
+    getDirContents gets all sub-files and sub-directories of the absolute directory path passed in as a param 
+    :testedWith: None - too small to be necessary
+    :param directoryPath: absolute path of the directory
+    :return: list of files and directories
+    """
     try:
-        return list(os.scandir(directory))
+        return list(os.scandir(directoryPath))
     except OSError as exception:
-        ErrorController.reportError(f"Failed to scan {directory} drive is probably inaccessible.", exception, True)
+        ErrorController.reportError(
+            f"Failed to scan {directoryPath} drive is probably inaccessible.", exception, True)
         return []
 
 
 def deleteDir(directoryPath):
+    """
+    deleteDir attempts to delete the directory using the absolute path passed in as a param
+    :testedWith: None - too small to be necessary
+    :param directoryPath: absolute path of the directory
+    :return: bool signalling the success of the operation
+    """
     try:
         shutil.rmtree(directoryPath)
         logging.info(f"Deleted '{directoryPath}'")
@@ -44,7 +76,14 @@ def deleteDir(directoryPath):
         ErrorController.reportError(f"Exception occurred whilst deleting residual directory `{directoryPath}`", exception=exception, sendEmail=True)
         return False
 
+
 def deleteFile(filePath):
+    """
+    deleteFile attempts to delete the file using the absolute path passed in as a param
+    :testedWith: None - too small to be necessary
+    :param filePath: absolute path of the file
+    :return: bool signalling the success of the operation
+    """
     try:
         if os.path.exists(filePath):
             os.remove(filePath)
@@ -60,17 +99,16 @@ def recycleOrDeleteDir(directoryPath):
     """
     recycleDir attempts to move the parent directory containing the rest of the downloaded files to the recycle_bin folder 
         so if the program made an error, the downloaded content still might be recoverable
-
     :testedWith: testCompletedDownloadsController:test_recycleDir
-
     :param fileSystemItem: the directory to be moved to the recycle bin
     :return: bool for success/failure of the move operation
     """
     try:
         # if user has not specified a RECYCLE_BIN_DIR in the .env file then the directory cannot be recycled, it is not critical so it will be deleted
-        if os.getenv("RECYCLE_BIN_DIR") and None: # deactivated for now
+        if "RECYCLE_BIN_DIR" not in os.environ:
             logging.info(f"`RECYCLE_BIN_DIR` env value not specified in .env file so '{directoryPath}' cannot be recycled.")
             deleteDir(directoryPath)
+            return True
 
         recycle_bin_dir = os.getenv("RECYCLE_BIN_DIR")
         shutil.move(directoryPath, recycle_bin_dir)

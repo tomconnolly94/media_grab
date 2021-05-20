@@ -11,13 +11,24 @@ from json.decoder import JSONDecodeError
 from controllers import TorrentFilterController, ErrorController
 from dataTypes.TorrentRecord import TorrentRecord
 
+
 def sortTorrents(torrents):
-    # order torrents by number of seeders
+    """
+    sortTorrents sorts a list of torrentRecord object based on whom has the most seeders
+    :param torrents: list of torrents
+    :testedWith: TestTPBInterface:test_getTorrentRecords
+    :return: sorted list of torrents
+    """
     return sorted(torrents, key=lambda torrent: -1 * torrent.getSeeders())
 
 
 def getTorrentRecords(mediaInfoRecord):
-
+    """
+    getTorrentRecords attempts to find a torrentRecord for the mediaInfoRecord passed in 
+    :param mediaInfoRecord: mediaInfoRecord for which torrent records should be found
+    :testedWith: TestTPBInterface:test_getTorrentRecords
+    :return: sorted and filtered list of torrents
+    """
     # make query for the mediaInfoRecord, if none are found, try the next query format
     for queryStr in mediaInfoRecord.getMediaSearchQueries():
         torrentRecords = queryAPI(queryStr)
@@ -44,8 +55,31 @@ def getTorrentRecords(mediaInfoRecord):
     return None
 
 
+def reportAPIError(response, exception, sendEmail, extraErrorMessage=""):
+    """
+    reportAPIError reports an APIError offering configuration options in the reporting
+    :param response: the response from the http request
+    :param exception: the python exception that was thrown
+    :param sendEmail: bool, whether to send an email for the error
+    :param extraErrorMessage: any extra error info that should be added to the error reports
+    :testedWith: None yet, must be tested
+    :return: empty list
+    """
+    errorString = f"Problem with TPB API has occurred. {extraErrorMessage} \n"
+
+    if response and response.content:
+        errorString += f" Received: {response.content}"
+    ErrorController.reportError(errorString, exception, sendEmail)
+    return []
+
+
 def queryAPI(queryTerm):
-    
+    """
+    queryAPI queries the torrent api with the queryTerm passed in
+    :param queryTerm: the text to be queried for
+    :testedWith: None yet, must be tested
+    :return: all matching torrents as torrentRecords
+    """
     # create query url
     queryUrl = f"https://apibay.org/q.php?q={queryTerm}"
     response = None
@@ -66,11 +100,10 @@ def queryAPI(queryTerm):
 
         return torrentRecords
 
-    except (JSONDecodeError, ChunkedEncodingError, ConnectionError) as exception:
+    except (ChunkedEncodingError, JSONDecodeError) as exception:
+        return reportAPIError(response, exception, True)
 
-        errorString = "Problem with TPB API has occurred."
+    except (ConnectionError) as exception:
+        extraErrorString = "Torrent API seems down at the moment."
+        return reportAPIError(response, exception, False, extraErrorString)
 
-        if response and response.content:
-            errorString += f" Received: {response.content}"
-        ErrorController.reportError(errorString, exception, True)
-        return []

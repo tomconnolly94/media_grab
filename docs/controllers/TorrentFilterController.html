@@ -28,6 +28,9 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
+                    <a class="function" href="#createBlacklistFilterFunc">createBlacklistFilterFunc</a>
+            </li>
+            <li>
                     <a class="function" href="#filterEpisodeTorrents">filterEpisodeTorrents</a>
             </li>
     </ul>
@@ -56,27 +59,58 @@
 <span class="kn">from</span> <span class="nn">num2words</span> <span class="kn">import</span> <span class="n">num2words</span>
 
 
-<span class="k">def</span> <span class="nf">filterEpisodeTorrents</span><span class="p">(</span><span class="n">torrents</span><span class="p">,</span> <span class="n">mediaData</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">createBlacklistFilterFunc</span><span class="p">(</span><span class="n">backlistTerms</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	createBlacklistFilterFunc defines and returns a function that can be passed to a filter call to remove all torrents that contain any of the disallowed blacklistTerms</span>
+<span class="sd">	:testedWith: TestTorrentFilterController:test_createBlacklistFilterFunc</span>
+<span class="sd">	:param blacklistTerms: a list of strings representing terms that the torrent name should not contain</span>
+<span class="sd">	:return: a function that will filter for blacklist terms</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">blacklistFilterFunc</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
 
+		<span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">backlistTerms</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+				<span class="k">return</span> <span class="kc">False</span>
+		<span class="k">return</span> <span class="kc">True</span>
+
+	<span class="k">return</span> <span class="n">blacklistFilterFunc</span>
+
+
+<span class="k">def</span> <span class="nf">filterEpisodeTorrents</span><span class="p">(</span><span class="n">torrents</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	filterEpisodeTorrents applies a set of filters that involve regex matching with the download name and ensuring the number of sources exceeds one</span>
+<span class="sd">	:testedWith: TestTorrentFilterController:filterEpisodeTorrents</span>
+<span class="sd">	:param torrents: a list of potential download items for the mediaInfoRecord to be filtered</span>
+<span class="sd">	:param mediaInfoRecord: the mediaInfoRecord for which the torrents were found</span>
+<span class="sd">	:return: a list of filtered downloads</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">if</span> <span class="ow">not</span> <span class="n">torrents</span><span class="p">:</span>
 		<span class="k">return</span> <span class="p">[]</span>
 		
-	<span class="n">name</span> <span class="o">=</span> <span class="n">mediaData</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span>
+	<span class="n">name</span> <span class="o">=</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span>
 	<span class="n">nameFirstLetter</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 	<span class="n">restOfName</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
 	<span class="n">restOfName</span> <span class="o">=</span> <span class="n">restOfName</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">D*&quot;</span><span class="p">)</span>
-	<span class="n">relevantSeason</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mediaData</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">())</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-	<span class="n">relevantEpisode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mediaData</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">())</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+	<span class="n">relevantSeason</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">())</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+	<span class="n">relevantEpisode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">())</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-	<span class="n">episodeRegex</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">nameFirstLetter</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="n">nameFirstLetter</span><span class="si">}</span><span class="s2">]</span><span class="si">{</span><span class="n">restOfName</span><span class="si">}</span><span class="s2">\D*[Ss]</span><span class="si">{</span><span class="n">relevantSeason</span><span class="si">}</span><span class="s2">[Ee]</span><span class="si">{</span><span class="n">relevantEpisode</span><span class="si">}</span><span class="s2">&quot;</span>
+	<span class="n">episodeRegex</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nameFirstLetter</span><span class="si">}{</span><span class="n">restOfName</span><span class="si">}</span><span class="s2">\D*[Ss]</span><span class="si">{</span><span class="n">relevantSeason</span><span class="si">}</span><span class="s2">[Ee]</span><span class="si">{</span><span class="n">relevantEpisode</span><span class="si">}</span><span class="s2">&quot;</span>
 	<span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Regex filter used: </span><span class="si">{</span><span class="n">episodeRegex</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 	<span class="n">episodeRegex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">episodeRegex</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
 	
 	<span class="n">torrentTitles</span> <span class="o">=</span> <span class="p">[</span> <span class="n">torrent</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="k">for</span> <span class="n">torrent</span> <span class="ow">in</span> <span class="n">torrents</span> <span class="p">]</span>
 	<span class="n">filteredTorrentTitles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">episodeRegex</span><span class="o">.</span><span class="n">search</span><span class="p">,</span> <span class="n">torrentTitles</span><span class="p">))</span>
+
+	<span class="n">blacklistFilterFunc</span> <span class="o">=</span> <span class="n">createBlacklistFilterFunc</span><span class="p">(</span>
+		<span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getBlacklistTerms</span><span class="p">())</span>
+
+	<span class="c1"># apply blacklist filters to torrent names to avoid any unwanted terms</span>
+	<span class="n">filteredTorrentTitles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+		<span class="nb">filter</span><span class="p">(</span><span class="n">blacklistFilterFunc</span><span class="p">,</span> <span class="n">filteredTorrentTitles</span><span class="p">))</span>
 	
     <span class="c1"># get a list of filtered in torrent items</span>
-	<span class="n">filteredTorrents</span> <span class="o">=</span> <span class="p">[</span> <span class="n">torrent</span> <span class="k">for</span> <span class="n">torrent</span> <span class="ow">in</span> <span class="n">torrents</span> <span class="k">if</span> <span class="n">torrent</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="ow">in</span> <span class="n">filteredTorrentTitles</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">torrent</span><span class="o">.</span><span class="n">getSeeders</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">]</span>
+	<span class="n">filteredTorrents</span> <span class="o">=</span> <span class="p">[</span><span class="n">torrent</span> <span class="k">for</span> <span class="n">torrent</span> <span class="ow">in</span> <span class="n">torrents</span> <span class="k">if</span> <span class="n">torrent</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span>
+	<span class="p">)</span> <span class="ow">in</span> <span class="n">filteredTorrentTitles</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">torrent</span><span class="o">.</span><span class="n">getSeeders</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">]</span>
 
 	<span class="k">return</span> <span class="n">filteredTorrents</span>
 </pre></div>
@@ -84,44 +118,101 @@
         </details>
 
             </section>
+                <section id="createBlacklistFilterFunc">
+                            <div class="attr function"><a class="headerlink" href="#createBlacklistFilterFunc">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">createBlacklistFilterFunc</span><span class="signature">(backlistTerms)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">createBlacklistFilterFunc</span><span class="p">(</span><span class="n">backlistTerms</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	createBlacklistFilterFunc defines and returns a function that can be passed to a filter call to remove all torrents that contain any of the disallowed blacklistTerms</span>
+<span class="sd">	:testedWith: TestTorrentFilterController:test_createBlacklistFilterFunc</span>
+<span class="sd">	:param blacklistTerms: a list of strings representing terms that the torrent name should not contain</span>
+<span class="sd">	:return: a function that will filter for blacklist terms</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">blacklistFilterFunc</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+
+		<span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">backlistTerms</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+				<span class="k">return</span> <span class="kc">False</span>
+		<span class="k">return</span> <span class="kc">True</span>
+
+	<span class="k">return</span> <span class="n">blacklistFilterFunc</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>createBlacklistFilterFunc defines and returns a function that can be passed to a filter call to remove all torrents that contain any of the disallowed blacklistTerms
+:testedWith: TestTorrentFilterController:test_createBlacklistFilterFunc
+:param blacklistTerms: a list of strings representing terms that the torrent name should not contain
+:return: a function that will filter for blacklist terms</p>
+</div>
+
+
+                </section>
                 <section id="filterEpisodeTorrents">
                             <div class="attr function"><a class="headerlink" href="#filterEpisodeTorrents">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">filterEpisodeTorrents</span><span class="signature">(torrents, mediaData)</span>:
+            <span class="name">filterEpisodeTorrents</span><span class="signature">(torrents, mediaInfoRecord)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">filterEpisodeTorrents</span><span class="p">(</span><span class="n">torrents</span><span class="p">,</span> <span class="n">mediaData</span><span class="p">):</span>
-
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">filterEpisodeTorrents</span><span class="p">(</span><span class="n">torrents</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	filterEpisodeTorrents applies a set of filters that involve regex matching with the download name and ensuring the number of sources exceeds one</span>
+<span class="sd">	:testedWith: TestTorrentFilterController:filterEpisodeTorrents</span>
+<span class="sd">	:param torrents: a list of potential download items for the mediaInfoRecord to be filtered</span>
+<span class="sd">	:param mediaInfoRecord: the mediaInfoRecord for which the torrents were found</span>
+<span class="sd">	:return: a list of filtered downloads</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">if</span> <span class="ow">not</span> <span class="n">torrents</span><span class="p">:</span>
 		<span class="k">return</span> <span class="p">[]</span>
 		
-	<span class="n">name</span> <span class="o">=</span> <span class="n">mediaData</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span>
+	<span class="n">name</span> <span class="o">=</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getShowName</span><span class="p">()</span>
 	<span class="n">nameFirstLetter</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 	<span class="n">restOfName</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
 	<span class="n">restOfName</span> <span class="o">=</span> <span class="n">restOfName</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">D*&quot;</span><span class="p">)</span>
-	<span class="n">relevantSeason</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mediaData</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">())</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-	<span class="n">relevantEpisode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mediaData</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">())</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+	<span class="n">relevantSeason</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestSeasonNumber</span><span class="p">())</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+	<span class="n">relevantEpisode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getLatestEpisodeNumber</span><span class="p">())</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-	<span class="n">episodeRegex</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">nameFirstLetter</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="n">nameFirstLetter</span><span class="si">}</span><span class="s2">]</span><span class="si">{</span><span class="n">restOfName</span><span class="si">}</span><span class="s2">\D*[Ss]</span><span class="si">{</span><span class="n">relevantSeason</span><span class="si">}</span><span class="s2">[Ee]</span><span class="si">{</span><span class="n">relevantEpisode</span><span class="si">}</span><span class="s2">&quot;</span>
+	<span class="n">episodeRegex</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nameFirstLetter</span><span class="si">}{</span><span class="n">restOfName</span><span class="si">}</span><span class="s2">\D*[Ss]</span><span class="si">{</span><span class="n">relevantSeason</span><span class="si">}</span><span class="s2">[Ee]</span><span class="si">{</span><span class="n">relevantEpisode</span><span class="si">}</span><span class="s2">&quot;</span>
 	<span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Regex filter used: </span><span class="si">{</span><span class="n">episodeRegex</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 	<span class="n">episodeRegex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">episodeRegex</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
 	
 	<span class="n">torrentTitles</span> <span class="o">=</span> <span class="p">[</span> <span class="n">torrent</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="k">for</span> <span class="n">torrent</span> <span class="ow">in</span> <span class="n">torrents</span> <span class="p">]</span>
 	<span class="n">filteredTorrentTitles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">episodeRegex</span><span class="o">.</span><span class="n">search</span><span class="p">,</span> <span class="n">torrentTitles</span><span class="p">))</span>
+
+	<span class="n">blacklistFilterFunc</span> <span class="o">=</span> <span class="n">createBlacklistFilterFunc</span><span class="p">(</span>
+		<span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getBlacklistTerms</span><span class="p">())</span>
+
+	<span class="c1"># apply blacklist filters to torrent names to avoid any unwanted terms</span>
+	<span class="n">filteredTorrentTitles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+		<span class="nb">filter</span><span class="p">(</span><span class="n">blacklistFilterFunc</span><span class="p">,</span> <span class="n">filteredTorrentTitles</span><span class="p">))</span>
 	
     <span class="c1"># get a list of filtered in torrent items</span>
-	<span class="n">filteredTorrents</span> <span class="o">=</span> <span class="p">[</span> <span class="n">torrent</span> <span class="k">for</span> <span class="n">torrent</span> <span class="ow">in</span> <span class="n">torrents</span> <span class="k">if</span> <span class="n">torrent</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="ow">in</span> <span class="n">filteredTorrentTitles</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">torrent</span><span class="o">.</span><span class="n">getSeeders</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">]</span>
+	<span class="n">filteredTorrents</span> <span class="o">=</span> <span class="p">[</span><span class="n">torrent</span> <span class="k">for</span> <span class="n">torrent</span> <span class="ow">in</span> <span class="n">torrents</span> <span class="k">if</span> <span class="n">torrent</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span>
+	<span class="p">)</span> <span class="ow">in</span> <span class="n">filteredTorrentTitles</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">torrent</span><span class="o">.</span><span class="n">getSeeders</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">]</span>
 
 	<span class="k">return</span> <span class="n">filteredTorrents</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>filterEpisodeTorrents applies a set of filters that involve regex matching with the download name and ensuring the number of sources exceeds one
+:testedWith: TestTorrentFilterController:filterEpisodeTorrents
+:param torrents: a list of potential download items for the mediaInfoRecord to be filtered
+:param mediaInfoRecord: the mediaInfoRecord for which the torrents were found
+:return: a list of filtered downloads</p>
+</div>
+
 
                 </section>
     </main>

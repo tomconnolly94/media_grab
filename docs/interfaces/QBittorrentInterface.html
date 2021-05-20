@@ -42,6 +42,9 @@
                         <li>
                                 <a class="function" href="#QBittorrentInterface.pauseTorrent">pauseTorrent</a>
                         </li>
+                        <li>
+                                <a class="function" href="#QBittorrentInterface.overrideQBObject">overrideQBObject</a>
+                        </li>
                 </ul>
 
             </li>
@@ -76,7 +79,14 @@
 <span class="n">qBittorrentInterfaceInstance</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="c1"># implement singleton pattern</span>
+
+
 <span class="k">def</span> <span class="nf">getInstance</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    getInstance creates/accesses the singleton instance of QBittorrentInterface</span>
+<span class="sd">    :testedWith: None - glue code</span>
+<span class="sd">    :return: singleton instance of QBittorrentInterface</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">qBittorrentInterfaceInstance</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">qBittorrentInterfaceInstance</span><span class="p">:</span>
         <span class="n">qBittorrentInterfaceInstance</span> <span class="o">=</span> <span class="n">QBittorrentInterface</span><span class="p">()</span>
@@ -85,22 +95,32 @@
 
 <span class="k">class</span> <span class="nc">QBittorrentInterface</span><span class="p">():</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dumpCompleteDir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dumpCompleteDir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qbittorrentClient</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        __init__ initialises a QBittorrentInterface object, creating a client object</span>
+<span class="sd">        :testedWith: TestCompletedDownloadsController:test_initTorrentDownload</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">qbtUrl</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;QBT_URL&#39;</span><span class="p">)</span>
 
+
         <span class="k">if</span> <span class="n">qbtUrl</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">qb</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">qbtUrl</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">qbtUrl</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             
         <span class="bp">self</span><span class="o">.</span><span class="n">dumpCompleteDir</span> <span class="o">=</span> <span class="n">dumpCompleteDir</span> <span class="k">if</span> <span class="n">dumpCompleteDir</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DUMP_COMPLETE_DIR&quot;</span><span class="p">)</span>
 
-
     <span class="k">def</span> <span class="nf">initTorrentDownload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="p">):</span>
-        <span class="n">downloadPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dumpCompleteDir</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getMediaGrabId</span><span class="p">())</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        initTorrentDownload extracts a magnet link from a mediaInfoRecord and submits it to qBittorrent for downloading</span>
+<span class="sd">        :testedWith: TestQBittorrentInterface:test_initTorrentDownload</span>
+<span class="sd">        :return: the success/failure of the operation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">downloadPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dumpCompleteDir</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getMediaGrabId</span><span class="p">())</span>
         <span class="n">torrentRecord</span> <span class="o">=</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getTorrentRecord</span><span class="p">()</span>
         
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">qbittorrentResponse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">download_from_link</span><span class="p">(</span><span class="n">torrentRecord</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">(),</span> <span class="n">savepath</span><span class="o">=</span><span class="n">downloadPath</span><span class="p">)</span>
+            <span class="n">qbittorrentResponse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span><span class="o">.</span><span class="n">download_from_link</span><span class="p">(</span><span class="n">torrentRecord</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">(),</span> <span class="n">savepath</span><span class="o">=</span><span class="n">downloadPath</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">qbittorrentResponse</span> <span class="o">==</span> <span class="s2">&quot;Ok.&quot;</span><span class="p">:</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Torrent added: </span><span class="si">{</span><span class="n">torrentRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">True</span>
@@ -109,15 +129,27 @@
             <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="s2">&quot;Exception occurred when submitting torrent magnet to qbittorrent&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-
     <span class="k">def</span> <span class="nf">pauseTorrent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">torrentName</span><span class="p">):</span>
-        <span class="n">torrents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">torrents</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        pauseTorrent requests that qBittorrent pause activity on a torrent found by name</span>
+<span class="sd">        :testedWith: None - too small to be necessary</span>
+<span class="sd">        :return: the success/failure of the operation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">torrents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span><span class="o">.</span><span class="n">torrents</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">torrent</span> <span class="ow">in</span> <span class="n">torrents</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">torrent</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">torrentName</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">torrent</span><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">torrent</span><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">])</span>
                 <span class="k">return</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">overrideQBObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overrideValue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        overrideQBObject injects a value to be set as the self.__qb object, useful for testing</span>
+<span class="sd">        :testedWith: None - too small to be necessary</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span> <span class="o">=</span> <span class="n">overrideValue</span>
 </pre></div>
 
         </details>
@@ -134,6 +166,11 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getInstance</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    getInstance creates/accesses the singleton instance of QBittorrentInterface</span>
+<span class="sd">    :testedWith: None - glue code</span>
+<span class="sd">    :return: singleton instance of QBittorrentInterface</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">qBittorrentInterfaceInstance</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">qBittorrentInterfaceInstance</span><span class="p">:</span>
         <span class="n">qBittorrentInterfaceInstance</span> <span class="o">=</span> <span class="n">QBittorrentInterface</span><span class="p">()</span>
@@ -142,7 +179,11 @@
 
         </details>
 
-    
+            <div class="docstring"><p>getInstance creates/accesses the singleton instance of QBittorrentInterface
+:testedWith: None - glue code
+:return: singleton instance of QBittorrentInterface</p>
+</div>
+
 
                 </section>
                 <section id="QBittorrentInterface">
@@ -158,22 +199,32 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">QBittorrentInterface</span><span class="p">():</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dumpCompleteDir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dumpCompleteDir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qbittorrentClient</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        __init__ initialises a QBittorrentInterface object, creating a client object</span>
+<span class="sd">        :testedWith: TestCompletedDownloadsController:test_initTorrentDownload</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">qbtUrl</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;QBT_URL&#39;</span><span class="p">)</span>
 
+
         <span class="k">if</span> <span class="n">qbtUrl</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">qb</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">qbtUrl</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">qbtUrl</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             
         <span class="bp">self</span><span class="o">.</span><span class="n">dumpCompleteDir</span> <span class="o">=</span> <span class="n">dumpCompleteDir</span> <span class="k">if</span> <span class="n">dumpCompleteDir</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DUMP_COMPLETE_DIR&quot;</span><span class="p">)</span>
 
-
     <span class="k">def</span> <span class="nf">initTorrentDownload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="p">):</span>
-        <span class="n">downloadPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dumpCompleteDir</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getMediaGrabId</span><span class="p">())</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        initTorrentDownload extracts a magnet link from a mediaInfoRecord and submits it to qBittorrent for downloading</span>
+<span class="sd">        :testedWith: TestQBittorrentInterface:test_initTorrentDownload</span>
+<span class="sd">        :return: the success/failure of the operation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">downloadPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dumpCompleteDir</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getMediaGrabId</span><span class="p">())</span>
         <span class="n">torrentRecord</span> <span class="o">=</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getTorrentRecord</span><span class="p">()</span>
         
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">qbittorrentResponse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">download_from_link</span><span class="p">(</span><span class="n">torrentRecord</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">(),</span> <span class="n">savepath</span><span class="o">=</span><span class="n">downloadPath</span><span class="p">)</span>
+            <span class="n">qbittorrentResponse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span><span class="o">.</span><span class="n">download_from_link</span><span class="p">(</span><span class="n">torrentRecord</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">(),</span> <span class="n">savepath</span><span class="o">=</span><span class="n">downloadPath</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">qbittorrentResponse</span> <span class="o">==</span> <span class="s2">&quot;Ok.&quot;</span><span class="p">:</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Torrent added: </span><span class="si">{</span><span class="n">torrentRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">True</span>
@@ -182,15 +233,27 @@
             <span class="n">ErrorController</span><span class="o">.</span><span class="n">reportError</span><span class="p">(</span><span class="s2">&quot;Exception occurred when submitting torrent magnet to qbittorrent&quot;</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="n">exception</span><span class="p">,</span> <span class="n">sendEmail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-
     <span class="k">def</span> <span class="nf">pauseTorrent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">torrentName</span><span class="p">):</span>
-        <span class="n">torrents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">torrents</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        pauseTorrent requests that qBittorrent pause activity on a torrent found by name</span>
+<span class="sd">        :testedWith: None - too small to be necessary</span>
+<span class="sd">        :return: the success/failure of the operation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">torrents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span><span class="o">.</span><span class="n">torrents</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">torrent</span> <span class="ow">in</span> <span class="n">torrents</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">torrent</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">torrentName</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">torrent</span><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">torrent</span><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">])</span>
                 <span class="k">return</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">overrideQBObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overrideValue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        overrideQBObject injects a value to be set as the self.__qb object, useful for testing</span>
+<span class="sd">        :testedWith: None - too small to be necessary</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span> <span class="o">=</span> <span class="n">overrideValue</span>
 </pre></div>
 
         </details>
@@ -201,22 +264,32 @@
                                         <div class="attr function"><a class="headerlink" href="#QBittorrentInterface.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">QBittorrentInterface</span><span class="signature">(dumpCompleteDir=None)</span>    </div>
+            <span class="name">QBittorrentInterface</span><span class="signature">(dumpCompleteDir=None, qbittorrentClient=None)</span>    </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dumpCompleteDir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dumpCompleteDir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qbittorrentClient</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        __init__ initialises a QBittorrentInterface object, creating a client object</span>
+<span class="sd">        :testedWith: TestCompletedDownloadsController:test_initTorrentDownload</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">qbtUrl</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;QBT_URL&#39;</span><span class="p">)</span>
 
+
         <span class="k">if</span> <span class="n">qbtUrl</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">qb</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">qbtUrl</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">qbtUrl</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             
         <span class="bp">self</span><span class="o">.</span><span class="n">dumpCompleteDir</span> <span class="o">=</span> <span class="n">dumpCompleteDir</span> <span class="k">if</span> <span class="n">dumpCompleteDir</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DUMP_COMPLETE_DIR&quot;</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>__init__ initialises a QBittorrentInterface object, creating a client object
+:testedWith: TestCompletedDownloadsController:test_initTorrentDownload
+:return: None</p>
+</div>
+
 
                             </div>
                             <div id="QBittorrentInterface.initTorrentDownload" class="classattr">
@@ -230,11 +303,17 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">initTorrentDownload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="p">):</span>
-        <span class="n">downloadPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dumpCompleteDir</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getMediaGrabId</span><span class="p">())</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        initTorrentDownload extracts a magnet link from a mediaInfoRecord and submits it to qBittorrent for downloading</span>
+<span class="sd">        :testedWith: TestQBittorrentInterface:test_initTorrentDownload</span>
+<span class="sd">        :return: the success/failure of the operation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">downloadPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dumpCompleteDir</span><span class="p">,</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getMediaGrabId</span><span class="p">())</span>
         <span class="n">torrentRecord</span> <span class="o">=</span> <span class="n">mediaInfoRecord</span><span class="o">.</span><span class="n">getTorrentRecord</span><span class="p">()</span>
         
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">qbittorrentResponse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">download_from_link</span><span class="p">(</span><span class="n">torrentRecord</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">(),</span> <span class="n">savepath</span><span class="o">=</span><span class="n">downloadPath</span><span class="p">)</span>
+            <span class="n">qbittorrentResponse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span><span class="o">.</span><span class="n">download_from_link</span><span class="p">(</span><span class="n">torrentRecord</span><span class="o">.</span><span class="n">getMagnet</span><span class="p">(),</span> <span class="n">savepath</span><span class="o">=</span><span class="n">downloadPath</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">qbittorrentResponse</span> <span class="o">==</span> <span class="s2">&quot;Ok.&quot;</span><span class="p">:</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Torrent added: </span><span class="si">{</span><span class="n">torrentRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">True</span>
@@ -246,7 +325,11 @@
 
         </details>
 
-    
+            <div class="docstring"><p>initTorrentDownload extracts a magnet link from a mediaInfoRecord and submits it to qBittorrent for downloading
+:testedWith: TestQBittorrentInterface:test_initTorrentDownload
+:return: the success/failure of the operation</p>
+</div>
+
 
                             </div>
                             <div id="QBittorrentInterface.pauseTorrent" class="classattr">
@@ -260,18 +343,55 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">pauseTorrent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">torrentName</span><span class="p">):</span>
-        <span class="n">torrents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">torrents</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        pauseTorrent requests that qBittorrent pause activity on a torrent found by name</span>
+<span class="sd">        :testedWith: None - too small to be necessary</span>
+<span class="sd">        :return: the success/failure of the operation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">torrents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span><span class="o">.</span><span class="n">torrents</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">torrent</span> <span class="ow">in</span> <span class="n">torrents</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">torrent</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">torrentName</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">torrent</span><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">torrent</span><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">])</span>
                 <span class="k">return</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="kc">False</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>pauseTorrent requests that qBittorrent pause activity on a torrent found by name
+:testedWith: None - too small to be necessary
+:return: the success/failure of the operation</p>
+</div>
+
+
+                            </div>
+                            <div id="QBittorrentInterface.overrideQBObject" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#QBittorrentInterface.overrideQBObject">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">overrideQBObject</span><span class="signature">(self, overrideValue)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">overrideQBObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overrideValue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        overrideQBObject injects a value to be set as the self.__qb object, useful for testing</span>
+<span class="sd">        :testedWith: None - too small to be necessary</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__qb</span> <span class="o">=</span> <span class="n">overrideValue</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>overrideQBObject injects a value to be set as the self.__qb object, useful for testing
+:testedWith: None - too small to be necessary
+:return: None</p>
+</div>
+
 
                             </div>
                 </section>
