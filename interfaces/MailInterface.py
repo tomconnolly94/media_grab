@@ -122,7 +122,7 @@ class MailInterface():
             return True
         else:
             return self.__sendMail(singleNewTorrentMessage, messageBody)
-    
+
     def sendAllCollatedMailItems(self):
         """
         sendAllCollatedMailItems formats all submitted mail items into one large email and sends that email
@@ -146,13 +146,9 @@ class MailInterface():
             else:
                 ErrorController.reportError(f"MailItemType: {mailItem.getMailItemType()} not handled!")
                 return False
-        
+
         if numNewTorrentMessages > 0:
-<<<<<<< HEAD
-            firstTorrentNameChunk = f"{newTorrentMailMessages[:40]}..."
-=======
             firstTorrentNameChunk = f"{newTorrentMailMessages[0][:40]}..."
->>>>>>> develop
             multiTorrentMessage = f"{multipleNewTorrentsMessage} - {firstTorrentNameChunk}"
             singleTorrentMessage = f"{singleNewTorrentMessage} - {firstTorrentNameChunk}"
 
