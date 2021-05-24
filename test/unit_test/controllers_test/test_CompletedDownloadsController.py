@@ -688,8 +688,6 @@ class TestCompletedDownloadsController(unittest.TestCase):
 
             # run auditDumpCompleteDir
             CompletedDownloadsController.auditDumpCompleteDir()
-
-            expectedNumItems = len(downloadingItems) - 1
             # assert that the contents of downloadingItems has been moved from the `dummy_directories/dump_complete` directory to the `dummy_directories/tv` directory
             self.assertEqual(4, len(list(os.scandir(os.path.join(
                 fakeTargetTvDir, expectedTvShowName, "Season 1")))))
@@ -702,7 +700,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         finally:
             # clean up moved files
             cleanUpDirs(directoriesToCleanUp, downloadingItems)
-
+            
     @mock.patch('interfaces.FolderInterface.deleteFile')
     @mock.patch('interfaces.FolderInterface.deleteDir')
     @mock.patch('os.path.getctime')

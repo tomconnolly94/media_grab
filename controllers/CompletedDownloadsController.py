@@ -328,9 +328,6 @@ def auditFileSystemItemsForEpisodes():
     fileSystemItemsFromDirectory = FolderInterface.getDirContents(dumpCompleteDir)
     logging.info(f"Items in dump_complete directory: {[item.name for item in fileSystemItemsFromDirectory] }")
 
-    mediaGrabInitiatedDownloads = []
-    manuallyInitiatedDownloads = []
-
     # divide the directories into two lists, those initiated by mediaGrab and those initiated manually
     for fileSystemItem in fileSystemItemsFromDirectory:
         auditFileSystemItemForEpisode(fileSystemItem)

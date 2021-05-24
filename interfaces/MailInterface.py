@@ -148,7 +148,7 @@ class MailInterface():
                 return False
         
         if numNewTorrentMessages > 0:
-            firstTorrentNameSlice = f"{newTorrentMailMessages[0][:40]}..."
+            firstTorrentNameChunk = f"{newTorrentMailMessages[0][:40]}..."
             multiTorrentMessage = f"{multipleNewTorrentsMessage} - {firstTorrentNameChunk}"
             singleTorrentMessage = f"{singleNewTorrentMessage} - {firstTorrentNameChunk}"
 
