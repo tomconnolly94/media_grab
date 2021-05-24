@@ -2,7 +2,7 @@
     "python.testing.unittestArgs": [
         "-v",
         "-s",
-        "/home/tom/projects/media_grab/test",
+        "./test",
         "-p",
         "test_*.py"
     ],
