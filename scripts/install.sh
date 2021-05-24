@@ -20,7 +20,6 @@ QBT_URL=http://127.0.0.1:8081
 QBT_USERNAME=admin
 QBT_PASSWORD=qbt_password
 MEDIA_FILE=data/MediaIndex.json
-DOWNLOADS_IN_PROGRESS_FILE=data/DownloadsInProgress.json
 MAIL_USERNAME=app.dev.notifications.tc@gmail.com
 MAIL_PASSWORD=mail_password
 ENVIRONMENT=production
@@ -36,7 +35,6 @@ touch $BASEDIR/data/MediaIndex.json
 cat >$BASEDIR/data/MediaIndex.json <<EOL
 {"media": []}
 EOL
-
 
 # create logs directory
 mkdir $BASEDIR/logs
