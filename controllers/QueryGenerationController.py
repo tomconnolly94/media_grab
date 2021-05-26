@@ -28,10 +28,13 @@ def addTVEpisodeQueriesToMediaInfoRecords(mediaInfoRecords):
 	:param mediaInfoRecords: a list of mediaInfoRecords 
 	:return: None
 	"""
-	queryUrls = {}
+	
 	for record in mediaInfoRecords:
-		record.setMediaSearchQueries(generateTVEpisodeQueryGroup(record.getShowName(
-		), record.getLatestSeasonNumber(), record.getLatestEpisodeNumber()))
+
+		seasonQueries = generateTVSeasonQuery(record.getShowName(), record.getLatestSeasonNumber()) if record.getLatestEpisodeNumber() == 1 else []
+		episodeQueries = generateTVEpisodeQueryGroup(record.getShowName(), record.getLatestSeasonNumber(), record.getLatestEpisodeNumber())
+
+		record.setMediaSearchQueries(seasonQueries + episodeQueries)
 
 
 def generateTVEpisodeQueryGroup(mediaName, relevantSeason, relevantEpisode):
@@ -51,5 +54,27 @@ def generateTVEpisodeQueryGroup(mediaName, relevantSeason, relevantEpisode):
 			queries.append(f'"{mediaName}" {seasonTemplates[index]}{relevantSeason} {template}{relevantEpisode}')
 		else:
 			queries.append(f'"{mediaName}" {seasonTemplates[index]}{relevantSeason:>02}{template}{relevantEpisode:>02}') # force season number to two digits, e.g. "1" -> "01"
+
+	return queries
+
+def generateTVSeasonQuery(mediaName, relevantSeason):
+	"""
+	generateTVSeasonQuery for the input mediaName and the relevant season, use the query templates to generate query strings that are likely to return torrent results for a full season
+	:testedWith: none yet
+	:param mediaName: the name of the media
+	:param relevantSeason: the season number
+	:return: a list of query strings
+	"""
+	queries = []
+
+	for template in seasonTemplates[2:]:
+		# create search url
+		if " " in template:
+			queries.append(
+				f'"{mediaName}" {template}{relevantSeason}')
+		else:
+			# force season number to two digits, e.g. "1" -> "01"
+			queries.append(
+				f'"{mediaName}" {template}{relevantSeason:>02}')
 
 	return queries

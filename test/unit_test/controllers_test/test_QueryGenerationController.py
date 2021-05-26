@@ -10,20 +10,25 @@ from dataTypes.MediaInfoRecord import MediaInfoRecord
 
 class TestQueryGenerationController(unittest.TestCase):
 
-
+    @mock.patch("controllers.QueryGenerationController.generateTVSeasonQuery")
     @mock.patch("controllers.QueryGenerationController.generateTVEpisodeQueryGroup")
-    def test_addTVEpisodeQueriesToMediaInfoRecords(self, generateTVEpisodeQueryGroupMock):
+    def test_addTVEpisodeQueriesToMediaInfoRecords(self, generateTVEpisodeQueryGroupMock, generateTVSeasonQueryMock):
 
         # config fake data
         fakeMediaInfoRecords = [
             MediaInfoRecord("fakeMediaInfoShowName1", 1, 2),
             MediaInfoRecord("fakeMediaInfoShowName2", 3, 4),
-            MediaInfoRecord("fakeMediaInfoShowName3", 5, 6)
+            MediaInfoRecord("fakeMediaInfoShowName3", 5, 6),
+            MediaInfoRecord("fakeMediaInfoShowName4", 1, 1)
         ]
-        fakeQueries = ["fakeQueryUrl1", "fakeQueryUrl2", "fakeQueryUrl3"]
+        fakeEpisodeQueries = ["fakeEpisodeQueryUrl1",
+                              "fakeEpisodeQueryUrl2", "fakeEpisodeQueryUrl3"]
+        fakeSeasonQueries = ["fakeSeasonQueryUrl1",
+                             "fakeSeasonQueryUrl2", "fakeSeasonQueryUrl3"]
 
         # config mocks
-        generateTVEpisodeQueryGroupMock.return_value = fakeQueries
+        generateTVEpisodeQueryGroupMock.return_value = fakeEpisodeQueries
+        generateTVSeasonQueryMock.return_value = fakeSeasonQueries
 
         # run testable function
         QueryGenerationController.addTVEpisodeQueriesToMediaInfoRecords(
@@ -31,9 +36,10 @@ class TestQueryGenerationController(unittest.TestCase):
 
         # expected values
         expectedQueryUrls = {
-            "fakeMediaInfoShowName1": fakeQueries,
-            "fakeMediaInfoShowName2": fakeQueries,
-            "fakeMediaInfoShowName3": fakeQueries,
+            "fakeMediaInfoShowName1": fakeEpisodeQueries,
+            "fakeMediaInfoShowName2": fakeEpisodeQueries,
+            "fakeMediaInfoShowName3": fakeEpisodeQueries,
+            "fakeMediaInfoShowName4": fakeSeasonQueries + fakeEpisodeQueries
         }
 
         actualQueryUrls = {
