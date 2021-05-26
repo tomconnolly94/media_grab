@@ -321,7 +321,7 @@ def auditFileSystemItemsForEpisodes():
     """
     # auditing is not necessary if the optional env "TV_TARGET_DIR" is not provided
     if "TV_TARGET_DIR" not in os.environ:
-        return
+        return "nope"
 
     logging.info("File auditing started.")
     dumpCompleteDir = os.getenv("DUMP_COMPLETE_DIR")
@@ -332,7 +332,6 @@ def auditFileSystemItemsForEpisodes():
     for fileSystemItem in fileSystemItemsFromDirectory:
         auditFileSystemItemForEpisode(fileSystemItem)
 
-
 def auditDumpCompleteDir():
     """
     auditDumpCompleteDir wrapper, entry function to this module to collate all operations necessary for download directory auditing
@@ -340,9 +339,10 @@ def auditDumpCompleteDir():
     :return: None
     """
     # look for episodes
-    auditFileSystemItemsForEpisodes()
+    output = auditFileSystemItemsForEpisodes()
     # deal with expired recycled items and logs
     permanentlyDeleteExpiredItems()
+    return output
 
 
 def permanentlyDeleteExpiredItems():

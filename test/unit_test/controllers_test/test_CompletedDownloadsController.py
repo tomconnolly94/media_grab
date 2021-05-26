@@ -608,18 +608,21 @@ class TestCompletedDownloadsController(unittest.TestCase):
     @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
     @mock.patch("controllers.CompletedDownloadsController.auditFileSystemItemForEpisode")
     @mock.patch("interfaces.FolderInterface.getDirContents")
+    @mock.patch('os.getenv')
     @mock.patch("logging.info")
-    def test_auditFileSystemItemsForEpisodes(self, loggingInfoMock, getDirContentsMock, auditFileSystemItemForEpisodeMock, downloadWasInitiatedByMediaGrabMock):
+    def test_auditFileSystemItemsForEpisodes(self, loggingInfoMock, getEnvMock, getDirContentsMock, auditFileSystemItemForEpisodeMock, downloadWasInitiatedByMediaGrabMock):
 
         # config fake data
         fakeDirName = "fakeDirName1"
         fakeFileSystemItems = [
             FakeFileSystemItem(fakeDirName, "fakeName1")
         ]
+        os.environ["TV_TARGET_DIR"] = fakeTargetTvDir
 
         # config mocks
         getDirContentsMock.return_value = fakeFileSystemItems
         downloadWasInitiatedByMediaGrabMock.return_value = True
+        getEnvMock.side_effect = getEnvMockFunc
 
         CompletedDownloadsController.auditFileSystemItemsForEpisodes()
 
@@ -658,6 +661,8 @@ class TestCompletedDownloadsController(unittest.TestCase):
         # assign mocked instance to return_value for mocked getInstance()
         qBittorrentInterfaceGetInstanceMock.return_value = qBittorrentInterfaceInstanceMock
         qBittorrentInterfaceInstanceMock.qBittorrentInterfaceInstanceMock.pauseTorrent.return_value = True
+        os.environ["TV_TARGET_DIR"] = fakeTargetTvDir
+        os.environ["RECYCLE_BIN_DIR"] = fakeRecycleBinDir
 
         # config mocks
         getEnvMock.side_effect = getEnvMockFunc
@@ -688,6 +693,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
 
             # run auditDumpCompleteDir
             CompletedDownloadsController.auditDumpCompleteDir()
+            
             # assert that the contents of downloadingItems has been moved from the `dummy_directories/dump_complete` directory to the `dummy_directories/tv` directory
             self.assertEqual(4, len(list(os.scandir(os.path.join(
                 fakeTargetTvDir, expectedTvShowName, "Season 1")))))
@@ -700,7 +706,8 @@ class TestCompletedDownloadsController(unittest.TestCase):
         finally:
             # clean up moved files
             cleanUpDirs(directoriesToCleanUp, downloadingItems)
-            
+            #pass
+                        
     @mock.patch('interfaces.FolderInterface.deleteFile')
     @mock.patch('interfaces.FolderInterface.deleteDir')
     @mock.patch('os.path.getctime')
