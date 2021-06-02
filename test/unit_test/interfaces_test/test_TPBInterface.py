@@ -14,10 +14,10 @@ from dataTypes.TorrentRecord import TorrentRecord
 
 class TestTPBInterface(unittest.TestCase):
 
-    @mock.patch("controllers.TorrentFilterController.filterEpisodeTorrents")
+    @mock.patch("controllers.TorrentFilterController.filterTorrents")
     @mock.patch("logging.info")
     @mock.patch("interfaces.TPBInterface.queryAPI")
-    def test_getTorrentRecords(self, queryMock, loggingInfoMock, filterEpisodeTorrentsMock):
+    def test_getTorrentRecords(self, queryMock, loggingInfoMock, filterTorrentsMock):
         
         # config fake data
         fakeTPBQueryResponses = [
@@ -35,7 +35,7 @@ class TestTPBInterface(unittest.TestCase):
 
         # config mocks
         queryMock.side_effect = fakeTPBQueryResponses
-        filterEpisodeTorrentsMock.return_value = fakeFilteredTorrents
+        filterTorrentsMock.return_value = fakeFilteredTorrents
 
         # run testable function
         torrentRecords = TPBInterface.getTorrentRecords(fakeMediaInfoRecord)
@@ -49,7 +49,8 @@ class TestTPBInterface(unittest.TestCase):
             call(queries[2])
         ]
         queryMock.has_calls(queryAPI)
-        filterEpisodeTorrentsMock.assert_called_with(fakeTPBQueryResponses[1], fakeMediaInfoRecord)
+        filterTorrentsMock.assert_called_with(
+            fakeTPBQueryResponses[1], fakeMediaInfoRecord)
         logCalls = [
             call(
                 f"Torrent search performed for: '{queries[0]}' - {len(fakeTPBQueryResponses[0])} results."),

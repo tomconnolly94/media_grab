@@ -23,7 +23,69 @@ def createBlacklistFilterFunc(backlistTerms):
 	return blacklistFilterFunc
 
 
-def filterEpisodeTorrents(torrents, mediaInfoRecord):
+def filterBySeason(torrentTitles, name, relevantSeason):
+	"""
+	filterBySeason applies a regex that matches a torrent for a specific season of a show
+	:testedWith: None yet
+	:param torrentTitles: a list of torrent titles to be filtered
+	:param name: name of tv show
+	:param relevantSeason: relevant season number as a string, to cutomise the regex
+	:param oneAboveRelevantSeason: relevant season number +1 as a string to allow removal of multi season torrents
+	:return: a list of filtered season torrent titles
+	"""
+
+	# regex used for dev - "the\Doffice.*?(?:season|s).{0,1}1+(?!episode|e|\d|-| 2)"
+
+	# create season regex
+	oneAboveRelevantSeason = str(int(relevantSeason) + 1)
+	relevantSeasonReduced = str(int(relevantSeason))
+
+	seasonRegexString = rf"{name}.*?(?:season|s).{{0,1}}(?:{relevantSeason}|{relevantSeasonReduced})+(?!episode|e|\d|-|{oneAboveRelevantSeason}| {oneAboveRelevantSeason})"
+	logging.info(f"Season regex filter used: {seasonRegexString}")
+	seasonRegex = re.compile(
+		seasonRegexString, flags=re.IGNORECASE | re.MULTILINE | re.X)
+
+	return list(filter(seasonRegex.search, torrentTitles))
+
+
+def filterByEpisode(torrentTitles, name, relevantSeason, relevantEpisode):
+	"""
+	filterByEpisode applies a regex that matches a torrent for a specific episode of a specific season of a show
+	:testedWith: None yet
+	:param torrentTitles: a list of torrent titles to be filtered
+	:param name: name of tv show
+	:param relevantSeason: relevant season number as a string, to cutomise the regex
+	:param relevantEpisode: relevant episode number as a string, to cutomise the regex
+	:return: a list of filtered episode torrent titles
+	"""
+
+	# create episode regex
+	episodeRegexString = rf"{name}\D*[Ss]{relevantSeason}[Ee]{relevantEpisode}"
+	logging.info(f"Episode regex filter used: {episodeRegexString}")
+	episodeRegex = re.compile(
+		episodeRegexString, flags=re.IGNORECASE | re.MULTILINE)
+
+	return list(filter(episodeRegex.search, torrentTitles))
+
+
+def filterUsingBlacklist(mediaInfoRecord, torrentTitles):
+	"""
+	filterUsingBlacklist removes any torrent titles from filteredTorrentTitles that contain terms from the mediaInfoRecord's blacklist
+	:testedWith: None yet
+	:param mediaInfoRecord: mediaInfoRecord from which to extract the blacklist
+	:param torrentTitles: list of torrent titles to be filtered
+	:return: a list of filtered torrent titles
+	"""
+
+	blacklistFilterFunc = createBlacklistFilterFunc(
+		mediaInfoRecord.getBlacklistTerms())
+
+	# apply blacklist filters to torrent names to avoid any unwanted terms
+	return list(
+		filter(blacklistFilterFunc, torrentTitles))
+
+
+def filterTorrents(torrents, mediaInfoRecord):
 	"""
 	filterEpisodeTorrents applies a set of filters that involve regex matching with the download name and ensuring the number of sources exceeds one
 	:testedWith: TestTorrentFilterController:filterEpisodeTorrents
@@ -35,39 +97,21 @@ def filterEpisodeTorrents(torrents, mediaInfoRecord):
 		return []
 		
 	name = mediaInfoRecord.getShowName()
-	nameFirstLetter = name[0].lower()
-	restOfName = name[1:]
-	restOfName = restOfName.replace(" ", "\\D*")
+	name = name.replace(" ", "\\D*")
 	relevantSeason = str(mediaInfoRecord.getLatestSeasonNumber()).zfill(2)
 	relevantEpisode = str(mediaInfoRecord.getLatestEpisodeNumber()).zfill(2)
 
-	# create episode regex
-	episodeRegexString = rf"{nameFirstLetter}{restOfName}\D*[Ss]{relevantSeason}[Ee]{relevantEpisode}"
-	logging.info(f"Episode regex filter used: {episodeRegexString}")
-	episodeRegex = re.compile(episodeRegexString, flags=re.IGNORECASE | re.MULTILINE)
-
-	# "the\D*office.*?(?:season|s).{0,1}\d+\D(?!episode|e|\d)"
-
-	# create season regex
-	seasonRegexString = rf"{nameFirstLetter}{restOfName}.*?(?:season|s).{{0,1}}\d+\D(?!episode|e|\d)"
-	logging.info(f"Season regex filter used: {seasonRegexString}")
-	seasonRegex = re.compile(
-		seasonRegexString, flags=re.IGNORECASE | re.MULTILINE | re.X)
-	
 	torrentTitles = [ torrent.getName() for torrent in torrents ]
-	filteredTorrentTitles = list(filter(
-		episodeRegex.search, torrentTitles)) + list(filter(seasonRegex.search, torrentTitles))
 
-	epList = list(filter(
-            episodeRegex.search, torrentTitles))
-	seasonList = list(filter(seasonRegex.search, torrentTitles))
-
-	blacklistFilterFunc = createBlacklistFilterFunc(
-		mediaInfoRecord.getBlacklistTerms())
+	# filter for torrents matching a relevant episode or season number
+	filteredTorrentTitles = list(set(
+		filterByEpisode(torrentTitles, name, relevantSeason, relevantEpisode) +
+		filterBySeason(torrentTitles, name, relevantSeason)
+	))
 
 	# apply blacklist filters to torrent names to avoid any unwanted terms
-	filteredTorrentTitles = list(
-		filter(blacklistFilterFunc, filteredTorrentTitles))
+	filteredTorrentTitles = filterUsingBlacklist(
+		mediaInfoRecord, filteredTorrentTitles)
 	
     # get a list of filtered in torrent items
 	filteredTorrents = [torrent for torrent in torrents if torrent.getName(

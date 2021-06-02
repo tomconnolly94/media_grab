@@ -39,7 +39,7 @@ def getTorrentRecords(mediaInfoRecord):
         if not torrentRecords:
             continue
 
-        filteredTorrents = TorrentFilterController.filterEpisodeTorrents(torrentRecords, mediaInfoRecord)
+        filteredTorrents = TorrentFilterController.filterTorrents(torrentRecords, mediaInfoRecord)
         logging.info(f"{len(torrentRecords)} torrents filtered down to {len(filteredTorrents)}")
 
         if not filteredTorrents:
