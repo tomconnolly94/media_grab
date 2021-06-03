@@ -115,6 +115,34 @@ class TestTorrentFilterController(unittest.TestCase):
         # assert that the right number of torrents in the input have the "passesFilter" field set to true
         self.assertEqual(torrentRecordsPassFilter, filteredPassedTorrents)
 
+
+    def test_filterByBlacklist(self):
+
+        mediaData = MediaInfoRecord("Rick and morty", 3, 2, ["blacklistTerm"])
+
+        torrentRecordsFailFilter = [
+            # these should fail because they include a term from the blacklist
+            " Rick and Morty S03E02 1080p PT-BR Subs Tocatoon blacklistTerm",
+            "Rick....and Morty S03E02 1080p PT-BR Subs TocatoonBlackListTerm"
+        ]
+
+        torrentRecordsPassFilter = [
+            " Rick and Morty S03E02 1080p PT-BR Subs Tocatoon ",
+            "Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon"
+        ]
+
+        filteredFailedTorrents = TorrentFilterController.filterByBlacklist(
+            mediaData, torrentRecordsFailFilter)
+        filteredPassedTorrents = TorrentFilterController.filterByBlacklist(
+            mediaData, torrentRecordsPassFilter)
+
+        # assert the right number of torrents were kept from the data input
+        self.assertEqual(0, len(filteredFailedTorrents))
+        self.assertEqual(len(torrentRecordsPassFilter),
+                         len(filteredPassedTorrents))
+        # assert that the right number of torrents in the input have the "passesFilter" field set to true
+        self.assertEqual(torrentRecordsPassFilter, filteredPassedTorrents)
+
     def test_filterTorrents(self):
 
         mediaData = MediaInfoRecord("Rick and morty", 3, 2, ["blacklistTerm"])
@@ -123,13 +151,18 @@ class TestTorrentFilterController(unittest.TestCase):
             # these should fail because they dont contain a season or episode reference
             TorrentRecord("Rick.and.morty", "fakeId", "fakeInfoHash", 2),
             # these should fail because they dont contain a season AND episode reference
-            TorrentRecord("Rick.and.Morty.episode.1", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord("Rick.and.Morty.episode.1",
+                          "fakeId", "fakeInfoHash", 2),
             # these should fail because they dont match the season and episode numbers
-            TorrentRecord("Rick.and.Morty.S04E02.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2),
-            TorrentRecord("Rick.and.Morty.S03E03.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2),
-            # these should fail because they include a term from the blacklist 
-            TorrentRecord(" Rick and Morty S03E02 1080p PT-BR Subs Tocatoon blacklistTerm", "fakeId", "fakeInfoHash", 2),
-            TorrentRecord("Rick....and Morty S03E02 1080p PT-BR Subs TocatoonBlackListTerm", "fakeId", "fakeInfoHash", 2)
+            TorrentRecord(
+                "Rick.and.Morty.S04E02.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord(
+                "Rick.and.Morty.S03E03.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2),
+            # these should fail because they include a term from the blacklist
+            TorrentRecord(
+                " Rick and Morty S03E02 1080p PT-BR Subs Tocatoon blacklistTerm", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord(
+                "Rick....and Morty S03E02 1080p PT-BR Subs TocatoonBlackListTerm", "fakeId", "fakeInfoHash", 2)
 
             #TODO: These should fail but I can't figure out a torrentFilter configuration that achieves that yet
             #TorrentRecord("Rick.and.Morty.the.movie.S03E02.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2),
@@ -137,11 +170,16 @@ class TestTorrentFilterController(unittest.TestCase):
         ]
 
         torrentRecordsPassFilter = [
-            TorrentRecord("Rick.and.Morty.S03E02.HDTV.x264-BATV", "fakeId", "fakeInfoHash", 2),
-            TorrentRecord("Rick.and.Morty.S03E02.720p.HDTV.x264-BATV[ettv]", "fakeId", "fakeInfoHash", 2),
-            TorrentRecord("Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2),
-            TorrentRecord(" Rick and Morty S03E02 1080p PT-BR Subs Tocatoon ", "fakeId", "fakeInfoHash", 2),
-            TorrentRecord("Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon ", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord("Rick.and.Morty.S03E02.HDTV.x264-BATV",
+                          "fakeId", "fakeInfoHash", 2),
+            TorrentRecord(
+                "Rick.and.Morty.S03E02.720p.HDTV.x264-BATV[ettv]", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord(
+                "Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord(
+                " Rick and Morty S03E02 1080p PT-BR Subs Tocatoon ", "fakeId", "fakeInfoHash", 2),
+            TorrentRecord(
+                "Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon ", "fakeId", "fakeInfoHash", 2),
 
             TorrentRecord("Rick.and.Morty.Season.3",
                           "fakeId", "fakeInfoHash", 2),
@@ -156,7 +194,8 @@ class TestTorrentFilterController(unittest.TestCase):
 
         # assert the right number of torrents were kept from the data input
         self.assertEqual(0, len(filteredFailedTorrents))
-        self.assertEqual(len(torrentRecordsPassFilter), len(filteredPassedTorrents))
+        self.assertEqual(len(torrentRecordsPassFilter),
+                         len(filteredPassedTorrents))
         # assert that the right number of torrents in the input have the "passesFilter" field set to true
         self.assertEqual(torrentRecordsPassFilter, filteredPassedTorrents)
 

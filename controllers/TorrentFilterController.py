@@ -68,7 +68,7 @@ def filterByEpisode(torrentTitles, name, relevantSeason, relevantEpisode):
 	return list(filter(episodeRegex.search, torrentTitles))
 
 
-def filterUsingBlacklist(mediaInfoRecord, torrentTitles):
+def filterByBlacklist(mediaInfoRecord, torrentTitles):
 	"""
 	filterUsingBlacklist removes any torrent titles from filteredTorrentTitles that contain terms from the mediaInfoRecord's blacklist
 	:testedWith: None yet
@@ -110,7 +110,7 @@ def filterTorrents(torrents, mediaInfoRecord):
 	))
 
 	# apply blacklist filters to torrent names to avoid any unwanted terms
-	filteredTorrentTitles = filterUsingBlacklist(
+	filteredTorrentTitles = filterByBlacklist(
 		mediaInfoRecord, filteredTorrentTitles)
 	
     # get a list of filtered in torrent items
