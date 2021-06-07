@@ -7,7 +7,7 @@ import json
 # internal dependencies
 from controllers import TorrentFilterController
 from dataTypes.MediaInfoRecord import MediaInfoRecord
-from dataTypes.TorrentRecord import TorrentRecord
+from dataTypes.TorrentRecord import TorrentRecord, TorrentCategory
 
 class TestTorrentFilterController(unittest.TestCase):
 
@@ -171,20 +171,20 @@ class TestTorrentFilterController(unittest.TestCase):
 
         torrentRecordsPassFilter = [
             TorrentRecord("Rick.and.Morty.S03E02.HDTV.x264-BATV",
-                          "fakeId", "fakeInfoHash", 2),
+                          "fakeId", "fakeInfoHash", 2, None, TorrentCategory.TV_EPISODE),
             TorrentRecord(
-                "Rick.and.Morty.S03E02.720p.HDTV.x264-BATV[ettv]", "fakeId", "fakeInfoHash", 2),
+                "Rick.and.Morty.S03E02.720p.HDTV.x264-BATV[ettv]", "fakeId", "fakeInfoHash", 2, None, TorrentCategory.TV_EPISODE),
             TorrentRecord(
-                "Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2),
+                "Rick.and.Morty.S03E02.1080p.WEBRip.x264-STRiFE", "fakeId", "fakeInfoHash", 2, None, TorrentCategory.TV_EPISODE),
             TorrentRecord(
-                " Rick and Morty S03E02 1080p PT-BR Subs Tocatoon ", "fakeId", "fakeInfoHash", 2),
+                " Rick and Morty S03E02 1080p PT-BR Subs Tocatoon ", "fakeId", "fakeInfoHash", 2, None, TorrentCategory.TV_EPISODE),
             TorrentRecord(
-                "Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon ", "fakeId", "fakeInfoHash", 2),
+                "Rick....and Morty S03E02 1080p PT-BR Subs Tocatoon ", "fakeId", "fakeInfoHash", 2, None, TorrentCategory.TV_EPISODE),
 
             TorrentRecord("Rick.and.Morty.Season.3",
-                          "fakeId", "fakeInfoHash", 2),
+                          "fakeId", "fakeInfoHash", 2, None, TorrentCategory.TV_SEASON),
             TorrentRecord("Rick..and.Morty.Season.3",
-                          "fakeId", "fakeInfoHash", 2)
+                          "fakeId", "fakeInfoHash", 2, None, TorrentCategory.TV_SEASON)
         ]
 
         filteredFailedTorrents = TorrentFilterController.filterTorrents(
@@ -196,8 +196,9 @@ class TestTorrentFilterController(unittest.TestCase):
         self.assertEqual(0, len(filteredFailedTorrents))
         self.assertEqual(len(torrentRecordsPassFilter),
                          len(filteredPassedTorrents))
-        # assert that the right number of torrents in the input have the "passesFilter" field set to true
-        self.assertEqual(torrentRecordsPassFilter, filteredPassedTorrents)
+        
+        for torrent in filteredPassedTorrents:
+            self.assertTrue(torrent in torrentRecordsPassFilter)
 
 
 if __name__ == '__main__':
