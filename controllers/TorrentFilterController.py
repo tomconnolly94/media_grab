@@ -103,12 +103,6 @@ def filterTorrents(torrents, mediaInfoRecord):
 	relevantEpisode = str(mediaInfoRecord.getLatestEpisodeNumber()).zfill(2)
 
 	torrentTitles = [ torrent.getName() for torrent in torrents ]
-
-	# filter for torrents matching a relevant episode or season number
-	filteredTorrentTitles = list(set(
-		filterByEpisode(torrentTitles, name, relevantSeason, relevantEpisode) +
-		filterBySeason(torrentTitles, name, relevantSeason)
-	))
 	
 	# apply blacklist filters to torrent names to avoid any unwanted terms
 	blacklistFilteredTorrentTitles = filterByBlacklist(
@@ -133,5 +127,7 @@ def filterTorrents(torrents, mediaInfoRecord):
 		torrent.setCategory(TorrentCategory.TV_SEASON)
 
 	filteredTorrents = filteredSeasonTorrents + filteredEpisodeTorrents
+	logging.info(f"{len(torrents)} torrents filtered down to {len(filteredTorrents)} ({len(filteredSeasonTorrents)} season, {len(filteredEpisodeTorrents)} episode)")
+
 
 	return filteredTorrents

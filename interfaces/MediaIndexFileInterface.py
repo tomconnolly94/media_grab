@@ -8,6 +8,7 @@ import logging
 
 # internal dependencies
 from dataTypes.MediaInfoRecord import MediaInfoRecord
+from dataTypes.TorrentRecord import TorrentCategory
 
 writeFile = True
 
@@ -27,8 +28,6 @@ def incrementSeason(mediaInfoRecords, queryMediaInfoRecord):
 
 			mediaInfoRecord.setLatestSeasonNumber(prevSeasonValue + 1)
 			mediaInfoRecord.setLatestEpisodeNumber(1)
-
-			currentLatestEpisodeValue = mediaInfoRecord.getLatestEpisodeNumber()
 			logging.info(
 				f"Updated latest season number from {prevSeasonValue} to {mediaInfoRecord.getLatestSeasonNumber()}")
 
@@ -81,10 +80,11 @@ def writeMediaFile(queryMediaInfoRecord):
 	"""
 	mediaInfoRecords = loadMediaFile()
 
-	updatedMediaInfoRecords = incrementEpisode(
-	    mediaInfoRecords, queryMediaInfoRecord)
-
-	if not updatedMediaInfoRecords:
+	if queryMediaInfoRecord.getTorrentRecord().getCategory() == TorrentCategory.TV_EPISODE:
+		incrementEpisode(mediaInfoRecords, queryMediaInfoRecord)
+	elif queryMediaInfoRecord.getTorrentRecord().getCategory() == TorrentCategory.TV_SEASON:
+		incrementSeason(mediaInfoRecords, queryMediaInfoRecord)
+	else:
 		return False
 
 	updatedMediaInfoRecordsAsDict = [ mediaInfoRecord.toDict() for mediaInfoRecord in mediaInfoRecords ]

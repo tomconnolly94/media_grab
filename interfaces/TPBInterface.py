@@ -40,7 +40,6 @@ def getTorrentRecords(mediaInfoRecord):
             continue
 
         filteredTorrents = TorrentFilterController.filterTorrents(torrentRecords, mediaInfoRecord)
-        logging.info(f"{len(torrentRecords)} torrents filtered down to {len(filteredTorrents)}")
 
         if not filteredTorrents:
             logging.info("No torrents survived the filter, trying the next query")
