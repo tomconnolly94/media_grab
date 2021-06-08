@@ -1,6 +1,9 @@
 #!/venv/bin/python
 
 
+from dataTypes.TorrentRecord import TorrentCategory, TorrentCategory
+
+
 class MediaInfoRecord():
 
     def __init__(self, showName, latestSeasonNumber, latestEpisodeNumber, blacklistTerms=[], torrentRecord=None, mediaSearchQueries=None):
@@ -14,7 +17,11 @@ class MediaInfoRecord():
     ########## accessor functions start ##########
 
     def getMediaGrabId(self):
-        return f"{self.__showName}--s{self.__latestSeasonNumber}e{self.__latestEpisodeNumber}"
+        episodeMediaGrabId = f"{self.__showName}--s{self.__latestSeasonNumber}e{self.__latestEpisodeNumber}"
+        if self.__torrentRecord.getCategory == TorrentCategory.TV_SEASON:
+            episodeMediaGrabId = f"{self.__showName}--s{self.__latestSeasonNumber}"
+
+        return episodeMediaGrabId
 
 
     def getShowName(self):

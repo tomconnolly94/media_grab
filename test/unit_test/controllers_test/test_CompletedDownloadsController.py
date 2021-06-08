@@ -476,7 +476,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         fakeSeasonNumber = 2
         fakeEpisodeNumber = 2
         fakeMediaGrabId = f"{fakeShowName}--s{fakeSeasonNumber}e{fakeEpisodeNumber}"
-        mode = PROGRAM_MODE.TV_EPISODES
+        mode = PROGRAM_MODE.TV
         fakeExtension = ".mp4"
         fakeSeasonDir = f"Season {fakeSeasonNumber}"
 
@@ -599,18 +599,19 @@ class TestCompletedDownloadsController(unittest.TestCase):
         getTargetFileMock.assert_called_with(fakeFileSystemItem)
         extractExtensionMock.assert_called_with(fakeTargetFile.name)
         getProspectiveFilePathMock.assert_called_with(
-            fakeFileSystemItemWrapper.name, PROGRAM_MODE.TV_EPISODES, fakeExtension)
+            fakeFileSystemItemWrapper.name, PROGRAM_MODE.TV, fakeExtension)
         fileExistsMock.assert_called_with(fakeProspectiveFile)
         osRenameMock.assert_called_with(fakeTargetFile.path, fakeProspectiveFile)
         recycleOrDeleteDirMock.assert_called_with(fakeFileSystemItem.path)
         osRmdirMock.assert_called_with(fakeFileSystemItemWrapper.path)
 
+    @mock.patch("controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems")
     @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
     @mock.patch("controllers.CompletedDownloadsController.auditFileSystemItemForEpisode")
     @mock.patch("interfaces.FolderInterface.getDirContents")
     @mock.patch('os.getenv')
     @mock.patch("logging.info")
-    def test_auditFileSystemItemsForEpisodes(self, loggingInfoMock, getEnvMock, getDirContentsMock, auditFileSystemItemForEpisodeMock, downloadWasInitiatedByMediaGrabMock):
+    def test_auditDumpCompleteDir(self, loggingInfoMock, getEnvMock, getDirContentsMock, auditFileSystemItemForEpisodeMock, downloadWasInitiatedByMediaGrabMock, permanentlyDeleteExpiredItemsMock):
 
         # config fake data
         fakeDirName = "fakeDirName1"
@@ -624,7 +625,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         downloadWasInitiatedByMediaGrabMock.return_value = True
         getEnvMock.side_effect = getEnvMockFunc
 
-        CompletedDownloadsController.auditFileSystemItemsForEpisodes()
+        CompletedDownloadsController.auditDumpCompleteDir()
 
         # asserts
         loggingInfoCalls = [
@@ -635,6 +636,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         getDirContentsMock.assert_called_with(fakeDumpCompleteDir)
         auditFileSystemItemForEpisodeMock.assert_called_with(
             fakeFileSystemItems[0])
+        permanentlyDeleteExpiredItemsMock.assert_called()
 
     @mock.patch("controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems")
     @mock.patch("interfaces.QBittorrentInterface.getInstance")
@@ -653,7 +655,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
         ] # representation of what is in the dump_complete folder
 
         # config fake data #
-        mode = PROGRAM_MODE.TV_EPISODES
+        mode = PROGRAM_MODE.TV
         expectedTvShowName = "Fake tv show name"
         directoriesToCleanUp = [ fakeTargetTvDir, fakeDumpCompleteDir, fakeRecycleBinDir ]
         # create mock for instance

@@ -97,7 +97,7 @@ class TestLogicController(unittest.TestCase):
             fakeMediaInfoRecord1Copy, fakeMediaInfoRecord2Copy]
 
         # config fake data
-        activeMode = PROGRAM_MODE.TV_EPISODES
+        activeMode = PROGRAM_MODE.TV
         
         # config mocks
         getMediaInfoRecordsWithTorrentsMock.side_effect = [

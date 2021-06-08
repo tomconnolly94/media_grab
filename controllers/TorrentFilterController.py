@@ -82,8 +82,7 @@ def filterByBlacklist(mediaInfoRecord, torrentTitles):
 		mediaInfoRecord.getBlacklistTerms())
 
 	# apply blacklist filters to torrent names to avoid any unwanted terms
-	return list(
-		filter(blacklistFilterFunc, torrentTitles))
+	return list(filter(blacklistFilterFunc, torrentTitles))
 
 
 def filterTorrents(torrents, mediaInfoRecord):

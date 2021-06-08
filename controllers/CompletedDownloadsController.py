@@ -216,6 +216,30 @@ def getTargetFile(fileSystemItem):
     return fileSystemItem
 
 
+def getTargetFiles(fileSystemItem):
+    """
+    getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could be the directory that the target file is in
+    :testedWith: TestCompletedDownloadsController:test_getTargetFile
+    :param fileSystemItem: the file system item, it could be a directory or a file
+    :return: the file system item if it is a file or if it is a directory then the largest file in that directory
+    """
+    if FolderInterface.directoryExists(fileSystemItem.path): # check if the fileSystemItem is a directory or a file
+        targetFiles = FolderInterface.getDirContents(fileSystemItem) # we assume that the target file is the largest file
+
+        if targetFiles:
+
+            targetFiles = list(filter(lambda targetFile: 50000000 < int(os.path.getsize(targetFile)), targetFiles))
+
+            joinedTargetFileString = "\\" + "\n".join(targetFiles)
+            logging.info(
+                f"{fileSystemItem.name} is a full season directory. The files: {joinedTargetFileString} have been extracted as the media item of interest. A filter of >50MB was applied.")
+            return targetFiles
+
+        ErrorController.reportError(f"The fileSystemItem: {fileSystemItem.name} is a directory but targetFiles could not be extracted. Skipping...")
+        return None
+    return None
+
+
 def getProspectiveFilePath(downloadId, mode, extension):
     """
     getProspectiveFilePath create the prospective file path by extracting the necessary info like the tv show name and season/episode numbers
@@ -257,7 +281,7 @@ def unWrapQBittorrentWrapperDir(fileSystemItem):
     return fileSystemSubItems[0]
 
 
-def auditFileSystemItemForEpisode(fileSystemItem):
+def auditFileSystemItemForSeason(fileSystemItem):
     """
     auditMediaGrabItemForEpisode collates all the operations necessary to deal with a finished download (that was initiated by mediaGrab), move it to an organised file system location, and notifies the user
     :testedWith: TestCompletedDownloadsController:test_auditMediaGrabItemForEpisode
@@ -269,24 +293,15 @@ def auditFileSystemItemForEpisode(fileSystemItem):
     containerDir = fileSystemItem.path
     if downloadWasInitiatedByMediaGrab(downloadId):
         fileSystemItem = unWrapQBittorrentWrapperDir(fileSystemItem)
-    
+
     if not fileSystemItem:
         return
-    
-    targetFile = getTargetFile(fileSystemItem)
 
-    # if target file could not be extracted, skip this fileSystemItem
-    if not targetFile:
-        return
+    targetFiles = getTargetFiles(fileSystemItem)
 
-    extension = extractExtension(targetFile.name)
-    
-    # generate the prosepctive file path, ensuring all parent directories exist
-    prospectiveFile = getProspectiveFilePath(
-        downloadId, PROGRAM_MODE.TV_EPISODES, extension)
-
-    if not prospectiveFile:
-        return
+    # if target files could not be extracted, skip this fileSystemItem
+    if not targetFiles:
+        return False
 
     # pause torrent to prevent unneccessary seeding
     requestTorrentPause(fileSystemItem.name)
@@ -294,11 +309,58 @@ def auditFileSystemItemForEpisode(fileSystemItem):
     logging.info(
         f"{fileSystemItem.name} has finished downloading and will be moved.")
 
+    for targetFile in targetFiles:
+        moveFile(targetFile, fileSystemItem)
+
+
+def auditFileSystemItemForEpisode(fileSystemItem):
+    """
+    auditMediaGrabItemForEpisode collates all the operations necessary to deal with a finished download (that was initiated by mediaGrab), move it to an organised file system location, and notifies the user
+    :testedWith: TestCompletedDownloadsController:test_auditMediaGrabItemForEpisode
+    :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId
+    :return: None
+    """
+    # capture the parent directory as the item's downloadId
+    downloadId = fileSystemItem.name
+    if downloadWasInitiatedByMediaGrab(downloadId):
+        fileSystemItem = unWrapQBittorrentWrapperDir(fileSystemItem)
+    
+    if not fileSystemItem:
+        return False
+    
+    targetFile = getTargetFile(fileSystemItem)
+
+    # if target file could not be extracted, skip this fileSystemItem
+    if not targetFile:
+        return False
+
+    # pause torrent to prevent unneccessary seeding
+    requestTorrentPause(fileSystemItem.name)
+
+    logging.info(
+        f"{fileSystemItem.name} has finished downloading and will be moved.")
+
+    moveFile(targetFile, fileSystemItem)
+
+
+def moveFile(targetFile, fileSystemItem):
+
+    downloadId = fileSystemItem.name
+    containerDir = fileSystemItem.path
+    extension = extractExtension(targetFile.name)
+    
+    # generate the prospective file path, ensuring all parent directories exist
+    prospectiveFile = getProspectiveFilePath(
+        downloadId, PROGRAM_MODE.TV, extension)
+
+    if not prospectiveFile:
+        return False
+
     # check if the prospective target file already exists
     if FolderInterface.fileExists(prospectiveFile):
         # report problem
         reportItemAlreadyExists(prospectiveFile, fileSystemItem.path)
-        return
+        return False
 
     # move file to appropriate directory
     os.rename(targetFile.path, prospectiveFile)
@@ -306,31 +368,15 @@ def auditFileSystemItemForEpisode(fileSystemItem):
 
     # if fileSystemItem is a directory, then clean up the directory and the rest of the contents
     if targetFile != fileSystemItem: 
-        FolderInterface.recycleOrDeleteDir(fileSystemItem.path)
+        if not FolderInterface.recycleOrDeleteDir(fileSystemItem.path):
+            return False
 
     if downloadWasInitiatedByMediaGrab(downloadId):
         # handle deletion of the container directory created by qbittorrent
         os.rmdir(containerDir)
+    
+    return True    
 
-
-def auditFileSystemItemsForEpisodes():
-    """
-    auditFileSystemItemsForEpisodes handles the extraction and filtering of items in the dump_complete directory
-    :testedWith: TestCompletedDownloadsController:test_auditFileSystemItemsForEpisodes
-    :return: None
-    """
-    # auditing is not necessary if the optional env "TV_TARGET_DIR" is not provided
-    if "TV_TARGET_DIR" not in os.environ:
-        return "nope"
-
-    logging.info("File auditing started.")
-    dumpCompleteDir = os.getenv("DUMP_COMPLETE_DIR")
-    fileSystemItemsFromDirectory = FolderInterface.getDirContents(dumpCompleteDir)
-    logging.info(f"Items in dump_complete directory: {[item.name for item in fileSystemItemsFromDirectory] }")
-
-    # divide the directories into two lists, those initiated by mediaGrab and those initiated manually
-    for fileSystemItem in fileSystemItemsFromDirectory:
-        auditFileSystemItemForEpisode(fileSystemItem)
 
 def auditDumpCompleteDir():
     """
@@ -338,11 +384,29 @@ def auditDumpCompleteDir():
     :testedWith: TestCompletedDownloadsController:test_auditFilesWithFileSystem
     :return: None
     """
-    # look for episodes
-    output = auditFileSystemItemsForEpisodes()
+
+    # auditing is not necessary if the optional env "TV_TARGET_DIR" is not provided
+    if "TV_TARGET_DIR" not in os.environ:
+        return
+
+    logging.info("File auditing started.")
+    dumpCompleteDir = os.getenv("DUMP_COMPLETE_DIR")
+    fileSystemItemsFromDirectory = FolderInterface.getDirContents(
+        dumpCompleteDir)
+    logging.info(
+        f"Items in dump_complete directory: {[item.name for item in fileSystemItemsFromDirectory] }")
+
+    # divide the directories into two lists, those initiated by mediaGrab and those initiated manually
+    for fileSystemItem in fileSystemItemsFromDirectory:
+        if(auditFileSystemItemForEpisode(fileSystemItem)):
+            continue
+
+        if(auditFileSystemItemForSeason(fileSystemItem)):
+            continue
+
+    
     # deal with expired recycled items and logs
     permanentlyDeleteExpiredItems()
-    return output
 
 
 def permanentlyDeleteExpiredItems():

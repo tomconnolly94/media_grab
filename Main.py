@@ -45,7 +45,7 @@ def interpretArguments(argv):
 
 	if not mode:
 		# mode defaults to tv-episodes if no mode is provided
-		mode = PROGRAM_MODE.TV_EPISODES
+		mode = PROGRAM_MODE.TV
 			
 	logging.info(f"Mode is {mode}")
 

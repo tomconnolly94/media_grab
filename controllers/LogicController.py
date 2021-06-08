@@ -69,7 +69,7 @@ def runProgramLogic(mode):
         mediaInfoRecords = MediaIndexFileInterface.loadMediaFile()
 
         # ascertain mode of program
-        if mode == PROGRAM_MODE.TV_EPISODES:
+        if mode == PROGRAM_MODE.TV:
 	        # add torrent queries to mediaInfoRecords
             QueryGenerationController.addTVEpisodeQueriesToMediaInfoRecords(mediaInfoRecords)
         else:
