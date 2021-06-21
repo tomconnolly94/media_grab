@@ -4,8 +4,9 @@
 import os
 import logging
 import re
-import shutil
 from datetime import datetime, timedelta
+from pathlib import Path
+import shutil
 
 # internal dependencies
 from dataTypes.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP, PROGRAM_MODE_MAP
@@ -19,14 +20,17 @@ def downloadWasInitiatedByMediaGrab(downloadId):
     downloadWasInitiatedByMediaGrab checks if a download was initiated by mediaGrab using a regex
     :testedWith: TestCompletedDownloadsController:test_downloadWasInitiatedByMediaGrab
     :param downloadId: the downloadId of the download
+    :param downloadIsEpisode: download is an episode, this determines which regex to use
     :return: the tv show name or `None` if one cannot be found
     """
     try:
-        regexRaw = r"[ \w]+--s\d+e\d+"
-        match = re.search(regexRaw, downloadId,
-                            re.IGNORECASE | re.MULTILINE)
-        if match:
-            return True
+        relevantRegexes = [r"[ \w]+--s\d+e\d+", r"[ \w]+--s\d+(?![es])"]
+
+        for regexRaw in relevantRegexes:
+            match = re.search(regexRaw, downloadId,
+                                re.IGNORECASE | re.MULTILINE)
+            if match:
+                return True
         return False
     except Exception as exception:
         ErrorController.reportError(
@@ -227,12 +231,12 @@ def getTargetFiles(fileSystemItem):
         targetFiles = FolderInterface.getDirContents(fileSystemItem) # we assume that the target file is the largest file
 
         if targetFiles:
-
             targetFiles = list(filter(lambda targetFile: 50000000 < int(os.path.getsize(targetFile)), targetFiles))
 
-            joinedTargetFileString = "\\" + "\n".join(targetFiles)
+            joinedTargetFileString = "\"" + "\n".join([ targetFile.name for targetFile in targetFiles ]) + "\n"
+            
             logging.info(
-                f"{fileSystemItem.name} is a full season directory. The files: {joinedTargetFileString} have been extracted as the media item of interest. A filter of >50MB was applied.")
+                f"{fileSystemItem.name} is a full season directory. The files: {joinedTargetFileString} have been extracted as the media items of interest. A filter of >50MB was applied.")
             return targetFiles
 
         ErrorController.reportError(f"The fileSystemItem: {fileSystemItem.name} is a directory but targetFiles could not be extracted. Skipping...")
@@ -310,7 +314,21 @@ def auditFileSystemItemForSeason(fileSystemItem):
         f"{fileSystemItem.name} has finished downloading and will be moved.")
 
     for targetFile in targetFiles:
-        moveFile(targetFile, fileSystemItem)
+        episodeNumber = extractEpisodeNumber(targetFile.name)
+        targetFileDownloadId = f"{downloadId}e{episodeNumber}"
+        if(not moveFile(
+                targetFile, fileSystemItem, targetFileDownloadId)):
+            return False
+
+    if downloadWasInitiatedByMediaGrab(downloadId) and containerDir:
+        # handle deletion of the container directory created by qbittorrent
+        try:
+            return postMoveDirectoryCleanup(downloadId, targetFile,
+                                        fileSystemItem, containerDir)
+        except OSError as exception:
+            ErrorController.reportError(
+                "Exception occurred when deleting season directory", exception=exception, sendEmail=True)
+            return None
 
 
 def auditFileSystemItemForEpisode(fileSystemItem):
@@ -322,6 +340,7 @@ def auditFileSystemItemForEpisode(fileSystemItem):
     """
     # capture the parent directory as the item's downloadId
     downloadId = fileSystemItem.name
+    containerDir = fileSystemItem.path
     if downloadWasInitiatedByMediaGrab(downloadId):
         fileSystemItem = unWrapQBittorrentWrapperDir(fileSystemItem)
     
@@ -340,13 +359,15 @@ def auditFileSystemItemForEpisode(fileSystemItem):
     logging.info(
         f"{fileSystemItem.name} has finished downloading and will be moved.")
 
-    moveFile(targetFile, fileSystemItem)
+    
+    if(moveFile(targetFile, fileSystemItem, downloadId, containerDir)):
+        return postMoveDirectoryCleanup(downloadId, targetFile,
+                             fileSystemItem, containerDir)
+    return False
 
 
-def moveFile(targetFile, fileSystemItem):
+def moveFile(targetFile, fileSystemItem, downloadId, containerDir=None):
 
-    downloadId = fileSystemItem.name
-    containerDir = fileSystemItem.path
     extension = extractExtension(targetFile.name)
     
     # generate the prospective file path, ensuring all parent directories exist
@@ -365,18 +386,26 @@ def moveFile(targetFile, fileSystemItem):
     # move file to appropriate directory
     os.rename(targetFile.path, prospectiveFile)
     logging.info(f"Moved '{targetFile.path}' to '{prospectiveFile}'")
-
-    # if fileSystemItem is a directory, then clean up the directory and the rest of the contents
-    if targetFile != fileSystemItem: 
-        if not FolderInterface.recycleOrDeleteDir(fileSystemItem.path):
-            return False
-
-    if downloadWasInitiatedByMediaGrab(downloadId):
-        # handle deletion of the container directory created by qbittorrent
-        os.rmdir(containerDir)
     
     return True    
 
+
+def postMoveDirectoryCleanup(downloadId, targetFile, fileSystemItem, containerDir):
+    
+    try:
+        # if fileSystemItem is a directory, then clean up the directory and the rest of the contents
+        if targetFile != fileSystemItem and containerDir:
+            if not FolderInterface.recycleOrDeleteDir(fileSystemItem.path):
+                return False
+
+        if downloadWasInitiatedByMediaGrab(downloadId) and containerDir:
+            # handle deletion of the container directory created by qbittorrent
+            os.rmdir(containerDir)
+        return True
+    except Exception as exception:
+        ErrorController.reportError(
+            "Exception occurred when cleaning up directories", exception=exception, sendEmail=True)
+    
 
 def auditDumpCompleteDir():
     """
