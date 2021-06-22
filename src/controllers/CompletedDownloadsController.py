@@ -10,7 +10,6 @@ from src.strategies.AuditEpisodeStrategy import AuditEpisodeStrategy
 from src.strategies.AuditSeasonStrategy import AuditSeasonStrategy
 from src.interfaces import FolderInterface
 
-
 def auditDumpCompleteDir():
     """
     auditDumpCompleteDir wrapper, entry function to this module to collate all operations necessary for download directory auditing
