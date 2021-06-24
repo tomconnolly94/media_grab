@@ -8,4 +8,4 @@ logs/*
 data/MediaIndex.json
 
 # test directories
-test/dummy_directories/*
+src/test/dummy_directories/*
