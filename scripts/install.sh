@@ -5,7 +5,7 @@ SCRIPTDIR=$(dirname "$0")
 BASEDIR=$SCRIPTDIR/..
 
 # create python virtual env
-virtualenv $BASEDIR/venv
+virtualenv -p python3 $BASEDIR/venv
 
 # activate virtual env
 source $BASEDIR/venv/bin/activate
