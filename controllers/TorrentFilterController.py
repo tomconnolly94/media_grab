@@ -17,7 +17,8 @@ def createBlacklistFilterFunc(backlistTerms):
 	def blacklistFilterFunc(item):
 
 		for term in backlistTerms:
-			if re.search(term, item, re.IGNORECASE):
+
+			if len(term.strip()) > 0 and re.search(term, item, re.IGNORECASE):
 				return False
 		return True
 
