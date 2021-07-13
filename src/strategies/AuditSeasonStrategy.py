@@ -11,15 +11,13 @@ from src.utilities import AuditUtilities
 
 class AuditSeasonStrategy(AuditStrategy):
 
-    def __init__(self):
-        super(AuditSeasonStrategy, self).__init__()
 
     def audit(self, fileSystemItem):
         """
         auditMediaGrabItemForEpisode collates all the operations necessary to deal with a finished download (that was initiated by mediaGrab), move it to an organised file system location, and notifies the user
         :testedWith: TestCompletedDownloadsController:test_auditMediaGrabItemForEpisode
         :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId
-        :return: None
+        :return: True if the fileSystemItem was handled correctly and completed, false if not
         """
         # capture the parent directory as the item's downloadId
         downloadId = fileSystemItem.name
@@ -29,7 +27,7 @@ class AuditSeasonStrategy(AuditStrategy):
                                    self).unWrapQBittorrentWrapperDir(fileSystemItem)
 
         if not fileSystemItem:
-            return
+            return False
 
         targetFiles = super(
             AuditSeasonStrategy, self).getTargetFiles(fileSystemItem)
@@ -57,10 +55,14 @@ class AuditSeasonStrategy(AuditStrategy):
         if AuditUtilities.downloadWasInitiatedByMediaGrab(downloadId) and containerDir:
             # handle deletion of the container directory created by qbittorrent
             try:
-                return super(
-                    AuditSeasonStrategy, self).postMoveDirectoryCleanup(downloadId, targetFile,
-                                                fileSystemItem, containerDir)
+                # TODO: what is targetFile? this needs to be refactored, so
+                if not super(
+                    AuditSeasonStrategy, self).postMoveDirectoryCleanup(downloadId, None,
+                                                fileSystemItem, containerDir):
+                    return False
             except OSError as exception:
                 ErrorController.reportError(
                     "Exception occurred when deleting season directory", exception=exception, sendEmail=True)
-                return None
+                return False
+
+        return True

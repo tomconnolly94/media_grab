@@ -1,10 +1,11 @@
 # external dependencies
 import os
+import shutil
 
 # fake directories for use across multiple tests
-fakeTargetTvDir = "test/dummy_directories/tv"
-fakeDumpCompleteDir = "test/dummy_directories/dump_complete"
-fakeRecycleBinDir = "test/dummy_directories/recycle_bin"
+fakeTargetTvDir = "src/test/dummy_directories/tv"
+fakeDumpCompleteDir = "src/test/dummy_directories/dump_complete"
+fakeRecycleBinDir = "src/test/dummy_directories/recycle_bin"
 
 
 class FakeFileSystemItem:

@@ -12,8 +12,8 @@ from src.dataTypes.MailItem import MailItemType
 
 class TestNewTorrentController(unittest.TestCase):
 
-    @mock.patch('interfaces.MailInterface.getInstance')
-    @mock.patch('interfaces.MediaIndexFileInterface.writeMediaFile')
+    @mock.patch('src.interfaces.MailInterface.getInstance')
+    @mock.patch('src.interfaces.MediaIndexFileInterface.writeMediaFile')
     def test_onSuccessfulTorrentAdd(self, writeMediaFileMock, mailInterfaceGetInstanceMock):
 
         # config fake values

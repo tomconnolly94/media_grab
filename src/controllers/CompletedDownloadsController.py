@@ -23,19 +23,19 @@ def auditDumpCompleteDir():
 
     logging.info("File auditing started.")
     dumpCompleteDir = os.getenv("DUMP_COMPLETE_DIR")
-    fileSystemItemsFromDirectory = FolderInterface.getDirContents(
-        dumpCompleteDir)
+    fileSystemItemsFromDirectory = FolderInterface.getDirContents(dumpCompleteDir)
+    
     logging.info(
         f"Items in dump_complete directory: {[item.name for item in fileSystemItemsFromDirectory] }")
 
     # divide the directories into two lists, those initiated by mediaGrab and those initiated manually
     for fileSystemItem in fileSystemItemsFromDirectory:
 
-        auditStrategies = [AuditEpisodeStrategy(
-        ), AuditSeasonStrategy()]
+        auditStrategies = [AuditEpisodeStrategy(), AuditSeasonStrategy()]
 
         for auditStrategy in auditStrategies:
-            auditStrategy.audit(fileSystemItem)
+            if auditStrategy.audit(fileSystemItem):
+                break
 
     
     # deal with expired recycled items and logs

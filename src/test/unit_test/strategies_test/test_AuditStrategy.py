@@ -3,17 +3,12 @@ import os
 import unittest
 import mock
 from mock import MagicMock
-from dataTypes.ProgramMode import PROGRAM_MODE
-from dataTypes.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
+from src.dataTypes.ProgramMode import PROGRAM_MODE
+from src.dataTypes.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
 
 # internal dependencies
 from src.strategies.AuditStrategy import AuditStrategy
-from test.unit_test.testUtilities import FakeFileSystemItem, getEnvMockFunc
-
-# fake directories for use across multiple tests
-fakeTargetTvDir = "test/dummy_directories/tv"
-fakeDumpCompleteDir = "test/dummy_directories/dump_complete"
-fakeRecycleBinDir = "test/dummy_directories/recycle_bin"
+from test.unit_test.testUtilities import FakeFileSystemItem
 
 
 class TestAuditStrategy(unittest.TestCase):
@@ -67,8 +62,8 @@ class TestAuditStrategy(unittest.TestCase):
         getLargestItemInDirMock.return_value = fakeTargetFile
 
         # call testable function - run 1: fileSystemItem is a directory and largest file is returned successfully
-        actualTargetFile = AuditStrategy.getTargetFile(
-            fakeFileSystemItem)
+        auditStrategy = AuditStrategy()
+        actualTargetFile = auditStrategy.getTargetFile(fakeFileSystemItem)
 
         # asserts
         directoryExistsMock.assert_called_with(fakeFileSystemItem.path)
@@ -84,7 +79,7 @@ class TestAuditStrategy(unittest.TestCase):
         reportErrorMock.reset_mock()
 
         # call testable function - run 2: fileSystemItem is not a directory
-        actualTargetFile = AuditStrategy.getTargetFile(
+        actualTargetFile = auditStrategy.getTargetFile(
             fakeFileSystemItem)
 
         # asserts
@@ -101,7 +96,7 @@ class TestAuditStrategy(unittest.TestCase):
         reportErrorMock.reset_mock()
 
         # call testable function - run 3: targetFile could not be extracted from directory
-        actualTargetFile = AuditStrategy.getTargetFile(
+        actualTargetFile = auditStrategy.getTargetFile(
             fakeFileSystemItem)
 
         # asserts
@@ -219,3 +214,41 @@ class TestAuditStrategy(unittest.TestCase):
             fakeTorrentName)
         loggingInfoMock.assert_called_with(
             f"Failed to pause torrent activity: ({fakeTorrentName})")
+
+
+    @mock.patch("os.rename")
+    @mock.patch("src.interfaces.FolderInterface.fileExists")
+    @mock.patch("src.strategies.AuditStrategy.AuditStrategy.getProspectiveFilePath")
+    @mock.patch("src.utilities.AuditUtilities.extractExtension")
+    @mock.patch("logging.info")
+    def test_moveFile(self, loggingInfoMock, extractExtensionMock, getProspectiveFilePathMock, fileExistsMock, osRenameMock):
+
+        # config fake values
+        fakeFileSystemItem = FakeFileSystemItem(
+            "fakeDir1Name", "fakePath1Name")
+        fakeTargetFile = FakeFileSystemItem(
+            "fakeTargetFileDir1Name", "fakeTargetFilePath1Name")
+        fakeExtension = ".mp4"
+        fakeProspectiveFile = "fakeProspectiveFile"
+
+        # config mocks
+        extractExtensionMock.return_value = fakeExtension
+        getProspectiveFilePathMock.return_value = fakeProspectiveFile
+        fileExistsMock.return_value = False
+
+        # create testable class
+        auditEpisodeStrategy = AuditStrategy()
+
+        # run testable function - run 1: successful run
+        auditEpisodeStrategy.moveFile(
+            fakeTargetFile, fakeFileSystemItem, fakeFileSystemItem.name, fakeFileSystemItem.path)
+
+        # asserts
+        loggingInfoMock.assert_called_with(
+            f"Moved '{fakeTargetFile.path}' to '{fakeProspectiveFile}'")
+        extractExtensionMock.assert_called_with(fakeTargetFile.name)
+        getProspectiveFilePathMock.assert_called_with(
+            fakeFileSystemItem.name, PROGRAM_MODE.TV, fakeExtension)
+        fileExistsMock.assert_called_with(fakeProspectiveFile)
+        osRenameMock.assert_called_with(
+            fakeTargetFile.path, fakeProspectiveFile)

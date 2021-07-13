@@ -14,9 +14,6 @@ from src.utilities import AuditUtilities
 
 class AuditStrategy:
 
-    def __init__(self):
-        pass
-
 
     def unWrapQBittorrentWrapperDir(self, fileSystemItem):
         """
@@ -36,7 +33,7 @@ class AuditStrategy:
         return fileSystemSubItems[0]
 
     
-    def getTargetFile(fileSystemItem):
+    def getTargetFile(self, fileSystemItem):
         """
         getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could be the directory that the target file is in
         :testedWith: TestCompletedDownloadsController:test_getTargetFile
@@ -97,8 +94,6 @@ class AuditStrategy:
         :param extension: the extension of the downloaded file
         :return: the path of the file after it has been moved to its prospective location
         """
-
-        dir_key = PROGRAM_MODE_DIRECTORY_KEY_MAP[mode]
         targetDir = os.getenv(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
         showName = AuditUtilities.extractShowName(
             downloadId).capitalize()  # name of the tv show

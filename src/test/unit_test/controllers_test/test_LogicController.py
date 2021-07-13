@@ -14,7 +14,7 @@ from src.dataTypes.MediaInfoRecord import MediaInfoRecord
 class TestLogicController(unittest.TestCase):
 
     @mock.patch("logging.info")
-    @mock.patch("interfaces.TPBInterface.getTorrentRecords")
+    @mock.patch("src.interfaces.TPBInterface.getTorrentRecords")
     def test_getMediaInfoRecordsWithTorrents(self, getTorrentRecordsMock, loggingInfoMock):      
 
         fakeTorrentRecords = [
@@ -67,12 +67,12 @@ class TestLogicController(unittest.TestCase):
         fakeTorrentRecordsNames = [ torrent.getName() for torrent in fakeTorrentRecords ]
 
 
-    @mock.patch("controllers.NewTorrentController.onSuccessfulTorrentAdd")
-    @mock.patch("interfaces.QBittorrentInterface.getInstance")
-    @mock.patch("controllers.LogicController.getMediaInfoRecordsWithTorrents")
-    @mock.patch("controllers.CompletedDownloadsController.auditDumpCompleteDir")
-    @mock.patch("controllers.QueryGenerationController.addTVEpisodeQueriesToMediaInfoRecords")
-    @mock.patch("interfaces.MediaIndexFileInterface.loadMediaFile")
+    @mock.patch("src.controllers.NewTorrentController.onSuccessfulTorrentAdd")
+    @mock.patch("src.interfaces.QBittorrentInterface.getInstance")
+    @mock.patch("src.controllers.LogicController.getMediaInfoRecordsWithTorrents")
+    @mock.patch("src.controllers.CompletedDownloadsController.auditDumpCompleteDir")
+    @mock.patch("src.controllers.QueryGenerationController.addTVEpisodeQueriesToMediaInfoRecords")
+    @mock.patch("src.interfaces.MediaIndexFileInterface.loadMediaFile")
     def test_runProgramLogic(self, loadMediaFileMock, addTVEpisodeQueriesToMediaInfoRecordsMock, auditDumpCompleteDirMock, getMediaInfoRecordsWithTorrentsMock, qbittorrentInterfaceGetInstanceMock, onSuccessfulTorrentAddMock):
         
         fakeMediaInfoRecord1 = MediaInfoRecord("fakeMediaInfoName1", 1, 1)

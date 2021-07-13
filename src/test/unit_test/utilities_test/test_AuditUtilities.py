@@ -55,7 +55,7 @@ class TestAuditUtilities(unittest.TestCase):
                 value)
             self.assertFalse(success)
 
-    @mock.patch("controllers.AuditUtilities.downloadWasInitiatedByMediaGrab")
+    @mock.patch("src.utilities.AuditUtilities.downloadWasInitiatedByMediaGrab")
     def test_extractShowNameMediaGrabDownload(self, downloadWasInitiatedByMediaGrabMock):
 
         # config fake data
@@ -73,7 +73,7 @@ class TestAuditUtilities(unittest.TestCase):
         self.assertEqual(
             None, AuditUtilities.extractShowName(""))
 
-    @mock.patch("controllers.AuditUtilities.downloadWasInitiatedByMediaGrab")
+    @mock.patch("src.utilities.AuditUtilities.downloadWasInitiatedByMediaGrab")
     def test_extractShowNameManualDownload(self, downloadWasInitiatedByMediaGrabMock):
 
         # config fake data
@@ -97,7 +97,7 @@ class TestAuditUtilities(unittest.TestCase):
                 fakeShowName)
             self.assertEqual(expectedFakeShowName, actualFakeShowName)
 
-    @mock.patch("controllers.ErrorController.reportError")
+    @mock.patch("src.controllers.ErrorController.reportError")
     @mock.patch("re.match")
     def test_extractShowNameManualDownloadFails(self, reMatchMock, reportErrorMock):
 
@@ -113,7 +113,7 @@ class TestAuditUtilities(unittest.TestCase):
         reportErrorMock.assert_called_with(
             "Exception occurred when extracting season number with regex", exception=fakeException, sendEmail=True)
 
-    @mock.patch("controllers.AuditUtilities.downloadWasInitiatedByMediaGrab")
+    @mock.patch("src.utilities.AuditUtilities.downloadWasInitiatedByMediaGrab")
     def test_extractSeasonNumberMediaGrabDownload(self, downloadWasInitiatedByMediaGrabMock):
 
         # config fake data
@@ -131,7 +131,7 @@ class TestAuditUtilities(unittest.TestCase):
         self.assertEqual(
             None, AuditUtilities.extractSeasonNumber(""))
 
-    @mock.patch("controllers.AuditUtilities.downloadWasInitiatedByMediaGrab")
+    @mock.patch("src.utilities.AuditUtilities.downloadWasInitiatedByMediaGrab")
     def test_extractSeasonNumberManualDownload(self, downloadWasInitiatedByMediaGrabMock):
 
         # config fake data
@@ -158,7 +158,7 @@ class TestAuditUtilities(unittest.TestCase):
         self.assertEqual(
             None, AuditUtilities.extractSeasonNumber(""))
 
-    @mock.patch("controllers.AuditUtilities.downloadWasInitiatedByMediaGrab")
+    @mock.patch("src.utilities.AuditUtilities.downloadWasInitiatedByMediaGrab")
     def test_extractEpisodeNumberMediaGrabDownload(self, downloadWasInitiatedByMediaGrabMock):
 
         # config fake data
@@ -176,7 +176,7 @@ class TestAuditUtilities(unittest.TestCase):
         self.assertEqual(
             None, AuditUtilities.extractSeasonNumber(""))
 
-    @mock.patch("controllers.AuditUtilities.downloadWasInitiatedByMediaGrab")
+    @mock.patch("src.utilities.AuditUtilities.downloadWasInitiatedByMediaGrab")
     def test_extractEpisodeNumberManualDownload(self, downloadWasInitiatedByMediaGrabMock):
 
         # config fake data
@@ -226,7 +226,7 @@ class TestAuditUtilities(unittest.TestCase):
                 fileName)
             self.assertEqual(expectedExtension, actualExtension)
 
-    @mock.patch("controllers.ErrorController.reportError")
+    @mock.patch("src.controllers.ErrorController.reportError")
     def test_reportItemAlreadyExists(self, reportErrorMock):
         fakeNewItemLocation = "fakeNewItemLocation"
         fakeTorrentName = "fakeTorrentName"
@@ -281,9 +281,9 @@ class TestAuditUtilities(unittest.TestCase):
         loggingInfoMock.assert_called_with(
             f"Tried to getLargestItemInDir from {fakeDirectory} but a file cold not be located")
 
-    @mock.patch("controllers.ErrorController.reportError")
-    @mock.patch("interfaces.FolderInterface.createDirectory")
-    @mock.patch("interfaces.FolderInterface.directoryExists")
+    @mock.patch("src.controllers.ErrorController.reportError")
+    @mock.patch("src.interfaces.FolderInterface.createDirectory")
+    @mock.patch("src.interfaces.FolderInterface.directoryExists")
     def test_ensureDirStructureExists(self, directoryExistsMock, createDirectoryMock, reportErrorMock):
 
         # config fake values
