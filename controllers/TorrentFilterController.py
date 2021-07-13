@@ -42,7 +42,9 @@ def filterBySeason(torrentTitles, name, relevantSeason):
 	oneAboveRelevantSeason = str(int(relevantSeason) + 1)
 	relevantSeasonReduced = str(int(relevantSeason))
 
-	seasonRegexString = rf"{name}.*?(?:season|s).{{0,1}}(?:{relevantSeason}|{relevantSeasonReduced})+(?!episode|e|\d|-|{oneAboveRelevantSeason}| {oneAboveRelevantSeason})"
+	#"rick\D*and\D*morty.*?(?:season|s).{0,1}(?:05|5)+(?![ .]?episode|[ .]?e|\d|-|[\s]?6)"gmi
+
+	seasonRegexString = rf"{name}.*?(?:season|s).{{0,1}}(?:{relevantSeason}|{relevantSeasonReduced})+(?![ .]?episode|[ .]?e|\d|-|\s?{oneAboveRelevantSeason})"
 	logging.info(f"Season regex filter used: {seasonRegexString}")
 	seasonRegex = re.compile(
 		seasonRegexString, flags=re.IGNORECASE | re.MULTILINE | re.X)
