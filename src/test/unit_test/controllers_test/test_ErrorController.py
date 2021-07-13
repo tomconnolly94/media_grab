@@ -13,7 +13,7 @@ from src.dataTypes.MailItem import MailItemType
 
 class TestErrorController(unittest.TestCase):
 
-    @mock.patch("interfaces.MailInterface.getInstance")
+    @mock.patch("src.interfaces.MailInterface.getInstance")
     @mock.patch("logging.getLoggerClass")
     @mock.patch("logging.error")
     @mock.patch("inspect.getframeinfo")

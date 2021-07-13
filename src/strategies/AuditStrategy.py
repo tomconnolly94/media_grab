@@ -32,6 +32,29 @@ class AuditStrategy:
 
         return fileSystemSubItems[0]
 
+    
+    def getTargetFile(self, fileSystemItem):
+        """
+        getTargetFile gets the target media file of interest from a file system item, which could be the target file, or could be the directory that the target file is in
+        :testedWith: TestCompletedDownloadsController:test_getTargetFile
+        :param fileSystemItem: the file system item, it could be a directory or a file
+        :return: the file system item if it is a file or if it is a directory then the largest file in that directory
+        """
+        if FolderInterface.directoryExists(fileSystemItem.path):  # check if the fileSystemItem is a directory or a file
+            # we assume that the target file is the largest file
+            targetFile = AuditUtilities.getLargestItemInDir(
+                fileSystemItem.path)
+
+            if targetFile:
+                logging.info(
+                    f"{fileSystemItem.name} is a directory. The file {targetFile.name} has been extracted as the media item of interest.")
+                return targetFile
+
+            ErrorController.reportError(
+                f"The fileSystemItem: {fileSystemItem.name} is a directory but a targetFile could not be extracted. Skipping...")
+            return None
+        return fileSystemItem
+
 
     def getTargetFiles(self, fileSystemItem):
         """
@@ -118,7 +141,7 @@ class AuditStrategy:
         return True
 
 
-    def postMoveDirectoryCleanup(downloadId, targetFile, fileSystemItem, containerDir):
+    def postMoveDirectoryCleanup(self, downloadId, targetFile, fileSystemItem, containerDir):
 
         try:
             # if fileSystemItem is a directory, then clean up the directory and the rest of the contents
@@ -135,7 +158,7 @@ class AuditStrategy:
                 "Exception occurred when cleaning up directories", exception=exception, sendEmail=True)
 
 
-    def requestTorrentPause(torrentName):
+    def requestTorrentPause(self, torrentName):
         """
         requestTorrentPause requests that the torrent client pauses the activity of the torrent
         :testedWith: TestCompletedDownloadsController:test_requestTorrentPause

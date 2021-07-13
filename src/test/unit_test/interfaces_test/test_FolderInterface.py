@@ -26,7 +26,7 @@ def getEnvMockFunc(param):
 
 class TestFolderInterface(unittest.TestCase):
 
-    @mock.patch('interfaces.FolderInterface.deleteDir')
+    @mock.patch('src.interfaces.FolderInterface.deleteDir')
     @mock.patch('logging.info')
     @mock.patch('shutil.move')
     @mock.patch('os.getenv')

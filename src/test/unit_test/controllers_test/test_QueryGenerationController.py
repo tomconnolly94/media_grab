@@ -10,8 +10,8 @@ from src.dataTypes.MediaInfoRecord import MediaInfoRecord
 
 class TestQueryGenerationController(unittest.TestCase):
 
-    @mock.patch("controllers.QueryGenerationController.generateTVSeasonQuery")
-    @mock.patch("controllers.QueryGenerationController.generateTVEpisodeQueryGroup")
+    @mock.patch("src.controllers.QueryGenerationController.generateTVSeasonQuery")
+    @mock.patch("src.controllers.QueryGenerationController.generateTVEpisodeQueryGroup")
     def test_addTVEpisodeQueriesToMediaInfoRecords(self, generateTVEpisodeQueryGroupMock, generateTVSeasonQueryMock):
 
         # config fake data

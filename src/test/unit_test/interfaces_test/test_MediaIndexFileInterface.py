@@ -64,7 +64,7 @@ class TestMediaIndexFileInterface(unittest.TestCase):
 
         self.assertEqual(None, updatedMedia)
 
-    @mock.patch("interfaces.TheMovieDatabaseInterface.getInstance")
+    @mock.patch("src.interfaces.TheMovieDatabaseInterface.getInstance")
     def test_incrementEpisode(self, theMovieDatabaseInterfaceGetInstanceMock):
 
         # config inputs

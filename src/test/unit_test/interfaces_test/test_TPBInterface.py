@@ -13,9 +13,9 @@ from src.dataTypes.TorrentRecord import TorrentRecord
 
 class TestTPBInterface(unittest.TestCase):
 
-    @mock.patch("controllers.TorrentFilterController.filterTorrents")
+    @mock.patch("src.controllers.TorrentFilterController.filterTorrents")
     @mock.patch("logging.info")
-    @mock.patch("interfaces.TPBInterface.queryAPI")
+    @mock.patch("src.interfaces.TPBInterface.queryAPI")
     def test_getTorrentRecords(self, queryMock, loggingInfoMock, filterTorrentsMock):
         
         # config fake data
