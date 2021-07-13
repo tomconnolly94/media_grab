@@ -12,7 +12,7 @@ from src.controllers import CompletedDownloadsController
 from src.dataTypes.ProgramMode import PROGRAM_MODE
 from src.dataTypes.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
 from strategies.AuditSeasonStrategy import AuditSeasonStrategy
-from test.unit_test.testUtilities import FakeFileSystemItem, cleanUpDirs, getEnvMockFunc
+#from test.unit_test.testUtilities import FakeFileSystemItem, cleanUpDirs, getEnvMockFunc
 
 # fake directories for use across multiple tests
 fakeTargetTvDir = "test/dummy_directories/tv"
