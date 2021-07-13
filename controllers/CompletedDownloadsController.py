@@ -316,8 +316,8 @@ def auditFileSystemItemForSeason(fileSystemItem):
     for targetFile in targetFiles:
         episodeNumber = extractEpisodeNumber(targetFile.name)
         targetFileDownloadId = f"{downloadId}e{episodeNumber}"
-        if(not moveFile(
-                targetFile, fileSystemItem, targetFileDownloadId)):
+        if not moveFile(
+                targetFile, fileSystemItem, targetFileDownloadId):
             return False
 
     if downloadWasInitiatedByMediaGrab(downloadId) and containerDir:
