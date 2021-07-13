@@ -11,317 +11,19 @@ from datetime import datetime, timedelta
 from src.controllers import CompletedDownloadsController
 from src.dataTypes.ProgramMode import PROGRAM_MODE
 from src.dataTypes.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
+from strategies.AuditEpisodeStrategy import AuditEpisodeStrategy
 from strategies.AuditSeasonStrategy import AuditSeasonStrategy
-
-# fake directories for use across multiple tests
-fakeTargetTvDir = "test/dummy_directories/tv"
-fakeDumpCompleteDir = "test/dummy_directories/dump_complete"
-fakeRecycleBinDir = "test/dummy_directories/recycle_bin"
-
-class FakeFileSystemItem:
-    
-    def __init__(self, dirName, path):
-        self.name = dirName
-        self.path = path
-
-# re-usable getEnvMock function
-def getEnvMockFunc(param):
-    if param == "TV_TARGET_DIR":
-        return fakeTargetTvDir
-    elif param == "DUMP_COMPLETE_DIR":
-        return fakeDumpCompleteDir
-    elif param == "RECYCLE_BIN_DIR":
-        return fakeRecycleBinDir
-    else:
-        assert(None)
-
-        
-def cleanUpDirs(directories, downloadingItems):
-    for directory in directories:
-        for root, dirs, files in os.walk(directory):
-            for file in files:
-                os.remove(os.path.join(root, file))
-
-            for directory in dirs:
-                shutil.rmtree(os.path.join(root, directory))
-
+from test.unit_test.testUtilities import FakeFileSystemItem, cleanUpDirs, getEnvMockFunc, fakeRecycleBinDir, fakeTargetTvDir, fakeDumpCompleteDir
 
 class TestCompletedDownloadsController(unittest.TestCase):
 
-    @mock.patch("logging.info")
-    @mock.patch("interfaces.QBittorrentInterface.getInstance")
-    def test_requestTorrentPause(self, qbittorrentInterfaceGetInstanceMock, loggingInfoMock):        
-
-        # config fake data
-        fakeTorrentName = "fakeTorrentName"
-
-        # config mocks        
-        qbittorrentInterfaceInstanceMock = MagicMock() # create mock for instance
-        # assign mocked instance to return_value for mocked getInstance()
-        qbittorrentInterfaceGetInstanceMock.return_value = qbittorrentInterfaceInstanceMock
-        qbittorrentInterfaceInstanceMock.pauseTorrent = MagicMock()
-        qbittorrentInterfaceInstanceMock.pauseTorrent.side_effect = [True, False]
-
-        # call testable function - run 1
-        CompletedDownloadsController.requestTorrentPause(fakeTorrentName)
-
-        # asserts
-        qbittorrentInterfaceGetInstanceMock.assert_called_with()
-        qbittorrentInterfaceInstanceMock.pauseTorrent.assert_called_with(fakeTorrentName)
-        loggingInfoMock.assert_called_with(f"Paused torrent activity: ({fakeTorrentName})")
-
-        # reset mocks
-        qbittorrentInterfaceGetInstanceMock.reset_mock()
-        qbittorrentInterfaceInstanceMock.pauseTorrent.reset_mock()
-        loggingInfoMock.reset_mock()
-        
-        # call testable function - run 2
-        CompletedDownloadsController.requestTorrentPause(fakeTorrentName)
-
-        # asserts
-        qbittorrentInterfaceGetInstanceMock.assert_called_with()
-        qbittorrentInterfaceInstanceMock.pauseTorrent.assert_called_with(fakeTorrentName)
-        loggingInfoMock.assert_called_with(f"Failed to pause torrent activity: ({fakeTorrentName})")
-
-
-    @mock.patch("logging.info")
-    @mock.patch("controllers.ErrorController.reportError")
-    @mock.patch("controllers.CompletedDownloadsControllerUtilities.getLargestItemInDir")
-    @mock.patch("interfaces.FolderInterface.directoryExists")
-    def test_getTargetFile(self, directoryExistsMock, getLargestItemInDirMock, reportErrorMock, loggingInfoMock):
-        
-        # config fake values
-        fakeFileSystemItem = FakeFileSystemItem("fakeDirName1", "fakePath1")
-        fakeTargetFile = FakeFileSystemItem("fakeDirName2", "fakePath2")
-
-        # config mocks
-        directoryExistsMock.side_effect = [True, False, True]
-        getLargestItemInDirMock.return_value = fakeTargetFile
-
-        # call testable function - run 1: fileSystemItem is a directory and largest file is returned successfully
-        actualTargetFile = CompletedDownloadsController.getTargetFile(fakeFileSystemItem)
-
-        # asserts
-        directoryExistsMock.assert_called_with(fakeFileSystemItem.path)
-        getLargestItemInDirMock.assert_called_with(fakeFileSystemItem.path)
-        loggingInfoMock.assert_called_with(f"{fakeFileSystemItem.name} is a directory. The file {fakeTargetFile.name} has been extracted as the media item of interest.")
-        reportErrorMock.assert_not_called()
-        self.assertEqual(fakeTargetFile, actualTargetFile)
-
-
-        # reset mocks
-        getLargestItemInDirMock.reset_mock()
-        loggingInfoMock.reset_mock()
-        reportErrorMock.reset_mock()
-
-        # call testable function - run 2: fileSystemItem is not a directory
-        actualTargetFile = CompletedDownloadsController.getTargetFile(fakeFileSystemItem)
-
-        # asserts
-        directoryExistsMock.assert_called_with(fakeFileSystemItem.path)
-        getLargestItemInDirMock.assert_not_called()
-        loggingInfoMock.assert_not_called()
-        reportErrorMock.assert_not_called()
-        self.assertEqual(fakeFileSystemItem, actualTargetFile)
-
-
-        # reset mocks
-        getLargestItemInDirMock.reset_mock()
-        getLargestItemInDirMock.return_value = None
-        loggingInfoMock.reset_mock()
-        reportErrorMock.reset_mock()
-
-        # call testable function - run 3: targetFile could not be extracted from directory
-        actualTargetFile = CompletedDownloadsController.getTargetFile(fakeFileSystemItem)
-
-        # asserts
-        directoryExistsMock.assert_called_with(fakeFileSystemItem.path)
-        getLargestItemInDirMock.assert_called_with(fakeFileSystemItem.path)
-        loggingInfoMock.assert_not_called()
-        reportErrorMock.assert_called_with(f"The fileSystemItem: {fakeFileSystemItem.name} is a directory but a targetFile could not be extracted. Skipping...")
-        self.assertEqual(None, actualTargetFile)
-
-    @mock.patch("controllers.CompletedDownloadsControllerUtilities.ensureDirStructureExists")
-    @mock.patch("controllers.CompletedDownloadsControllerUtilities.extractEpisodeNumber")
-    @mock.patch("controllers.CompletedDownloadsControllerUtilities.extractSeasonNumber")
-    @mock.patch("controllers.CompletedDownloadsControllerUtilities.extractShowName")
-    @mock.patch("os.getenv")
-    def test_getProspectiveFilePath(self, osGetentMock, extractShowNameMock, extractSeasonNumberMock, extractEpisodeNumberMock, ensureDirStructureExistsMock):
-
-        # config fake data
-        fakeTargetTvDir = "fakeTargetTvDir"
-        fakeShowName = "Fakeshowname"
-        fakeSeasonNumber = 2
-        fakeEpisodeNumber = 2
-        fakeMediaGrabId = f"{fakeShowName}--s{fakeSeasonNumber}e{fakeEpisodeNumber}"
-        mode = PROGRAM_MODE.TV
-        fakeExtension = ".mp4"
-        fakeSeasonDir = f"Season {fakeSeasonNumber}"
-
-        # expected values
-        expectedProspectiveFilePath = os.path.join(fakeTargetTvDir, fakeShowName, fakeSeasonDir, f"{fakeShowName} - S0{fakeSeasonNumber}E0{fakeEpisodeNumber}{fakeExtension}")
-        expectedTvShowDir = os.path.join(fakeTargetTvDir, fakeShowName)
-        expectedSeasonDir = os.path.join(expectedTvShowDir, fakeSeasonDir)
-
-        # config mocks
-        osGetentMock.return_value = fakeTargetTvDir
-        extractShowNameMock.return_value = fakeShowName
-        extractSeasonNumberMock.return_value = fakeSeasonNumber
-        extractEpisodeNumberMock.return_value = fakeEpisodeNumber
-
-        # run testable function - run 1: success
-        actualProspectiveFilePath = CompletedDownloadsController.getProspectiveFilePath(
-            fakeMediaGrabId, mode, fakeExtension)
-
-        # asserts
-        self.assertEqual(expectedProspectiveFilePath,
-                         actualProspectiveFilePath)
-        osGetentMock.assert_called_with(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
-        extractShowNameMock.assert_called_with(fakeMediaGrabId)
-        extractSeasonNumberMock.assert_called_with(fakeMediaGrabId)
-        extractEpisodeNumberMock.assert_called_with(fakeMediaGrabId)
-        ensureDirStructureExistsMock.assert_called_with(
-            expectedTvShowDir, expectedSeasonDir)
-
-        # reconfig mocks
-        osGetentMock.return_value = fakeTargetTvDir
-        extractShowNameMock.return_value = fakeShowName
-        extractSeasonNumberMock.return_value = None
-        extractEpisodeNumberMock.return_value = fakeEpisodeNumber
-        ensureDirStructureExistsMock.reset_mock()
-
-        # run testable function - run 2: failure
-        actualProspectiveFilePath = CompletedDownloadsController.getProspectiveFilePath(
-            fakeMediaGrabId, mode, fakeExtension)
-
-        # asserts
-        self.assertIsNone(actualProspectiveFilePath)
-        osGetentMock.assert_called_with(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
-        extractShowNameMock.assert_called_with(fakeMediaGrabId)
-        extractSeasonNumberMock.assert_called_with(fakeMediaGrabId)
-        extractEpisodeNumberMock.assert_called_with(fakeMediaGrabId)
-        ensureDirStructureExistsMock.assert_not_called()
-
-    @mock.patch("logging.info")
-    @mock.patch("os.scandir")
-    def test_unWrapQBittorrentWrapperDir(self, osScandirMock, loggingInfoMock):
-
-        # config fake values
-        fakeFileSystemItem = FakeFileSystemItem("fakeDirPath", "fakeDirName")
-        fakeFileSystemSubItems = [
-            FakeFileSystemItem("fakeSubDir1Path", "fakeSubDir1Name")
-        ]
-
-        # config mocks
-        osScandirMock.return_value = fakeFileSystemSubItems
-
-        # call testable function - run 1
-        actualSubItem = CompletedDownloadsController.unWrapQBittorrentWrapperDir(fakeFileSystemItem)
-
-        # asserts
-        self.assertEqual(fakeFileSystemSubItems[0], actualSubItem)
-
-        # reconfig mocks
-        osScandirMock.return_value = []
-
-        # call testable function - run 1
-        actualSubItem = CompletedDownloadsController.unWrapQBittorrentWrapperDir(
-            fakeFileSystemItem)
-
-        # asserts
-        loggingInfoMock.assert_called_with(
-            f"Tried to browse past the directory created by qbittorrent ({fakeFileSystemItem.path}) but nothing was found inside.")
-
-    @mock.patch("controllers.CompletedDownloadsController.postMoveDirectoryCleanup")
-    @mock.patch("controllers.CompletedDownloadsController.moveFile")
-    @mock.patch("controllers.CompletedDownloadsController.getTargetFile")
-    @mock.patch("logging.info")
-    @mock.patch("controllers.CompletedDownloadsController.requestTorrentPause")
-    @mock.patch("controllers.CompletedDownloadsController.unWrapQBittorrentWrapperDir")
-    @mock.patch("controllers.CompletedDownloadsControllerUtilities.downloadWasInitiatedByMediaGrab")
-    def test_auditFileSystemItemForEpisode(self, downloadWasInitiatedByMediaGrabMock, unWrapQBittorrentWrapperDirMock, requestTorrentPauseMock, loggingInfoMock, getTargetFileMock, moveFileMock, postMoveDirectoryCleanupMock):
-
-        # config fake values
-        fakeFileSystemItemWrapper = FakeFileSystemItem(
-            "fakeWrapperDir1Name", "fakeWrapperPath1Name")
-        fakeFileSystemItem = FakeFileSystemItem(
-            "fakeDir1Name", "fakePath1Name")
-        fakeTargetFile = FakeFileSystemItem(
-            "fakeTargetFileDir1Name", "fakeTargetFilePath1Name")
-
-        # config mocks
-        unWrapQBittorrentWrapperDirMock.return_value = fakeFileSystemItem
-        getTargetFileMock.return_value = fakeTargetFile
-        downloadWasInitiatedByMediaGrabMock.return_value = True
-        moveFileMock.return_value = True
-        postMoveDirectoryCleanupMock.return_value = True
-
-
-        # run testable function - run 1: successful run
-        result = CompletedDownloadsController.auditFileSystemItemForEpisode(
-            fakeFileSystemItemWrapper)
-
-        # asserts
-        self.assertTrue(result)
-        downloadWasInitiatedByMediaGrabMock.assert_called_with(
-            fakeFileSystemItemWrapper.name)
-        unWrapQBittorrentWrapperDirMock.assert_called_with(
-            fakeFileSystemItemWrapper)
-        getTargetFileMock.assert_called_with(fakeFileSystemItem)
-        requestTorrentPauseMock.assert_called_with(fakeFileSystemItem.name)
-        loggingCalls = [
-            call(
-                f"{fakeFileSystemItem.name} has finished downloading and will be moved."),
-        ]
-        loggingInfoMock.assert_has_calls(loggingCalls)
-        moveFileMock.assert_called_with(
-            fakeTargetFile, fakeFileSystemItem, fakeFileSystemItemWrapper.name, fakeFileSystemItemWrapper.path)
-        postMoveDirectoryCleanupMock.assert_called_with(
-            fakeFileSystemItemWrapper.name, fakeTargetFile, fakeFileSystemItem, fakeFileSystemItemWrapper.path)
-
-    # @mock.patch("controllers.CompletedDownloadsController.downloadWasInitiatedByMediaGrab")
-    # @mock.patch("interfaces.FolderInterface.recycleOrDeleteDir")
-    # @mock.patch("os.rmdir")
-    @mock.patch("os.rename")
-    @mock.patch("interfaces.FolderInterface.fileExists")
-    @mock.patch("controllers.CompletedDownloadsController.getProspectiveFilePath")
-    @mock.patch("controllers.CompletedDownloadsControllerUtilities.extractExtension")
-    @mock.patch("logging.info")
-    def test_moveFile(self, loggingInfoMock, extractExtensionMock, getProspectiveFilePathMock, fileExistsMock, osRenameMock):
-
-        # config fake values
-        fakeFileSystemItem = FakeFileSystemItem(
-            "fakeDir1Name", "fakePath1Name")
-        fakeTargetFile = FakeFileSystemItem(
-            "fakeTargetFileDir1Name", "fakeTargetFilePath1Name")
-        fakeExtension = ".mp4"
-        fakeProspectiveFile = "fakeProspectiveFile"
-
-        # config mocks
-        extractExtensionMock.return_value = fakeExtension
-        getProspectiveFilePathMock.return_value = fakeProspectiveFile
-        fileExistsMock.return_value = False
-
-        # run testable function - run 1: successful run
-        CompletedDownloadsController.moveFile(fakeTargetFile, fakeFileSystemItem, fakeFileSystemItem.name, fakeFileSystemItem.path)
-
-        # asserts
-        loggingInfoMock.assert_called_with(
-            f"Moved '{fakeTargetFile.path}' to '{fakeProspectiveFile}'")
-        extractExtensionMock.assert_called_with(fakeTargetFile.name)
-        getProspectiveFilePathMock.assert_called_with(
-            fakeFileSystemItem.name, PROGRAM_MODE.TV, fakeExtension)
-        fileExistsMock.assert_called_with(fakeProspectiveFile)
-        osRenameMock.assert_called_with(
-            fakeTargetFile.path, fakeProspectiveFile)
-
     @mock.patch("src.controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems")
-    @mock.patch("src.strategies.AuditSeasonStrategy.AuditSeasonStrategy")
-    @mock.patch("src.strategies.AuditEpisodeStrategy.AuditEpisodeStrategy")
+    @mock.patch("src.strategies.AuditSeasonStrategy.AuditSeasonStrategy.audit")
+    @mock.patch("src.strategies.AuditEpisodeStrategy.AuditEpisodeStrategy.audit")
     @mock.patch("src.interfaces.FolderInterface.getDirContents")
     @mock.patch('os.getenv')
     @mock.patch("logging.info")
-    def test_auditDumpCompleteDir(self, loggingInfoMock, getEnvMock, getDirContentsMock, AuditSeasonStrategyMock, AuditEpisodeStrategyMock, permanentlyDeleteExpiredItemsMock):
+    def test_auditDumpCompleteDir(self, loggingInfoMock, getEnvMock, getDirContentsMock, AuditEpisodeStrategyAuditMock, AuditSeasonStrategyAuditMock, permanentlyDeleteExpiredItemsMock):
 
         # config fake data
         fakeDirName = "fakeDirName1"
@@ -334,13 +36,10 @@ class TestCompletedDownloadsController(unittest.TestCase):
         getDirContentsMock.return_value = fakeFileSystemItems
         getEnvMock.side_effect = getEnvMockFunc
 
-        # AuditSeasonStrategyMockObj = MagicMock()
-        # AuditSeasonStrategyMockObj.audit = 
-        AuditSeasonStrategyMock = MagicMock
-        AuditEpisodeStrategyMock = MagicMock
+        AuditEpisodeStrategyAuditMock.return_value = True
+        AuditSeasonStrategyAuditMock.return_value = True
 
-        with patch.object(AuditSeasonStrategy, "", return_value=MagicMock()):
-            CompletedDownloadsController.auditDumpCompleteDir()
+        CompletedDownloadsController.auditDumpCompleteDir()
 
         # asserts
         loggingInfoCalls = [
@@ -351,10 +50,10 @@ class TestCompletedDownloadsController(unittest.TestCase):
         getDirContentsMock.assert_called_with(fakeDumpCompleteDir)
         permanentlyDeleteExpiredItemsMock.assert_called()
 
-    @mock.patch("controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems")
-    @mock.patch("interfaces.QBittorrentInterface.getInstance")
+    @mock.patch("src.controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems")
+    @mock.patch("src.interfaces.QBittorrentInterface.getInstance")
     @mock.patch("logging.info")
-    @mock.patch("controllers.CompletedDownloadsControllerUtilities.reportItemAlreadyExists")
+    @mock.patch("src.utilities.AuditUtilities.reportItemAlreadyExists")
     @mock.patch('os.getenv')
     def test_auditFilesWithFileSystem(self, getEnvMock, reportItemAlreadyExistsMock, loggingInfoMock, qBittorrentInterfaceGetInstanceMock, permanentlyDeleteExpiredItemsMock):
 
@@ -430,15 +129,16 @@ class TestCompletedDownloadsController(unittest.TestCase):
             cleanUpDirs(directoriesToCleanUp, downloadingItems)
             pass
                         
-    @mock.patch('interfaces.FolderInterface.deleteFile')
-    @mock.patch('interfaces.FolderInterface.deleteDir')
+    @mock.patch('src.interfaces.FolderInterface.deleteFile')
+    @mock.patch('src.interfaces.FolderInterface.deleteDir')
     @mock.patch('os.path.getctime')
-    @mock.patch('interfaces.FolderInterface.getDirContents')
-    def test_permanentlyDeleteExpiredItems(self, getDirContentsMock, getctimeMock, deleteDirMock, deleteFileMock):
+    @mock.patch('src.interfaces.FolderInterface.getDirContents')
+    @mock.patch('os.getenv')
+    def test_permanentlyDeleteExpiredItems(self, getEnvMock, getDirContentsMock, getctimeMock, deleteDirMock, deleteFileMock):
 
         logsDir = "logs"
 
-        def getDirContents(directory):
+        def fakeGetDirContents(directory):
 
             assert(directory in [fakeRecycleBinDir, logsDir])
 
@@ -448,13 +148,14 @@ class TestCompletedDownloadsController(unittest.TestCase):
             ]
 
         # config mocks
-        getDirContentsMock.side_effect = getDirContents
+        getDirContentsMock.side_effect = fakeGetDirContents
         getctimeMock.side_effect = [
             (datetime.now() - timedelta(weeks=5)).timestamp(), # 5 weeks old
             (datetime.now() - timedelta(weeks=3)).timestamp(), # 3 weeks old
             (datetime.now() - timedelta(days=8)).timestamp(), # 8 days old
             (datetime.now() - timedelta(days=6)).timestamp(), # 6 days old
         ]
+        getEnvMock.side_effect = getEnvMockFunc
         
         # run testable function
         CompletedDownloadsController.permanentlyDeleteExpiredItems()
