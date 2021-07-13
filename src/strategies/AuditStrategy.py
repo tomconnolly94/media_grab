@@ -14,9 +14,6 @@ from src.utilities import AuditUtilities
 
 class AuditStrategy:
 
-    def __init__(self):
-        pass
-
 
     def unWrapQBittorrentWrapperDir(self, fileSystemItem):
         """

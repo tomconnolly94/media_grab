@@ -4,13 +4,15 @@ import mock
 import os
 from unittest.mock import call
 import shutil
-from mock import MagicMock
+from mock import MagicMock, patch
 from datetime import datetime, timedelta
 
 # internal dependencies
 from src.controllers import CompletedDownloadsController
 from src.dataTypes.ProgramMode import PROGRAM_MODE
 from src.dataTypes.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
+from strategies.AuditSeasonStrategy import AuditSeasonStrategy
+from test.unit_test.testUtilities import FakeFileSystemItem, cleanUpDirs, getEnvMockFunc
 
 # fake directories for use across multiple tests
 fakeTargetTvDir = "test/dummy_directories/tv"
@@ -314,13 +316,13 @@ class TestCompletedDownloadsController(unittest.TestCase):
         osRenameMock.assert_called_with(
             fakeTargetFile.path, fakeProspectiveFile)
 
-    @mock.patch("controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems")
-    @mock.patch("controllers.CompletedDownloadsControllerUtilities.downloadWasInitiatedByMediaGrab")
-    @mock.patch("controllers.CompletedDownloadsController.auditFileSystemItemForEpisode")
-    @mock.patch("interfaces.FolderInterface.getDirContents")
+    @mock.patch("src.controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems")
+    @mock.patch("src.strategies.AuditSeasonStrategy.AuditSeasonStrategy")
+    @mock.patch("src.strategies.AuditEpisodeStrategy.AuditEpisodeStrategy")
+    @mock.patch("src.interfaces.FolderInterface.getDirContents")
     @mock.patch('os.getenv')
     @mock.patch("logging.info")
-    def test_auditDumpCompleteDir(self, loggingInfoMock, getEnvMock, getDirContentsMock, auditFileSystemItemForEpisodeMock, downloadWasInitiatedByMediaGrabMock, permanentlyDeleteExpiredItemsMock):
+    def test_auditDumpCompleteDir(self, loggingInfoMock, getEnvMock, getDirContentsMock, AuditSeasonStrategyMock, AuditEpisodeStrategyMock, permanentlyDeleteExpiredItemsMock):
 
         # config fake data
         fakeDirName = "fakeDirName1"
@@ -331,10 +333,15 @@ class TestCompletedDownloadsController(unittest.TestCase):
 
         # config mocks
         getDirContentsMock.return_value = fakeFileSystemItems
-        downloadWasInitiatedByMediaGrabMock.return_value = True
         getEnvMock.side_effect = getEnvMockFunc
 
-        CompletedDownloadsController.auditDumpCompleteDir()
+        # AuditSeasonStrategyMockObj = MagicMock()
+        # AuditSeasonStrategyMockObj.audit = 
+        AuditSeasonStrategyMock = MagicMock
+        AuditEpisodeStrategyMock = MagicMock
+
+        with patch.object(AuditSeasonStrategy, "", return_value=MagicMock()):
+            CompletedDownloadsController.auditDumpCompleteDir()
 
         # asserts
         loggingInfoCalls = [
@@ -343,8 +350,6 @@ class TestCompletedDownloadsController(unittest.TestCase):
         ]
         loggingInfoMock.assert_has_calls(loggingInfoCalls)
         getDirContentsMock.assert_called_with(fakeDumpCompleteDir)
-        auditFileSystemItemForEpisodeMock.assert_called_with(
-            fakeFileSystemItems[0])
         permanentlyDeleteExpiredItemsMock.assert_called()
 
     @mock.patch("controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems")

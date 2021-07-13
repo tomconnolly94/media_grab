@@ -10,8 +10,6 @@ from src.utilities import AuditUtilities
 
 class AuditEpisodeStrategy(AuditStrategy):
 
-    def __init__(self):
-        super(AuditEpisodeStrategy, self).__init__()
 
     def audit(self, fileSystemItem):
         """

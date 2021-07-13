@@ -11,8 +11,6 @@ from src.utilities import AuditUtilities
 
 class AuditSeasonStrategy(AuditStrategy):
 
-    def __init__(self):
-        super(AuditSeasonStrategy, self).__init__()
 
     def audit(self, fileSystemItem):
         """
