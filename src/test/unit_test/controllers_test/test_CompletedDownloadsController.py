@@ -18,12 +18,12 @@ from test.unit_test.testUtilities import FakeFileSystemItem, cleanUpDirs, getEnv
 class TestCompletedDownloadsController(unittest.TestCase):
 
     @mock.patch("src.controllers.CompletedDownloadsController.permanentlyDeleteExpiredItems")
-    @mock.patch("src.strategies.AuditSeasonStrategy.AuditSeasonStrategy")
-    @mock.patch("src.strategies.AuditEpisodeStrategy.AuditEpisodeStrategy")
+    @mock.patch("src.strategies.AuditSeasonStrategy.AuditSeasonStrategy.audit")
+    @mock.patch("src.strategies.AuditEpisodeStrategy.AuditEpisodeStrategy.audit")
     @mock.patch("src.interfaces.FolderInterface.getDirContents")
     @mock.patch('os.getenv')
     @mock.patch("logging.info")
-    def test_auditDumpCompleteDir(self, loggingInfoMock, getEnvMock, getDirContentsMock, AuditSeasonStrategyMock, AuditEpisodeStrategyMock, permanentlyDeleteExpiredItemsMock):
+    def test_auditDumpCompleteDir(self, loggingInfoMock, getEnvMock, getDirContentsMock, AuditEpisodeStrategyAuditMock, AuditSeasonStrategyAuditMock, permanentlyDeleteExpiredItemsMock):
 
         # config fake data
         fakeDirName = "fakeDirName1"
@@ -36,13 +36,10 @@ class TestCompletedDownloadsController(unittest.TestCase):
         getDirContentsMock.return_value = fakeFileSystemItems
         getEnvMock.side_effect = getEnvMockFunc
 
-        # AuditSeasonStrategyMockObj = MagicMock()
-        # AuditSeasonStrategyMockObj.audit = 
-        AuditSeasonStrategyMock = MagicMock
-        AuditEpisodeStrategyMock = MagicMock
+        AuditEpisodeStrategyAuditMock.return_value = True
+        AuditSeasonStrategyAuditMock.return_value = True
 
-        with patch.object(AuditSeasonStrategy, return_value=MagicMock()):
-            CompletedDownloadsController.auditDumpCompleteDir()
+        CompletedDownloadsController.auditDumpCompleteDir()
 
         # asserts
         loggingInfoCalls = [

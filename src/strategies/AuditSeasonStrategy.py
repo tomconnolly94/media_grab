@@ -23,22 +23,19 @@ class AuditSeasonStrategy(AuditStrategy):
         downloadId = fileSystemItem.name
         containerDir = fileSystemItem.path
         if AuditUtilities.downloadWasInitiatedByMediaGrab(downloadId):
-            fileSystemItem = super(AuditSeasonStrategy,
-                                   self).unWrapQBittorrentWrapperDir(fileSystemItem)
+            fileSystemItem = super().unWrapQBittorrentWrapperDir(fileSystemItem)
 
         if not fileSystemItem:
             return False
 
-        targetFiles = super(
-            AuditSeasonStrategy, self).getTargetFiles(fileSystemItem)
+        targetFiles = super().getTargetFiles(fileSystemItem)
 
         # if target files could not be extracted, skip this fileSystemItem
         if not targetFiles:
             return False
 
         # pause torrent to prevent unneccessary seeding
-        super(AuditSeasonStrategy,
-              self).requestTorrentPause(fileSystemItem.name)
+        super().requestTorrentPause(fileSystemItem.name)
 
         logging.info(
             f"{fileSystemItem.name} has finished downloading and will be moved.")
@@ -47,8 +44,7 @@ class AuditSeasonStrategy(AuditStrategy):
             episodeNumber = AuditUtilities.extractEpisodeNumber(
                 targetFile.name)
             targetFileDownloadId = f"{downloadId}e{episodeNumber}"
-            if(not super(
-                AuditSeasonStrategy, self).moveFile(
+            if(not super().moveFile(
                     targetFile, fileSystemItem, targetFileDownloadId)):
                 return False
 
@@ -56,8 +52,7 @@ class AuditSeasonStrategy(AuditStrategy):
             # handle deletion of the container directory created by qbittorrent
             try:
                 # TODO: what is targetFile? this needs to be refactored, so
-                if not super(
-                    AuditSeasonStrategy, self).postMoveDirectoryCleanup(downloadId, None,
+                if not super().postMoveDirectoryCleanup(downloadId, None,
                                                 fileSystemItem, containerDir):
                     return False
             except OSError as exception:

@@ -24,7 +24,7 @@ def auditDumpCompleteDir():
     logging.info("File auditing started.")
     dumpCompleteDir = os.getenv("DUMP_COMPLETE_DIR")
     fileSystemItemsFromDirectory = FolderInterface.getDirContents(dumpCompleteDir)
-    
+
     logging.info(
         f"Items in dump_complete directory: {[item.name for item in fileSystemItemsFromDirectory] }")
 
