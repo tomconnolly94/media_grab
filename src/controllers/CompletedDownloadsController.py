@@ -12,7 +12,7 @@ from src.interfaces import FolderInterface
 
 def auditDumpCompleteDir():
     """
-    auditDumpCompleteDir wrapper, entry function to this module to collate all operations necessary for download directory auditing
+    auditDumpCompleteDir wrapper, entry function to audit functionality to collate all operations necessary for download directory auditing
     :testedWith: TestCompletedDownloadsController:test_auditFilesWithFileSystem
     :return: None
     """
