@@ -6,7 +6,7 @@ from mock import MagicMock
 
 # internal dependencies
 from src.interfaces.QBittorrentInterface import QBittorrentInterface
-from src.dataTypes.TorrentRecord import TorrentRecord
+from src.dataTypes.TorrentRecord import TorrentCategory, TorrentRecord
 from src.dataTypes.MediaInfoRecord import MediaInfoRecord
 
 class TestQBittorrentInterface(unittest.TestCase):
@@ -16,8 +16,9 @@ class TestQBittorrentInterface(unittest.TestCase):
     def test_initTorrentDownload(self, getEnvMock, loggingInfoMock):
 
         # config fake values
-        fakeTorrent = TorrentRecord("fakeTorrentName1", "id", "fakeInfoHash", 2)
+        fakeTorrent = TorrentRecord("fakeTorrentName1", "id", "fakeInfoHash", 2, 3, TorrentCategory.TV_SEASON)
         fakeMediaInfoRecord = MediaInfoRecord("fakeShowName", 1, 2, [], fakeTorrent)
+        fakeMediaInfoRecord.setTorrentRecord(fakeTorrent)
         fakeDumpCompleteDir = "/fake/dump/complete/dir"
 
         # create testable object and override the qb member

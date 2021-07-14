@@ -16,20 +16,8 @@ class MediaInfoRecord():
 
     ########## accessor functions start ##########
 
-    def getMediaGrabId(self):
-        episodeMediaGrabId = f"{self.__showName}--s{self.__latestSeasonNumber}e{self.__latestEpisodeNumber}"
-        if self.__torrentRecord.getCategory == TorrentCategory.TV_SEASON:
-            episodeMediaGrabId = f"{self.__showName}--s{self.__latestSeasonNumber}"
-
-        return episodeMediaGrabId
-
-
     def getShowName(self):
         return self.__showName
-
-
-    def getTorrentRecord(self):
-        return self.__torrentRecord
 
 
     def getLatestSeasonNumber(self):
@@ -40,12 +28,28 @@ class MediaInfoRecord():
         return self.__latestEpisodeNumber
 
 
+    def getBlacklistTerms(self):
+        return self.__blacklistTerms
+
+
+    def getTorrentRecord(self):
+        return self.__torrentRecord
+
+
     def getMediaSearchQueries(self):
         return self.__mediaSearchQueries
 
 
-    def getBlacklistTerms(self):
-        return self.__blacklistTerms
+    def getMediaGrabId(self):
+        if not self.__torrentRecord:
+            return None
+
+        mediaGrabId = f"{self.__showName}--s{self.__latestSeasonNumber}e{self.__latestEpisodeNumber}"
+
+        if self.__torrentRecord.getCategory().value is TorrentCategory.TV_SEASON.value:
+            mediaGrabId = f"{self.__showName}--s{self.__latestSeasonNumber}"
+
+        return mediaGrabId
 
     ########## accessor functions end ##########
 
