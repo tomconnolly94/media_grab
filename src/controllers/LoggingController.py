@@ -14,7 +14,7 @@ def initLogging():
     """
     logFormat = '%(asctime)s - %(levelname)s - %(message)s'
     logDateFormat = '%d-%b-%y %H:%M:%S'
-    projectBaseDir = os.path.dirname(os.path.dirname(__file__))
+    projectBaseDir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
     if os.getenv("ENVIRONMENT") == "production":
         logFilename = os.path.join(projectBaseDir, "logs", f"media-grab_{time.strftime('%d-%m-%Y_%H-%M')}.log")
