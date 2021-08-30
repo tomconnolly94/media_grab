@@ -89,6 +89,17 @@ def filterByBlacklist(mediaInfoRecord, torrentTitles):
 	return list(filter(blacklistFilterFunc, torrentTitles))
 
 
+def filterTorrentsByTitleList(torrents, titles, category):
+
+	filteredTorrents = [torrent for torrent in torrents if torrent.getName(
+	) in titles ]
+
+	for torrent in filteredTorrents:
+		torrent.setCategory(category)
+
+	return filteredTorrents
+	
+
 def filterTorrents(torrents, mediaInfoRecord):
 	"""
 	filterEpisodeTorrents applies a set of filters that involve regex matching with the download name and ensuring the number of sources exceeds one
@@ -116,18 +127,8 @@ def filterTorrents(torrents, mediaInfoRecord):
 	filteredSeasonTorrentTitles = filterBySeason(
 		blacklistFilteredTorrentTitles, name, relevantSeason)
 
-	# get a list of filtered torrentRecord objects from the torrentTitles
-	filteredEpisodeTorrents = [torrent for torrent in torrents if torrent.getName(
-	) in filteredEpisodeTorrentTitles and int(torrent.getSeeders()) > 0]
-
-	for torrent in filteredEpisodeTorrents:
-		torrent.setCategory(TorrentCategory.TV_EPISODE)
-
-	filteredSeasonTorrents = [torrent for torrent in torrents if torrent.getName(
-	) in filteredSeasonTorrentTitles and int(torrent.getSeeders()) > 0]
-
-	for torrent in filteredSeasonTorrents:
-		torrent.setCategory(TorrentCategory.TV_SEASON)
+	filteredEpisodeTorrents = filterTorrentsByTitleList(torrents, filteredEpisodeTorrentTitles, TorrentCategory.TV_EPISODE)
+	filteredSeasonTorrents = filterTorrentsByTitleList(torrents, filteredSeasonTorrentTitles, TorrentCategory.TV_SEASON)
 
 	filteredTorrents = filteredSeasonTorrents + filteredEpisodeTorrents
 	logging.info(f"{len(torrents)} torrents filtered down to {len(filteredTorrents)} ({len(filteredSeasonTorrents)} season, {len(filteredEpisodeTorrents)} episode)")

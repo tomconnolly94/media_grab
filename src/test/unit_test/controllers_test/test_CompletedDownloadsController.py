@@ -4,16 +4,14 @@ import mock
 import os
 from unittest.mock import call
 import shutil
-from mock import MagicMock, patch
+from mock import MagicMock
 from datetime import datetime, timedelta
 
 # internal dependencies
 from src.controllers import CompletedDownloadsController
 from src.dataTypes.ProgramMode import PROGRAM_MODE
-from src.dataTypes.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
-from strategies.AuditEpisodeStrategy import AuditEpisodeStrategy
-from strategies.AuditSeasonStrategy import AuditSeasonStrategy
-from test.unit_test.testUtilities import FakeFileSystemItem, cleanUpDirs, getEnvMockFunc, fakeRecycleBinDir, fakeTargetTvDir, fakeDumpCompleteDir
+from src.test.unit_test.testUtilities import FakeFileSystemItem, cleanUpDirs, getEnvMockFunc, fakeRecycleBinDir, fakeTargetTvDir, fakeDumpCompleteDir
+
 
 class TestCompletedDownloadsController(unittest.TestCase):
 
