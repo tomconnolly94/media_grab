@@ -45,8 +45,7 @@ class MailInterface():
         """
         # assign class properties if they are provided, use defaults if they are not
         self.__enterLogMessage = enterLogMessage if enterLogMessage else "MailInterface:__sendMail called."
-        self.__toEmailAddress = toEmailAddress if toEmailAddress else os.getenv(
-            "ENVIRONMENT")
+        self.__toEmailAddress = toEmailAddress if toEmailAddress else os.getenv("MAIL_NOTIFICATION_ADDRESS")
         self.__environment = environment if environment else os.getenv("ENVIRONMENT")
         self.__mailUsername = mailUsername if mailUsername else os.getenv("MAIL_USERNAME")
         self.__mailPassword = mailPassword if mailPassword else os.getenv("MAIL_PASSWORD")

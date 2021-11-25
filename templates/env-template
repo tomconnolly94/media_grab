@@ -1,0 +1,9 @@
+QBT_URL=http://127.0.0.1:8081
+QBT_USERNAME=admin
+QBT_PASSWORD=qbt_password
+MEDIA_FILE=data/MediaIndex.json
+MAIL_USERNAME=app.dev.notifications.tc@gmail.com
+MAIL_PASSWORD=mail_password
+ENVIRONMENT=production
+DUMP_COMPLETE_DIR=./dump_complete_dir
+TV_TARGET_DIR=./tv_target_dir
