@@ -18,26 +18,17 @@ RUN pip3 install -r requirements.txt
 # install env file
 RUN echo "##### ATTENTION: Please make sure you have inserted your values into env-template! #####"
 
+# make directories that the program requires
 RUN mkdir $PROJDIR/logs
 RUN mkdir $PROJDIR/data
-
-RUN ls $PROJDIR/templates
 
 # COPY .env ${PROJDIR}/.env
 COPY ./templates/env-example $PROJDIR/.env
 COPY ./templates/MediaIndex-template.json $PROJDIR/data/MediaIndex.json
 
-# install cron job
+# install cron job and config access rights
 COPY ./scripts/media_grab.cronjob /etc/cron.d/media_grab
-
-# Give execution rights on the cron job
 RUN chmod 0644 /etc/cron.d/media_grab
-# Apply cron job
-# RUN crontab /etc/cron.d/media_grab
 
-# Run the command on container startup
-#CMD cron 
-#&& tail -f $PROJDIR/logs/*
-
-# cmd that never returns, to keep the container running
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+# run cron and tail, a cmd that never returns, to keep the container running
+CMD cron -f
