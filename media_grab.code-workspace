@@ -5,7 +5,7 @@
 		}
 	],
 	"settings": {
-		"python.pythonPath": "venv/bin/python3",
+		"python.pythonPath": "media_grab-container/venv/bin/python3",
 		"pythonTestExplorer.testFramework": "unittest"
 	}
 }
