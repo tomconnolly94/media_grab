@@ -17,3 +17,21 @@ services:
       - 6881:6881/udp
       - 8080:8080
     restart: unless-stopped
+  media_grab:
+    build: ./media_grab-container
+    container_name: media_grab-container
+    restart: always
+    environment:
+      - APP_NAME=Media Grab Web app
+      - MEDIA_INDEX_FILE_LOCATION=/tmp/media_grab/data/MediaIndex.json
+      - MEDIA_GRAB_DIRECTORY=/tmp/media_grab
+    volumes:
+      - type: bind
+        source: ../media_grab
+        target: /tmp/media_grab
+        volume:
+          nocopy: true
+    expose:
+      - 8080
+    networks:
+      - media_grab_webapp_default
