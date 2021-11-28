@@ -5,7 +5,7 @@ venv*
 logs/*
 
 # data files
-data/MediaIndex.json
+MediaIndex.json
 
 # test directories
 src/test/dummy_directories/*
