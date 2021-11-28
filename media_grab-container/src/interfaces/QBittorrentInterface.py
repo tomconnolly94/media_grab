@@ -38,6 +38,8 @@ class QBittorrentInterface():
 
         if qbtUrl:
             self.__qb = Client(qbtUrl, verify=False)
+            self.__qb.login(os.getenv("QBT_USERNAME"), os.getenv("QBT_PASSWORD"))
+
             
         self.dumpCompleteDir = dumpCompleteDir if dumpCompleteDir else os.getenv("DUMP_COMPLETE_DIR")
 

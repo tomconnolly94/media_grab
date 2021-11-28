@@ -3,35 +3,52 @@ version: "2.1"
 services:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent
-    container_name: qbittorrent
+    container_name: qbittorrent-container
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/London
-      - WEBUI_PORT=8080
+      - WEBUI_PORT=${QBITTORRENT_WEBUI_PORT}
     volumes:
-      - /path/to/appdata/config:/config
-      - /path/to/downloads:/downloads
+      - ${HOST_DOWNLOADS_TEMP_DIR}:${CONTAINER_DOWNLOADS_TEMP_DIR}:rw
+      - ${HOST_DOWNLOADS_COMPLETE_DIR}:${CONTAINER_DOWNLOADS_COMPLETE_DIR}:rw
+      - ${HOST_TV_DIR}:${CONTAINER_TV_DIR}:rw
     ports:
       - 6881:6881
       - 6881:6881/udp
-      - 8080:8080
-    restart: unless-stopped
+      - ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT}
+    expose:
+      - ${QBITTORRENT_WEBUI_PORT}
+    restart: always
+    networks:
+      - media_grab_webapp_default
   media_grab:
     build: ./media_grab-container
     container_name: media_grab-container
     restart: always
     environment:
-      - APP_NAME=Media Grab Web app
-      - MEDIA_INDEX_FILE_LOCATION=/tmp/media_grab/data/MediaIndex.json
-      - MEDIA_GRAB_DIRECTORY=/tmp/media_grab
+      - APP_NAME=Media Grab
+      - QBT_URL=http://qbittorrent-container:${QBITTORRENT_WEBUI_PORT}
+      - QBT_USERNAME=admin
+      - QBT_PASSWORD=adminadmin
+      - MEDIA_FILE=data/MediaIndex.json
+      - ENVIRONMENT=production
+      - DUMP_COMPLETE_DIR=${CONTAINER_DOWNLOADS_COMPLETE_DIR}
+      - RECYCLE_BIN_DIR=${CONTAINER_RECYCLE_DIR}
+      - LOGS_DIR=logs
+      - THE_MOVIE_DATABASE_API_KEY=${THE_MOVIE_DATABASE_API_KEY}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_NOTIFICATION_ADDRESS=${MAIL_NOTIFICATION_ADDRESS}
+      - TV_TARGET_DIR=${CONTAINER_TV_DIR}
     volumes:
-      - type: bind
-        source: ../media_grab
-        target: /tmp/media_grab
-        volume:
-          nocopy: true
-    expose:
-      - 8080
+      - ${HOST_DOWNLOADS_COMPLETE_DIR}:${CONTAINER_DOWNLOADS_COMPLETE_DIR}:rw
+      - ${HOST_TV_DIR}:${CONTAINER_TV_DIR}:rw
+      - ${HOST_RECYCLE_DIR}:${CONTAINER_RECYCLE_DIR}:rw
     networks:
       - media_grab_webapp_default
+
+networks:
+  media_grab_webapp_default:
+    external:
+      name: media_grab_webapp_default

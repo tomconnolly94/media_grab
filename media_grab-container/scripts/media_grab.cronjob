@@ -3,3 +3,4 @@
 #
 # Runs media_grab at 3 hour intervals
 0 */3 * * * root cd /proj-dir; /usr/bin/python3 Main.py
+#* * * * * root cd /proj-dir; /usr/bin/python3 Main.py

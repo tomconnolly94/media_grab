@@ -3,7 +3,7 @@
 # external dependencies
 from dotenv import load_dotenv
 import os, sys
-from os.path import join, dirname
+from os.path import join, dirname, exists
 import logging
 import getopt
 
@@ -13,8 +13,12 @@ from src.interfaces import MailInterface
 from src.dataTypes.ProgramModeMap import PROGRAM_MODE_MAP
 from src.dataTypes.ProgramMode import PROGRAM_MODE
 
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
+dotenv_local_path = join(dirname(__file__), '.env')
+dotenv_global_path = "/etc/environment"
+if exists(dotenv_local_path):
+	load_dotenv(dotenv_local_path)
+if exists(dotenv_global_path): # allows docker env injection
+	load_dotenv(dotenv_global_path)
 
 #intitialise logging module
 LoggingController.initLogging()
@@ -63,7 +67,7 @@ def assertVitalEnvValuesExist():
 
 	if essentialEnvs.issubset(os.environ):
 		return True
-	exceptionText = "Some of the required env entries are not present, please review your .env file. Program exited."
+	exceptionText = f"Some of the required env entries are not present, please review your .env file. Program exited. os.environ keys: {dict(os.environ).keys()}"
 	exception = Exception(exceptionText)
 	ErrorController.reportError(exceptionText, exception=exception, sendEmail=True)
 	raise exception

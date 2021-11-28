@@ -1,1 +1,15 @@
-{"media": []}
+{
+    "media": [
+        {
+            "name": "below deck",
+            "typeSpecificData": {
+                "latestSeason": 1,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": [
+                "sailing",
+                "mediterranean"
+            ]
+        }
+    ]
+}
