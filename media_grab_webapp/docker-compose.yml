@@ -1,0 +1,51 @@
+version: "3.7"
+
+services:
+
+  flask-container:
+    build: ./flask-container
+    container_name: flask-container
+    restart: always
+    environment:
+      - APP_NAME=Media Grab Web app
+      - MEDIA_INDEX_FILE_LOCATION=/data-volume/MediaIndex.json
+      - MEDIA_GRAB_DIRECTORY=/tmp/media_grab/media_grab-container
+    volumes:
+      - type: bind
+        source: ../
+        target: /tmp/media_grab
+        volume:
+          nocopy: true
+      - media_grab-data-volume:/data-volume:rw
+    expose:
+      - 8080
+    networks:
+      - media_grab_webapp_default
+
+
+  nginx-container:
+    build: ./nginx-container
+    container_name: nginx-container
+    restart: always
+    ports:
+      - "5000:80"
+    depends_on:
+      - "flask-container"
+    networks:
+      - media_grab_webapp_default
+
+# networks:
+#   default:
+#     driver: bridge
+#     ipam:
+#       config:
+#         - subnet: 172.16.57.0/24
+
+networks:
+  media_grab_webapp_default:
+    external:
+      name: media_grab_webapp_default
+
+volumes:
+  media_grab-data-volume:
+    name: media_grab-data-volume
