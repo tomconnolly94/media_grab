@@ -63,7 +63,7 @@ def permanentlyDeleteExpiredItems():
             FolderInterface.deleteDir(directoryItem.path)
 
     # get log files from logs dir
-    logFiles = FolderInterface.getDirContents("logs")
+    logFiles = FolderInterface.getDirContents(os.getenv("LOGS_DIR"))
 
     for logFile in logFiles:
         fileCreationDate = datetime.fromtimestamp(os.path.getctime(logFile.path))

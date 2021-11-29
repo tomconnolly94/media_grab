@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# export environment variables in a file
-printenv | grep -v “no_proxy” >> /etc/environment
+# export environment variables to a file so that an app can explicitly import them later
+printenv > /etc/environment
 
-# run cron in the foreground to keep the container running
-cron -f
+# run cron in the background
+cron
+
+webappRoot=/proj-dir/webapp
+
+cd $webappRoot
+
+uwsgi app.ini
