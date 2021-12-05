@@ -26,9 +26,9 @@ RUN $WEBAPPDIR/client/node_modules/gulp/bin/gulp.js --gulpfile $WEBAPPDIR/client
 
 # make directories that the program requires
 RUN mkdir /var/log/media_grab
-RUN mkdir $PROJDIR/data
-RUN chmod 0600 /var/log/media_grab
+RUN chmod 0666 /var/log/media_grab
 
+#RUN rm /data-volume/MediaIndex.json
 COPY ./templates/MediaIndex-template.json /data-volume/MediaIndex.json
 
 # install cron job and config access rights

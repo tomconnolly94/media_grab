@@ -5,14 +5,13 @@ services:
     image: lscr.io/linuxserver/qbittorrent
     container_name: qbittorrent-container
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=0
+      - PGID=0
       - TZ=Europe/London
       - WEBUI_PORT=${QBITTORRENT_WEBUI_PORT}
     volumes:
-      - ${HOST_DOWNLOADS_TEMP_DIR}:${CONTAINER_DOWNLOADS_TEMP_DIR}:rw
-      - ${HOST_DOWNLOADS_COMPLETE_DIR}:${CONTAINER_DOWNLOADS_COMPLETE_DIR}:rw
-      - ${HOST_TV_DIR}:${CONTAINER_TV_DIR}:rw
+      - ${HOST_QBITTORRENT_CONFIG_DIR}:/config:rw
+      - samba-data-volume:/samba-volume:rw
     ports:
       - 6881:6881
       - 6881:6881/udp
@@ -34,20 +33,18 @@ services:
       - QBT_PASSWORD=adminadmin
       - MEDIA_FILE=/data-volume/MediaIndex.json
       - ENVIRONMENT=production
-      - DUMP_COMPLETE_DIR=${CONTAINER_DOWNLOADS_COMPLETE_DIR}
-      - RECYCLE_BIN_DIR=${CONTAINER_RECYCLE_DIR}
+      - DUMP_COMPLETE_DIR=/samba-volume${DOWNLOADS_COMPLETE_DIR}
+      - RECYCLE_BIN_DIR=/samba-volume${RECYCLE_DIR}
       - LOGS_DIR=/var/log/media_grab
       - THE_MOVIE_DATABASE_API_KEY=${THE_MOVIE_DATABASE_API_KEY}
       - MAIL_USERNAME=${MAIL_USERNAME}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - MAIL_NOTIFICATION_ADDRESS=${MAIL_NOTIFICATION_ADDRESS}
-      - TV_TARGET_DIR=${CONTAINER_TV_DIR}
+      - TV_TARGET_DIR=${TV_DIR}
       - MEDIA_INDEX_FILE_LOCATION=/data-volume/MediaIndex.json
       - MEDIA_GRAB_DIRECTORY=../
     volumes:
-      - ${HOST_DOWNLOADS_COMPLETE_DIR}:${CONTAINER_DOWNLOADS_COMPLETE_DIR}:rw
-      - ${HOST_TV_DIR}:${CONTAINER_TV_DIR}:rw
-      - ${HOST_RECYCLE_DIR}:${CONTAINER_RECYCLE_DIR}:rw
+      - samba-data-volume:/samba-volume:rw
       - media_grab-data-volume:/data-volume:rw
     expose:
       - 8080
@@ -73,3 +70,9 @@ networks:
 volumes:
   media_grab-data-volume:
     name: media_grab-data-volume
+  samba-data-volume:
+    name: samba-data-volume
+    driver_opts:
+      type: "cifs"
+      device: "//${SAMBA_DRIVE_IP_ADDRESS}${SAMBA_DRIVE_ROOT}"
+      o: "uid=0,gid=0,username=${SAMBA_USERNAME},password=${SAMBA_PASSWORD},file_mode=0764,dir_mode=0764"

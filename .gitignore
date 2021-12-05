@@ -60,3 +60,15 @@ MediaIndex.json
 */dummy_directories/*
 
 
+# qbittorrent-container/*
+# !*qBittorrent.conf
+
+qbittorrent-container/*
+!qbittorrent-container/config
+qbittorrent-container/config/*
+!qbittorrent-container/config/qBittorrent.conf
+
+pippo/*
+!pippo/pluto
+pippo/pluto/*
+!pippo/pluto/paperino.xml
