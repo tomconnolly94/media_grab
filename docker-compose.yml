@@ -35,14 +35,14 @@ services:
       - ENVIRONMENT=production
       - DUMP_COMPLETE_DIR=/samba-volume${DOWNLOADS_COMPLETE_DIR}
       - RECYCLE_BIN_DIR=/samba-volume${RECYCLE_DIR}
-      - LOGS_DIR=/var/log/media_grab
+      - LOGS_DIR=${LOGS_DIR}
       - THE_MOVIE_DATABASE_API_KEY=${THE_MOVIE_DATABASE_API_KEY}
       - MAIL_USERNAME=${MAIL_USERNAME}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - MAIL_NOTIFICATION_ADDRESS=${MAIL_NOTIFICATION_ADDRESS}
-      - TV_TARGET_DIR=${TV_DIR}
+      - TV_TARGET_DIR=/samba-volume${TV_DIR}
       - MEDIA_INDEX_FILE_LOCATION=/data-volume/MediaIndex.json
-      - MEDIA_GRAB_DIRECTORY=../
+      - MEDIA_GRAB_DIRECTORY=/proj-dir
     volumes:
       - samba-data-volume:/samba-volume:rw
       - media_grab-data-volume:/data-volume:rw
