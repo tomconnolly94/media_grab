@@ -16,7 +16,9 @@ docker container prune
 docker volume rm samba-data-volume
 
 # move to project root
-cd SCRIPTDIR/..
+cd $SCRIPTDIR/..
 
 # rebuild and restart containers in daemon mode
 docker-compose up --build -d
+
+cd -
