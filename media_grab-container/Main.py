@@ -14,11 +14,8 @@ from src.dataTypes.ProgramModeMap import PROGRAM_MODE_MAP
 from src.dataTypes.ProgramMode import PROGRAM_MODE
 
 dotenv_local_path = join(dirname(__file__), '.env')
-dotenv_global_path = "/etc/environment"
 if exists(dotenv_local_path):
 	load_dotenv(dotenv_local_path)
-if exists(dotenv_global_path): # allows docker env injection
-	load_dotenv(dotenv_global_path)
 
 #intitialise logging module
 LoggingController.initLogging()

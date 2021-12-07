@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # export environment variables to a file so that an app can explicitly import them later
-printenv > /etc/environment
+printenv > /proj-dir/.env
 
 # run cron in the background
 cron
