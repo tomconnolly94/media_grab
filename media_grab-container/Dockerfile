@@ -29,7 +29,7 @@ RUN mkdir /var/log/media_grab
 RUN chmod 0666 /var/log/media_grab
 
 #RUN rm /data-volume/MediaIndex.json
-COPY ./templates/MediaIndex-template.json /data-volume/MediaIndex.json
+COPY ./templates/MediaIndex-template.json /data/MediaIndex.json
 
 # install cron job and config access rights
 COPY ./scripts/media_grab.cronjob /etc/cron.d/media_grab

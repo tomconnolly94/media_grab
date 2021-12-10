@@ -1,0 +1,8 @@
+volumes:
+  media-volume:
+    name: media-volume
+    driver_opts:
+      type: "cifs"
+      device: "//${SAMBA_DRIVE_IP_ADDRESS}${SAMBA_DRIVE_ROOT}"
+      o: "uid=0,gid=0,username=${SAMBA_USERNAME},password=${SAMBA_PASSWORD},file_mode=0764,dir_mode=0764"
+  
