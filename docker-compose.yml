@@ -33,7 +33,7 @@ services:
     restart: always
     environment:
       - APP_NAME=Media Grab
-      - QBT_URL=http://qbittorrent-container:${QBITTORRENT_WEBUI_PORT}
+      - QBT_URL=http://qbittorrent-container:80
       - QBT_USERNAME=admin
       - QBT_PASSWORD=adminadmin
       - MEDIA_FILE=/data/MediaIndex.json
