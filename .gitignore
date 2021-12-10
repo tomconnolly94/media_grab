@@ -72,3 +72,6 @@ pippo/*
 !pippo/pluto
 pippo/pluto/*
 !pippo/pluto/paperino.xml
+
+# vs code
+*-workspace
