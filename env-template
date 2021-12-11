@@ -1,0 +1,21 @@
+# env to be fed into docker-compose.yml
+
+# suggested defaults
+QBITTORRENT_WEBUI_PORT=7002
+DOWNLOADS_COMPLETE_DIR=/download/dump_complete
+DOWNLOADS_TEMP_DIR=/download/dump_temp
+TV_TARGET_DIR=/TV
+RECYCLE_DIR=/download/recycle_bin
+LOGS_DIR=/var/log/media_grab
+# change this one to put your media somewhere else
+MEDIA_DIR=media
+
+# you need to provide your own values
+THE_MOVIE_DATABASE_API_KEY=840d0e8c5c7051961bce196da992bd9d
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_NOTIFICATION_ADDRESS=
+SAMBA_DRIVE_IP_ADDRESS=
+SAMBA_DRIVE_ROOT=
+SAMBA_USERNAME=
+SAMBA_PASSWORD=

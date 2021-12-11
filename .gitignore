@@ -75,3 +75,12 @@ pippo/pluto/*
 
 # vs code
 *-workspace
+
+# backup files
+*.bak
+
+# ignore all media files
+media/download/dump_complete
+media/download/dump_temp
+media/TV/*
+media/TV/._

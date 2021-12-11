@@ -13,12 +13,12 @@ docker stop nginx-container qbittorrent-container media_grab-container
 docker container prune
 
 # remove the samba volume
-docker volume rm samba-data-volume
+docker volume rm data-volume media-volume
 
 # move to project root
 cd $SCRIPTDIR/..
 
 # rebuild and restart containers in daemon mode
-docker-compose up --build -d
+docker-compose -f docker-compose.yml -f docker-compose.directory.yml up --build
 
 cd -
