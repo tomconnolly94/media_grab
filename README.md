@@ -24,7 +24,13 @@ After this you can access the web UI from [localhost:5000](localhost:5000) and t
 
 Add a new TV show via the web UI, click Run MediaGrab and watch the download appear in the qbittorrent UI.
 
-After it has downloaded and mediaGrab has run again it will be filed neatly in `./media/TV/<tv_show>/etc`
+After it has downloaded and mediaGrab has run again it will be filed neatly in `./media/TV/<tv_show>/<season_number>/<episode>`.
+
+MediaGrab is also installed as a cronjob, it runs automatically every three hours.
+
+Ideally after you have loaded up your favourite TV shows, you should find them waiting for you as soon as they are released.
+
+Consider installing something like Plex to get the full home Netflix effect.
 
 ## Tests
 
