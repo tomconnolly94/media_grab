@@ -74,4 +74,4 @@ pippo/pluto/*
 media/download/dump_complete
 media/download/dump_temp
 media/TV/*
-media/TV/._
+!media/TV/._
