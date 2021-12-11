@@ -30,6 +30,6 @@ if [ -n "$MAIL_PASSWORD" ]; then
 ./dotenv.sh -f $CONFIG_FILE set "MailNotification\password"=$MAIL_PASSWORD
 fi
 
-cp config-template/qBittorrent.template.conf /config/qBittorrent.conf
+cp config-template/qBittorrent.template.conf /config/qBittorrent/qBittorrent.conf
 
 tail -f /dev/null
