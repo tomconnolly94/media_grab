@@ -177,6 +177,10 @@ function formatBackendItemToFrontendItem(mediaInfoData) {
 			edit: false,
 			content: ""
 		}
+		item["newPotentialSimilarShowItem"] = {
+			edit: false,
+			content: ""
+		}
 	});
 	return mediaInfoData;
 }

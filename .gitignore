@@ -59,11 +59,6 @@ MediaIndex.json
 # test directories
 */dummy_directories/*
 
-pippo/*
-!pippo/pluto
-pippo/pluto/*
-!pippo/pluto/paperino.xml
-
 # vs code
 *-workspace
 

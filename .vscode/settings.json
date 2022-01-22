@@ -2,7 +2,7 @@
     "python.testing.unittestArgs": [
         "-v",
         "-s",
-        "./src",
+        "media_grab-container/src",
         "-p",
         "test_*.py"
     ],
@@ -10,5 +10,6 @@
     "python.testing.nosetestsEnabled": false,
     "python.testing.unittestEnabled": true,
     "python.pythonPath": "/home/tom/projects/media_grab/venv-dev/bin/python3.8",
-    "editor.formatOnPaste": true
+    "editor.formatOnPaste": true,
+    "python.formatting.provider": "black"
 }

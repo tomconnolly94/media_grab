@@ -33,8 +33,12 @@ class TheMovieDatabaseInterface():
         :testedWith: None yet - must be tested eventually
         :return: None
         """
-        self.tmdbClient = TMDb()
-        self.tmdbClient.api_key = os.getenv("THE_MOVIE_DATABASE_API_KEY")
+        tmdbApiKey = os.getenv('THE_MOVIE_DATABASE_API_KEY')
+
+
+        if tmdbApiKey:
+            self.tmdbClient = TMDb() 
+            self.tmdbClient.api_key = tmdbApiKey
 
     def getShowSeasonCount(self, tvShowName):
         """
@@ -51,6 +55,7 @@ class TheMovieDatabaseInterface():
             tvShowDetails = tv.details(tvShow.id)
             if tvShowDetails:
                 return tvShowDetails["number_of_seasons"]
+
 
     def getShowEpisodeCount(self, tvShowName, seasonIndex):
         """
@@ -77,3 +82,21 @@ class TheMovieDatabaseInterface():
                 ErrorController.reportError(message=f"Failed to get a result from The Movie Database for '{tvShowName}' for Season {seasonIndex}", exception=None, sendEmail=True)
 
         return None
+
+
+    def getShowReccomendations(self, tvShowName):
+        """
+        getShowReccomendation returns the number of episodes for a season of a show referenced by the params tvShowName and seasonIndex
+        :param tvShowName the name of the tv show for which the show episode count is requested
+        :param seasonIndex the season number for which the show episode count is requested
+        :testedWith: None yet - must be tested eventually
+        :return: number of episodes
+        """
+        tv = TV()
+        tvShows = tv.search(tvShowName)
+
+        if tvShows:
+            tvShow = tvShows[0]
+            similarShows = tv.similar(tvShow.id)
+
+            return [ show["original_name"] for show in similarShows ]

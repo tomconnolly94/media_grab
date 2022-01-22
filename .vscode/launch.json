@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "python": "/home/tom/projects/media_grab/venv-dev/bin/python3.8",
+            "python": "/home/tom/projects/media_grab/media_grab-container/venv-dev/bin/python3.8",
             "args": [],
             "env": {"PYTHONPATH": "${workspaceRoot}"},
             "envFile": "${workspaceRoot}/.env",

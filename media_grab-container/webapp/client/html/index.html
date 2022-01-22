@@ -27,6 +27,7 @@
 								<th>Season</th>
 								<th>Episode</th>
 								<th>Blacklist</th>
+								<th>Recommendations</th>
 								<th>Remove</th>
 							</tr>
 							<tr v-for="(item, itemIndex) in content"
@@ -60,29 +61,53 @@
 										<label @click="makeFieldEditable(item['typeSpecificData']['latestEpisode']);"> {{
 											item['typeSpecificData']['latestEpisode'].content }} </label>
 									</div>
-								</td>
-								<td>
+								</td><td>
 									<div id="blacklistPanel" class="flex-direction row">
 										<div class="blacklistPanelColumn col-md-10">
 											<div v-for="blacklistTerm in item.blacklistTerms">
-												<input 	v-if="blacklistTerm.edit"
-														v-model="blacklistTerm.content" 
-														@blur="confirmItemEdit(item, blacklistTerm, itemIndex);"
-														@keyup.enter="confirmItemEdit(item, blacklistTerm, itemIndex);">
+												<input v-if="blacklistTerm.edit" v-model="blacklistTerm.content"
+													@blur="confirmItemEdit(item, blacklistTerm, itemIndex);"
+													@keyup.enter="confirmItemEdit(item, blacklistTerm, itemIndex);">
 												<div v-else>
-													<button id="blacklistTermRemoveButton" class="btn" i @click="showModal(() => { removeBlacklistTerm(item, itemIndex, blacklistTerm); }, `Are you sure you want to remove blacklist term ${blacklistTerm.content}?`);"><i class="fa fa-close"></i></button>
-													<label 	@click="makeFieldEditable(blacklistTerm);" >
+													<button id="blacklistTermRemoveButton" class="btn" i
+														@click="showModal(() => { removeBlacklistTerm(item, itemIndex, blacklistTerm); }, `Are you sure you want to remove blacklist term ${blacklistTerm.content}?`);"><i
+															class="fa fa-close"></i></button>
+													<label @click="makeFieldEditable(blacklistTerm);">
 														{{ blacklistTerm.content }}
 													</label>
 												</div>
 											</div>
 										</div>
 										<div class="blacklistPanelColumn col-md-2">
-											<input 	v-if="item.newPotentialBlacklistItem.edit"
-													v-model="item.newPotentialBlacklistItem.content" 
-													@blur="addNewBlacklistTerm(item, itemIndex);"
-													@keyup.enter="addNewBlacklistTerm(item, itemIndex);">
+											<input v-if="item.newPotentialBlacklistItem.edit" v-model="item.newPotentialBlacklistItem.content"
+												@blur="addNewBlacklistTerm(item, itemIndex);" @keyup.enter="addNewBlacklistTerm(item, itemIndex);">
 											<button class="btn" v-else v-on:click="item.newPotentialBlacklistItem.edit = true;">
+												<i class="fa fa-plus" aria-hidden="true"></i>
+											</button>
+										</div>
+									</div>
+								</td>
+								<td>
+									<div id="recommendationPanel" class="flex-direction row">
+										<div class="recommendationPanelColumn col-md-10">
+											<div v-for="similarShow in item.similarShows">
+												<input v-if="similarShow.edit" v-model="similarShow.content"
+													@blur="confirmItemEdit(item, similarShow, itemIndex);"
+													@keyup.enter="confirmItemEdit(item, similarShow, itemIndex);">
+												<div v-else>
+													<button id="recommendationRemoveButton" class="btn" i
+														@click="showModal(() => { removeSimilarShow(item, itemIndex, similarShow); }, `Are you sure you want to remove blacklist term ${blacklistTerm.content}?`);"><i
+															class="fa fa-close"></i></button>
+													<label @click="makeFieldEditable(similarShow);">
+														{{ similarShow.content }}
+													</label>
+												</div>
+											</div>
+										</div>
+										<div class="recommendationPanelColumn col-md-2">
+											<input v-if="item.newPotentialSimilarShowItem.edit" v-model="item.newPotentialSimilarShowItem.content"
+												@blur="addNewSimilarShowTerm(item, itemIndex);" @keyup.enter="addNewsimilarShow(item, itemIndex);">
+											<button class="btn" v-else v-on:click="item.newPotentialSimilarShowItem.edit = true;">
 												<i class="fa fa-plus" aria-hidden="true"></i>
 											</button>
 										</div>

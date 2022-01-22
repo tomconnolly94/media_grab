@@ -7,12 +7,14 @@ import subprocess
 
 # internal dependencies
 from server.interfaces.MediaIndexFileInterface import removeRecordFromMediaInfoFile, updateRecordInMediaInfoFile, writeNewRecordToMediaInfoFile
+from server.interfaces.TheMovieDatabaseInterface import TheMovieDatabaseInterface
 
 
 def serveMediaInfo():
     f = open(os.getenv("MEDIA_INDEX_FILE_LOCATION"), "r")
-    mediaIndexFileContent = f.read()
-    return mediaIndexFileContent
+    theMovieDatabaseInterface = TheMovieDatabaseInterface()
+    mediaIndexFileContentWithReccomendations = theMovieDatabaseInterface.addShowReccomendationsToMediaIndexContent(f.read())
+    return mediaIndexFileContentWithReccomendations
 
 
 def submitMediaInfoRecord(data):

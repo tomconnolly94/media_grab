@@ -281,26 +281,26 @@ input {
 /* triggerPanel styles */
 
 
-/* blacklistPanel styles */
+/* blacklistPanel/recommendationPanel styles */
 
 * {
     box-sizing: border-box;
 }
 
 /* Create two equal columns that floats next to each other */
-.blacklistPanelColumn {
+.blacklistPanelColumn, .recommendationPanelColumn {
     float: left;
     width: 50%;
     padding: 10px;
 }
 
-.blacklistPanelColumn .btn{
+.blacklistPanelColumn .btn, .recommendationPanelColumn .btn{
     float: right;
     margin: 1px;
 }
 
 /* Clear floats after the columns */
-#blacklistPanel:after {
+#blacklistPanel:after, #recommendationPanel:after{
     content: "";
     display: table;
     clear: both;
@@ -308,20 +308,20 @@ input {
 
 /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
 @media screen and (max-width: 600px) {
-    .blacklistPanelColumn {
+    .blacklistPanelColumn, .recommendationPanelColumn {
         width: 100%;
     }
 }
 
-#blacklistTermRemoveButton {
+#blacklistTermRemoveButton, #recommendationRemoveButton {
     margin: 5px 10px;
     padding:0px 4px 0px 3px; 
     float:left; 
     font-size: 16px;
 }
 
+/* blacklistPanel/recommendationPanel styles */
 
-/* blacklistPanel styles */
 
 /* titlePanel styles */
 
