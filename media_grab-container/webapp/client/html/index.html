@@ -123,15 +123,20 @@
 													
 													<div id="recommendationPanel" class="flex-direction row">
 														<div v-for="similarShow in item.similarShows">
-															<input v-if="similarShow.edit" v-model="similarShow.content"
+															<!-- code to allow editing similar show content, not sure if i want this yet -->
+															<!-- <input v-if="similarShow.edit" v-model="similarShow.content"
 																@blur="confirmItemEdit(item, similarShow, itemIndex);"
 																@keyup.enter="confirmItemEdit(item, similarShow, itemIndex);">
-															<div v-else>
+															<div v-else> -->
+															<div>
 																<button id="recommendationAddButton" class="btn" i
 																	@click="showModal(() => { addSimilarShow(similarShow); }, `Are you sure you want to add recommendation ${similarShow.content} to the MediaIndex file?`);"><i
 																		class="fa fa-plus"></i></button>
-																<label @click="makeFieldEditable(similarShow);">
-																	{{ similarShow.content }}
+																<!-- <label @click="makeFieldEditable(similarShow);"> -->
+																<label>
+																	<a v-bind:href="'https://en.wikipedia.org/wiki/' + similarShow.content" target="_blank">
+																		{{ similarShow.content }}
+																	</a>
 																</label>
 															</div>
 														</div>
