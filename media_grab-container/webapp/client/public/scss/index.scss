@@ -290,7 +290,6 @@ input {
 /* Create two equal columns that floats next to each other */
 .blacklistPanelColumn, .recommendationPanelColumn {
     float: left;
-    width: 50%;
     padding: 10px;
 }
 
@@ -342,8 +341,24 @@ td.accordion-panel{
 
 /* accordion styles */
 
-.accordion {
-    width: 350px;
+// .accordion {
+//   width: 350px;
+// }
+
+.accordion-collapse:not(.show){
+  width:50px;
+}
+
+.accordion-collapse.show{
+  width:100%;
+}
+
+.accordion-button{
+  width:60px;
+}
+
+.accordion-item, .accordion-header{
+    width: fit-content;
 }
 
 /* accordion styles */
