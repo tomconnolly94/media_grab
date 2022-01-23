@@ -54,17 +54,13 @@ class TheMovieDatabaseInterface():
         for mediaIndexRecord in mediaIndexFileContent["media"]:
             tv = TV()
             tvShows = tv.search(mediaIndexRecord["name"])
-
-            print(mediaIndexRecord["name"])
-
+ 
             if tvShows:
                 tvShow = tvShows[0]
                 similarShows = tv.similar(tvShow.id)
 
                 similarShowTitles = [ show["original_name"] for show in similarShows ]
             
-                print(similarShowTitles)
-
                 mediaIndexRecord["similarShows"] = similarShowTitles
 
         return mediaIndexFileContent

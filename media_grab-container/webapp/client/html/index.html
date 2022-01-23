@@ -66,19 +66,20 @@
 								<td class="accordion-panel">
 									<div class="accordion" id="accordionExample">
 										<div class="accordion-item">
-											<h2 class="accordion-header" id="headingTwo">
-												<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-													v-bind:data-bs-target="'#blacklist-accordion-' + itemIndex"
-													aria-expanded="false"
-													v-bind:aria-controls="'blacklist-accordion-' + itemIndex">
-												</button>
-											</h2>
+											<h4 class="accordion-header" id="headingTwo">
+												{{ item.blacklistTerms.length }}
+											</h4>
+											<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+												v-bind:data-bs-target="'#blacklist-accordion-' + itemIndex"
+												aria-expanded="false"
+												v-bind:aria-controls="'blacklist-accordion-' + itemIndex">
+											</button>
 											<div v-bind:id="'blacklist-accordion-' + itemIndex"
 												class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
 												<div class="accordion-body">
 
 													<div id="blacklistPanel" class="flex-direction row">
-														<div class="blacklistPanelColumn col-md-10">
+														<div class="blacklistPanelColumn">
 															<div v-for="blacklistTerm in item.blacklistTerms">
 																<input v-if="blacklistTerm.edit" v-model="blacklistTerm.content"
 																	@blur="confirmItemEdit(item, blacklistTerm, itemIndex);"
@@ -93,7 +94,7 @@
 																</div>
 															</div>
 														</div>
-														<div class="blacklistPanelColumn col-md-2">
+														<div class="blacklistPanelColumn">
 															<input v-if="item.newPotentialBlacklistItem.edit" v-model="item.newPotentialBlacklistItem.content"
 																@blur="addNewBlacklistTerm(item, itemIndex);" @keyup.enter="addNewBlacklistTerm(item, itemIndex);">
 															<button class="btn" v-else v-on:click="item.newPotentialBlacklistItem.edit = true;">
@@ -110,11 +111,12 @@
 								<td class="accordion-panel">
 									<div class="accordion" id="accordionExample">
 										<div class="accordion-item">
-											<h2 class="accordion-header" id="headingTwo">
-												<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" v-bind:data-bs-target="'#recommendation-accordion-' + itemIndex"
-													aria-expanded="false" v-bind:aria-controls="'recommendation-accordion-' + itemIndex">
-												</button>
-											</h2>
+											<h4 class="accordion-header" id="headingTwo">
+												{{ item.similarShows.length }}
+											</h4>
+											<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" v-bind:data-bs-target="'#recommendation-accordion-' + itemIndex"
+												aria-expanded="false" v-bind:aria-controls="'recommendation-accordion-' + itemIndex">
+											</button>
 											<div v-bind:id="'recommendation-accordion-' + itemIndex" class="accordion-collapse collapse" aria-labelledby="headingTwo"
 												data-bs-parent="#accordionExample">
 												<div class="accordion-body">

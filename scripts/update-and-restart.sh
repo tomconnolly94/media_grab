@@ -19,6 +19,6 @@ docker volume rm data-volume media-volume
 cd $SCRIPTDIR/..
 
 # rebuild and restart containers in daemon mode
-docker-compose -f docker-compose.yml -f docker-compose.directory.yml up --build
+docker-compose -f docker-compose.yml -f docker-compose.samba.yml up --build
 
 cd -
