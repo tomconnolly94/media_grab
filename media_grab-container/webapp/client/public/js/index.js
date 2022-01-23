@@ -141,6 +141,18 @@ function loadMediaIndexJson() {
 						item.newPotentialBlacklistItem.edit = false;
 						item.newPotentialBlacklistItem.content = "";
 					});
+				},
+				addSimilarShow: function(similarShow){
+
+					var newItem = {
+						mediaName: similarShow.content,
+						latestSeason: "1",
+						latestEpisode: "1",
+						blacklistTerms: ""
+					};
+					var vueInstance = this;
+
+					makeNewMediaInfoRecordCall(newItem, vueInstance, function () {}, function () {});
 				}
 			}
 		});
@@ -237,6 +249,27 @@ new Vue({
 	}
 });
 
+function makeNewMediaInfoRecordCall(newItem, vueInstance, successCallback, errorCallback){
+	axios.post(`/MediaInfoRecord/0`, newItem).then((response) => {
+
+		var newFrontendItem = formatBackendItemToFrontendItem([{
+			"name": newItem.mediaName,
+			"typeSpecificData": {
+				"latestSeason": newItem.latestSeason,
+				"latestEpisode": newItem.latestEpisode
+			},
+			"blacklistTerms": newItem.blacklistTerms
+		}])[0];
+
+		vueInstance.$bus.$emit("new-item-added", newFrontendItem, function () {
+			successCallback();
+		});
+
+	}).catch(function () {
+		errorCallback();
+	});
+}
+
 
 new Vue({
 	el: '#inputPanel',
@@ -261,24 +294,11 @@ new Vue({
 				blacklistTerms: blacklistTerms.join()
 			};
 
-			axios.post(`/MediaInfoRecord/0`, newItem).then((response) => {
+			var vueInstance = this;
 
-				var newItem = formatBackendItemToFrontendItem([{
-					"name": mediaName,
-					"typeSpecificData": {
-						"latestSeason": latestSeason,
-						"latestEpisode": latestEpisode
-					},
-					"blacklistTerms": blacklistTerms
-				}])[0];
-
-				var vueInstance = this;
-
-				this.$bus.$emit("new-item-added", newItem, function(){
-					vueInstance.resetForm();
-				});
-
-			}).catch(function(){
+			makeNewMediaInfoRecordCall(newItem, vueInstance, function(){
+				vueInstance.resetForm();
+			}, function(){
 				refreshPage();
 			});
 		},

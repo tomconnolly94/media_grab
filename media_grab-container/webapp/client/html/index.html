@@ -6,6 +6,7 @@
 	<meta charset=utf-8>
 	<link rel="stylesheet" href="/public/css/index.css">
 	<link rel="icon" href="/favicon.ico">
+
 </head>
 
 <body>
@@ -61,55 +62,83 @@
 										<label @click="makeFieldEditable(item['typeSpecificData']['latestEpisode']);"> {{
 											item['typeSpecificData']['latestEpisode'].content }} </label>
 									</div>
-								</td><td>
-									<div id="blacklistPanel" class="flex-direction row">
-										<div class="blacklistPanelColumn col-md-10">
-											<div v-for="blacklistTerm in item.blacklistTerms">
-												<input v-if="blacklistTerm.edit" v-model="blacklistTerm.content"
-													@blur="confirmItemEdit(item, blacklistTerm, itemIndex);"
-													@keyup.enter="confirmItemEdit(item, blacklistTerm, itemIndex);">
-												<div v-else>
-													<button id="blacklistTermRemoveButton" class="btn" i
-														@click="showModal(() => { removeBlacklistTerm(item, itemIndex, blacklistTerm); }, `Are you sure you want to remove blacklist term ${blacklistTerm.content}?`);"><i
-															class="fa fa-close"></i></button>
-													<label @click="makeFieldEditable(blacklistTerm);">
-														{{ blacklistTerm.content }}
-													</label>
+								</td>
+								<td class="accordion-panel">
+									<div class="accordion" id="accordionExample">
+										<div class="accordion-item">
+											<h2 class="accordion-header" id="headingTwo">
+												<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+													v-bind:data-bs-target="'#blacklist-accordion-' + itemIndex"
+													aria-expanded="false"
+													v-bind:aria-controls="'blacklist-accordion-' + itemIndex">
+													Blacklist
+												</button>
+											</h2>
+											<div v-bind:id="'blacklist-accordion-' + itemIndex"
+												class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+												<div class="accordion-body">
+
+													<div id="blacklistPanel" class="flex-direction row">
+														<div class="blacklistPanelColumn col-md-10">
+															<div v-for="blacklistTerm in item.blacklistTerms">
+																<input v-if="blacklistTerm.edit" v-model="blacklistTerm.content"
+																	@blur="confirmItemEdit(item, blacklistTerm, itemIndex);"
+																	@keyup.enter="confirmItemEdit(item, blacklistTerm, itemIndex);">
+																<div v-else>
+																	<button id="blacklistTermRemoveButton" class="btn" i
+																		@click="showModal(() => { removeBlacklistTerm(item, itemIndex, blacklistTerm); }, `Are you sure you want to remove blacklist term ${blacklistTerm.content}?`);"><i
+																			class="fa fa-close"></i></button>
+																	<label @click="makeFieldEditable(blacklistTerm);">
+																		{{ blacklistTerm.content }}
+																	</label>
+																</div>
+															</div>
+														</div>
+														<div class="blacklistPanelColumn col-md-2">
+															<input v-if="item.newPotentialBlacklistItem.edit" v-model="item.newPotentialBlacklistItem.content"
+																@blur="addNewBlacklistTerm(item, itemIndex);" @keyup.enter="addNewBlacklistTerm(item, itemIndex);">
+															<button class="btn" v-else v-on:click="item.newPotentialBlacklistItem.edit = true;">
+																<i class="fa fa-plus" aria-hidden="true"></i>
+															</button>
+														</div>
+													</div>
+
 												</div>
 											</div>
-										</div>
-										<div class="blacklistPanelColumn col-md-2">
-											<input v-if="item.newPotentialBlacklistItem.edit" v-model="item.newPotentialBlacklistItem.content"
-												@blur="addNewBlacklistTerm(item, itemIndex);" @keyup.enter="addNewBlacklistTerm(item, itemIndex);">
-											<button class="btn" v-else v-on:click="item.newPotentialBlacklistItem.edit = true;">
-												<i class="fa fa-plus" aria-hidden="true"></i>
-											</button>
 										</div>
 									</div>
 								</td>
-								<td>
-									<div id="recommendationPanel" class="flex-direction row">
-										<div class="recommendationPanelColumn col-md-10">
-											<div v-for="similarShow in item.similarShows">
-												<input v-if="similarShow.edit" v-model="similarShow.content"
-													@blur="confirmItemEdit(item, similarShow, itemIndex);"
-													@keyup.enter="confirmItemEdit(item, similarShow, itemIndex);">
-												<div v-else>
-													<button id="recommendationRemoveButton" class="btn" i
-														@click="showModal(() => { removeSimilarShow(item, itemIndex, similarShow); }, `Are you sure you want to remove blacklist term ${blacklistTerm.content}?`);"><i
-															class="fa fa-close"></i></button>
-													<label @click="makeFieldEditable(similarShow);">
-														{{ similarShow.content }}
-													</label>
+								<td class="accordion-panel">
+									<div class="accordion" id="accordionExample">
+										<div class="accordion-item">
+											<h2 class="accordion-header" id="headingTwo">
+												<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" v-bind:data-bs-target="'#recommendation-accordion-' + itemIndex"
+													aria-expanded="false" v-bind:aria-controls="'recommendation-accordion-' + itemIndex">
+													Recommendations
+												</button>
+											</h2>
+											<div v-bind:id="'recommendation-accordion-' + itemIndex" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+												data-bs-parent="#accordionExample">
+												<div class="accordion-body">
+													
+													<div id="recommendationPanel" class="flex-direction row">
+														<div v-for="similarShow in item.similarShows">
+															<input v-if="similarShow.edit" v-model="similarShow.content"
+																@blur="confirmItemEdit(item, similarShow, itemIndex);"
+																@keyup.enter="confirmItemEdit(item, similarShow, itemIndex);">
+															<div v-else>
+																<button id="recommendationAddButton" class="btn" i
+																	@click="showModal(() => { addSimilarShow(similarShow); }, `Are you sure you want to add recommendation ${similarShow.content} to the MediaIndex file?`);"><i
+																		class="fa fa-plus"></i></button>
+																<label @click="makeFieldEditable(similarShow);">
+																	{{ similarShow.content }}
+																</label>
+															</div>
+														</div>
+													</div>
+
 												</div>
 											</div>
-										</div>
-										<div class="recommendationPanelColumn col-md-2">
-											<input v-if="item.newPotentialSimilarShowItem.edit" v-model="item.newPotentialSimilarShowItem.content"
-												@blur="addNewSimilarShowTerm(item, itemIndex);" @keyup.enter="addNewsimilarShow(item, itemIndex);">
-											<button class="btn" v-else v-on:click="item.newPotentialSimilarShowItem.edit = true;">
-												<i class="fa fa-plus" aria-hidden="true"></i>
-											</button>
 										</div>
 									</div>
 								</td>

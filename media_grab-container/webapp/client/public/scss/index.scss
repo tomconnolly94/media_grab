@@ -313,11 +313,15 @@ input {
     }
 }
 
-#blacklistTermRemoveButton, #recommendationRemoveButton {
+#blacklistTermRemoveButton, #recommendationAddButton {
     margin: 5px 10px;
     padding:0px 4px 0px 3px; 
     float:left; 
     font-size: 16px;
+}
+
+td.accordion-panel{
+    max-width:400px;
 }
 
 /* blacklistPanel/recommendationPanel styles */
@@ -334,3 +338,12 @@ input {
 }
 
 /* titlePanel styles */
+
+
+/* accordion styles */
+
+.accordion {
+    width: 350px;
+}
+
+/* accordion styles */

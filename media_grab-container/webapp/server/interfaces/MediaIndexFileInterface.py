@@ -42,7 +42,7 @@ def writeNewRecordToMediaInfoFile(name, latestSeason, latestEpisode, blacklistTe
 
     mediaInfoRecords.append(newRecord)
 
-    mediaInfoRecords = sorted(mediaInfoRecords, key=lambda record: record["name"])
+    mediaInfoRecords = sorted(mediaInfoRecords, key=lambda record: record["name"].lower())
 
     writeToMediaInfoRecordsFile(mediaInfoRecords)
     return True
