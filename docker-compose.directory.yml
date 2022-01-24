@@ -1,5 +1,6 @@
 volumes:
   media-volume:
+    name: media-volume
     driver: local
     driver_opts:
       type: none
