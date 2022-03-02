@@ -12,7 +12,7 @@ docker stop nginx-container qbittorrent-container media_grab-container
 # remove the containers
 docker container prune
 
-# remove the samba media volume
+# remove the media volume
 docker volume rm media-volume
 
 # move to project root

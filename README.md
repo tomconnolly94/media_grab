@@ -32,6 +32,12 @@ Ideally after you have loaded up your favourite TV shows, you should find them w
 
 Consider installing something like Plex to get the full home Netflix effect.
 
+
+## FAQs
+
+Q: Why do I have problems running apt install commands in a container?
+A: run `sudo nano /etc/default/docker` and make sure the line `DOCKER_OPTS="--dns 8.8.8.8 --dns 8.8.4.4"` is uncommented
+
 ## Tests
 
 Tests are located in the `test/` directory, and the unit tests inside the `test/unit_test` directory. Run the tests from the project root directory with this command: `python -m unittest discover -v -s .` after creating and activating a development virtualenv (dependencies are held in `requirements-dev.txt`)
