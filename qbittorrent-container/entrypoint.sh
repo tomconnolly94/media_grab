@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # using https://github.com/bashup/dotenv
 
 # define conf file
@@ -40,26 +39,11 @@ then
     mkdir $CONFIG_DIR_TARGET
 fi
 
-cat /config/qBittorrent/qBittorrent.conf
 
 cp $CONFIG_FILE /config/qBittorrent/qBittorrent.conf
 
-echo "###########################################################"
-echo "###########################################################"
-echo "###########################################################"
-cat /config/qBittorrent/qBittorrent.conf
+kill -9 $(ps -ef|grep -i qbittorrent-nox | grep -v grep| awk '{print $2}')
 
-ps aux | grep qbittorrent
-
-kill `ps -ef|grep -i qbittorrent-nox| grep -v grep| awk '{print $2}'`
-
-echo "###########################################################"
-echo "###########################################################"
-echo "###########################################################"
-cat /config/qBittorrent/qBittorrent.conf
-
-echo "restarted qbittorrent"
-
-ps aux | grep qbittorrent
+echo "Restarted qbittorrent with new qBittorrent.conf file."
 
 tail -f /dev/null
