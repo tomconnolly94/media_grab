@@ -8,6 +8,9 @@ CONFIG_FILE=./config-template/qBittorrent.template.conf
 # check if temp dir is provided
 temp_dir_set=false
 
+echo "########## QBITTORRENT CONTAINER DUMP_COMPLETE_DIR ##########"
+echo "$DUMP_COMPLETE_DIR"
+
 
 # inject variables into qBittorrent.conf
 ./dotenv.sh -f $CONFIG_FILE set "Downloads\SavePath"=$DUMP_COMPLETE_DIR
@@ -27,9 +30,36 @@ if [ -n "$MAIL_USERNAME" ]; then
 fi
 
 if [ -n "$MAIL_PASSWORD" ]; then
-./dotenv.sh -f $CONFIG_FILE set "MailNotification\password"=$MAIL_PASSWORD
+    ./dotenv.sh -f $CONFIG_FILE set "MailNotification\password"=$MAIL_PASSWORD
 fi
 
-cp config-template/qBittorrent.template.conf /config/qBittorrent/qBittorrent.conf
+CONFIG_DIR_TARGET=/config/qBittorrent
+
+if [[ ! -d $CONFIG_DIR_TARGET ]]
+then
+    mkdir $CONFIG_DIR_TARGET
+fi
+
+cat /config/qBittorrent/qBittorrent.conf
+
+cp $CONFIG_FILE /config/qBittorrent/qBittorrent.conf
+
+echo "###########################################################"
+echo "###########################################################"
+echo "###########################################################"
+cat /config/qBittorrent/qBittorrent.conf
+
+ps aux | grep qbittorrent
+
+kill `ps -ef|grep -i qbittorrent-nox| grep -v grep| awk '{print $2}'`
+
+echo "###########################################################"
+echo "###########################################################"
+echo "###########################################################"
+cat /config/qBittorrent/qBittorrent.conf
+
+echo "restarted qbittorrent"
+
+ps aux | grep qbittorrent
 
 tail -f /dev/null

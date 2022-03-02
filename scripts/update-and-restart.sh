@@ -13,7 +13,7 @@ docker stop nginx-container qbittorrent-container media_grab-container
 docker container prune
 
 # remove the samba volume
-docker volume rm data-volume media-volume
+docker volume rm media-volume
 
 # move to project root
 cd $SCRIPTDIR/..
