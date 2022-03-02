@@ -7,10 +7,6 @@ CONFIG_FILE=./config-template/qBittorrent.template.conf
 # check if temp dir is provided
 temp_dir_set=false
 
-echo "########## QBITTORRENT CONTAINER DUMP_COMPLETE_DIR ##########"
-echo "$DUMP_COMPLETE_DIR"
-
-
 # inject variables into qBittorrent.conf
 ./dotenv.sh -f $CONFIG_FILE set "Downloads\SavePath"=$DUMP_COMPLETE_DIR
 
