@@ -8,8 +8,8 @@ import os
 import json
 
 # internal dependencies
-from server.controllers.PageServer import serveIndex, serveNodeModule, serveCustomJsModule, serveCustomCssModule, serveNodeModuleMapModule
-from server.controllers.DataServer import serveMediaInfo, submitMediaInfoRecord, deleteMediaInfoRecord, updateMediaInfoRecord, runMediaGrab
+from server.controllers.PageServer import serveIndex
+from server.controllers.DataServer import serveMediaInfo, submitMediaInfoRecord, deleteMediaInfoRecord, updateMediaInfoRecord, runMediaGrab, getSimilarShows
 
 #create app
 app = Flask(__name__, template_folder="client")
@@ -38,7 +38,12 @@ def MediaInfoRecords():
         return serveMediaInfo()
 
 
-@app.route('/MediaInfoRecord/<recordIndex>', methods=["POST", "PUT", "DELETE"])
+@app.route("/SimilarShows/<showTitle>", methods=["GET"])
+def SimilarShows(showTitle):
+        return getSimilarShows(showTitle)
+
+
+@app.route("/MediaInfoRecord/<recordIndex>", methods=["POST", "PUT", "DELETE"])
 def MediaIndexRecord(recordIndex):
     if request.method == "POST":
         submitMediaInfoRecord(json.loads(request.data))

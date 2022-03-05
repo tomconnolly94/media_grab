@@ -95,6 +95,13 @@ function loadMediaIndexJson() {
 					});
 					successCallback();
 				});
+
+				for(var i = 0; i < this.content.length; i++){
+
+					contentItem = this.content[i];
+
+					this.makeSimilarShowsRequest(contentItem);
+				}
 			},
 			methods: {
 				makeFieldEditable: function (field){
@@ -153,6 +160,11 @@ function loadMediaIndexJson() {
 					var vueInstance = this;
 
 					makeNewMediaInfoRecordCall(newItem, vueInstance, function () {}, function () {});
+				},
+				makeSimilarShowsRequest: function(contentItem){
+					axios.get(`/SimilarShows/${contentItem.name.content}`).then((response) => {
+						contentItem.similarShows = addEditFieldToStringList(response.data["similarShows"]);
+					});
 				}
 			}
 		});
@@ -168,6 +180,21 @@ function addEditFieldToObject(obj, relevantKey){
 	newObj["content"] = obj[relevantKey];
 
 	obj[relevantKey] = newObj;
+}
+
+
+function addEditFieldToStringList(list){
+
+	const newList = []
+
+	list.forEach(function(item){
+		var newObj = {
+			edit: false
+		}
+		newObj["content"] = item;
+		newList.push(newObj);
+	});
+	return newList;
 }
 
 
@@ -193,6 +220,8 @@ function formatBackendItemToFrontendItem(mediaInfoData) {
 			edit: false,
 			content: ""
 		}
+		item["similarShows"] = [];
+
 	});
 	return mediaInfoData;
 }

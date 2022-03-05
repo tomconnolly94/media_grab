@@ -38,6 +38,7 @@ class TheMovieDatabaseInterface():
         if tmdbApiKey:
             self.tmdbClient = TMDb() 
             self.tmdbClient.api_key = tmdbApiKey
+            self.tv = TV()
 
 
     def addShowReccomendationsToMediaIndexContent(self, mediaIndexFileContent):
@@ -49,18 +50,20 @@ class TheMovieDatabaseInterface():
         :return: number of episodes
         """
         
-        mediaIndexFileContent = json.loads(mediaIndexFileContent)
-
         for mediaIndexRecord in mediaIndexFileContent["media"]:
-            tv = TV()
-            tvShows = tv.search(mediaIndexRecord["name"])
- 
-            if tvShows:
-                tvShow = tvShows[0]
-                similarShows = tv.similar(tvShow.id)
-
-                similarShowTitles = [ show["original_name"] for show in similarShows ]
-            
-                mediaIndexRecord["similarShows"] = similarShowTitles
-
+            mediaIndexRecord["similarShows"] = self.getSimilarShowTitles(mediaIndexRecord["name"])
         return mediaIndexFileContent
+
+
+    def getSimilarShowTitles(self, showTitle):
+
+        tvShows = self.tv.search(showTitle)
+        if tvShows:
+            tvShow = tvShows[0]
+            similarShows = self.tv.similar(tvShow.id)
+            similarShowsFormatted = {
+                "similarShows": [ show["original_name"] for show in similarShows ]
+            }
+            print(similarShowsFormatted)
+            return similarShowsFormatted
+        return []

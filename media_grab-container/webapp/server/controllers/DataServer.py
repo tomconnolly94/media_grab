@@ -7,14 +7,14 @@ import subprocess
 
 # internal dependencies
 from server.interfaces.MediaIndexFileInterface import removeRecordFromMediaInfoFile, updateRecordInMediaInfoFile, writeNewRecordToMediaInfoFile
-from server.interfaces.TheMovieDatabaseInterface import TheMovieDatabaseInterface
+from server.interfaces import TheMovieDatabaseInterface
 
 
 def serveMediaInfo():
-    f = open(os.getenv("MEDIA_INDEX_FILE_LOCATION"), "r")
-    theMovieDatabaseInterface = TheMovieDatabaseInterface()
-    mediaIndexFileContentWithReccomendations = theMovieDatabaseInterface.addShowReccomendationsToMediaIndexContent(f.read())
-    return mediaIndexFileContentWithReccomendations
+    file = open(os.getenv("MEDIA_INDEX_FILE_LOCATION"), "r")
+    mediaIndexFile = json.loads(file.read())
+    # return TheMovieDatabaseInterface.getInstance().addShowReccomendationsToMediaIndexContent(mediaIndexFile)
+    return mediaIndexFile
 
 
 def submitMediaInfoRecord(data):
@@ -48,3 +48,7 @@ def runMediaGrab():
     subprocess.check_call(['python3', 'Main.py'], cwd=mediaGrabDir)
 
     return True
+
+
+def getSimilarShows(showTitle):
+    return TheMovieDatabaseInterface.getInstance().getSimilarShowTitles(showTitle)
