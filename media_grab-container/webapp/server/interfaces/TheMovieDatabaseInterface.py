@@ -62,8 +62,7 @@ class TheMovieDatabaseInterface():
             tvShow = tvShows[0]
             similarShows = self.tv.similar(tvShow.id)
             similarShowsFormatted = {
-                "similarShows": [ show["original_name"] for show in similarShows ]
+                "similarShows": [ show["original_name"].encode('utf-8', 'ignore').decode('utf-8') for show in similarShows ]
             }
-            print(similarShowsFormatted)
             return similarShowsFormatted
         return []
