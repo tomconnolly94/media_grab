@@ -267,11 +267,13 @@ new Vue({
 			this.running = true;
 			this.startTime = new Date().toLocaleString();
 			this.spinnerParentClass = "col-sm-8"
+			this.responseMessage = "";
+			vueComponent = this;
 
 			axios.get(`/runMediaGrab`).then((response) => {
-				this.cleanUpMediaGrabRun(true);
+				vueComponent.cleanUpMediaGrabRun(true);
 			}).catch(function(){
-				this.cleanUpMediaGrabRun(false);
+				vueComponent.cleanUpMediaGrabRun(false);
 			});
 		}
 	}
