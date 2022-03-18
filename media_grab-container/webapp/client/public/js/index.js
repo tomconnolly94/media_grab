@@ -252,6 +252,13 @@ new Vue({
 		}
 	},
 	methods: {
+		cleanUpMediaGrabRun: function(success){
+			var successStr = success ? "successfully" : "unsuccessfully";
+			console.log(`runMediaGrab finished ${successStr}.`);
+			this.responseMessage = `MediaGrab run ${successStr} at ${vueComponent.startTime}`
+			this.running = false;
+			this.spinnerParentClass = this.originalSpinnerParentClass
+		},
 		runMediaGrab: function (){
 			if (this.running){
 				return;
@@ -261,18 +268,10 @@ new Vue({
 			this.startTime = new Date().toLocaleString();
 			this.spinnerParentClass = "col-sm-8"
 
-			function cleanUpMediaGrabRun(vueComponent, success){
-				var successStr = success ? "successfully" : "unsuccessfully";
-				console.log(`runMediaGrab finished ${successStr}.`);
-				vueComponent.responseMessage = `MediaGrab run ${successStr} at ${vueComponent.startTime}`
-				vueComponent.running = false;
-				vueComponent.spinnerParentClass = vueComponent.originalSpinnerParentClass
-			}
-
 			axios.get(`/runMediaGrab`).then((response) => {
-				cleanUpMediaGrabRun(this, true);
+				this.cleanUpMediaGrabRun(true);
 			}).catch(function(){
-				cleanUpMediaGrabRun(this, false);
+				this.cleanUpMediaGrabRun(false);
 			});
 		}
 	}
