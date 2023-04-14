@@ -68,19 +68,17 @@ class MailInterface():
             return False
 
         if self.__environment == "production":
-            with smtplib.SMTP('smtp.gmail.com', 587) as server:
-                # init mail server connection
-                server.starttls()
-                server.ehlo()
-
-                # log in to the server                
-                server.login(self.__mailUsername, self.__mailPassword)
-
+            try:
                 mailContent = f'Subject: [Media Grab] {heading}\n\n{messageBody}'
-                server.sendmail(self.__mailUsername,
-                                    self.__toEmailAddress, 
-                                    mailContent)
-                return True
+                smtpserver = smtplib.SMTP("smtp.gmail.com",587)
+                smtpserver.ehlo()
+                smtpserver.starttls()
+                smtpserver.ehlo
+                smtpserver.login(self.__mailUsername, self.__mailPassword)
+                smtpserver.sendmail(self.__mailUsername, self.__toEmailAddress, mailContent)
+                smtpserver.close()
+            except Exception as e:
+                logging.error(e)
 
 
         elif self.__environment == "dev":
