@@ -155,6 +155,8 @@ class MailInterface():
 
         if numErrorMessages > 0:
             self.__sendMail(errorMailHeading, errorMailMessages)
+        
+        logging.info(f"Email sending has finished, new torrents: {numNewTorrentMessages}, errors: {numErrorMessages}")
 
     ##### Public functions end #####
 

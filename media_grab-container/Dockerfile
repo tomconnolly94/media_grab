@@ -6,13 +6,14 @@ ARG WEBAPPDIR=$PROJDIR/webapp
 
 # Set the working directory to $PROJDIR
 WORKDIR $PROJDIR
+
 # Copy the current directory contents into the container
 ADD . $PROJDIR
 
 # install apt dependencies
 RUN apt-get update
-RUN apt-get -y install cron
 RUN apt-get install -y python3
+RUN apt-get install -y cron
 RUN apt-get install -y python3-pip
 
 # Install pip dependencies

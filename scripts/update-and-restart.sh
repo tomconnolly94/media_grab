@@ -10,7 +10,7 @@ git pull
 docker stop nginx-container qbittorrent-container media_grab-container
 
 # remove the containers
-docker container prune
+docker container prune -f
 
 # remove the media volume
 docker volume rm media-volume

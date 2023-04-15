@@ -13,4 +13,4 @@ docker volume rm data-volume media-volume media_grab_media-volume
 # docker-compose -f docker-compose.yml -f docker-compose.directory.yml build --no-cache
 
 # remove the networks
-# docker network rm media_grab_webapp_default
+docker network rm media_grab_webapp_default
