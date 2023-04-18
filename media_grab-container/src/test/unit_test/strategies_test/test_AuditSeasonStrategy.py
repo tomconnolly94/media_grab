@@ -3,11 +3,11 @@
 # external dependencies
 import unittest
 from unittest import mock
-from mock import call
+from unittest.mock import call
 
 # internal dependencies
-from test.unit_test.testUtilities import FakeFileSystemItem
-from strategies.AuditSeasonStrategy import AuditSeasonStrategy
+from src.test.unit_test.testUtilities import FakeFileSystemItem
+from src.strategies.AuditSeasonStrategy import AuditSeasonStrategy
 
 
 class TestAuditSeasonStrategy(unittest.TestCase):

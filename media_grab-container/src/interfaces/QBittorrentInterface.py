@@ -1,12 +1,15 @@
 #!/venv/bin/python
 
 # external dependencies
-from qbittorrent import Client
+try:
+    from qbittorrent import Client
+except Exception:
+    pass
 import os
 import logging
 
 # internal dependencies
-from src.controllers import ErrorController
+
 
 qBittorrentInterfaceInstance = None
 
@@ -43,6 +46,7 @@ class QBittorrentInterface():
             
         self.dumpCompleteDir = dumpCompleteDir if dumpCompleteDir else os.getenv("DUMP_COMPLETE_DIR")
 
+
     def initTorrentDownload(self, mediaInfoRecord):
         """
         initTorrentDownload extracts a magnet link from a mediaInfoRecord and submits it to qBittorrent for downloading
@@ -52,16 +56,13 @@ class QBittorrentInterface():
         downloadPath = os.path.join(
             self.dumpCompleteDir, mediaInfoRecord.getMediaGrabId())
         torrentRecord = mediaInfoRecord.getTorrentRecord()
-        
-        try:
-            qbittorrentResponse = self.__qb.download_from_link(torrentRecord.getMagnet(), savepath=downloadPath)
-            if qbittorrentResponse == "Ok.":
-                logging.info(f"Torrent added: {torrentRecord.getName()}")
-                return True
-            return False
-        except Exception as exception:
-            ErrorController.reportError("Exception occurred when submitting torrent magnet to qbittorrent", exception=exception, sendEmail=True)
-            return False
+
+        qbittorrentResponse = self.__qb.download_from_link(torrentRecord.getMagnet(), savepath=downloadPath)
+        if qbittorrentResponse == "Ok.":
+            logging.info(f"Torrent added: {torrentRecord.getName()}")
+            return True
+        raise Exception("Response from qbittorent was not 'Ok.'")
+
 
     def pauseTorrent(self, torrentName):
         """
@@ -76,6 +77,7 @@ class QBittorrentInterface():
                 self.__qb.pause(torrent["hash"])
                 return True
         return False
+    
 
     def overrideQBObject(self, overrideValue):
         """

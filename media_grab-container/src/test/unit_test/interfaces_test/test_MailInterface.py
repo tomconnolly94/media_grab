@@ -1,6 +1,6 @@
 # external dependencies
 import unittest
-import mock
+from unittest import mock
 from unittest.mock import call
 
 # internal dependencies
@@ -55,13 +55,12 @@ class TestMailInterface(unittest.TestCase):
 
         calls = [
             call('smtp.gmail.com', 587),
-            call().__enter__(),
-            call().__enter__().starttls(),
-            call().__enter__().ehlo(),
-            call().__enter__().login(fakeMailUsername, fakeMailPassword),
-            call().__enter__().sendmail(fakeMailUsername, fakeToEmailAddress,
+            call().ehlo(),
+            call().starttls(),
+            call().login(fakeMailUsername, fakeMailPassword),
+            call().sendmail(fakeMailUsername, fakeToEmailAddress,
                                         f'Subject: [Media Grab] {singleNewTorrentMessage}\n\n{fakeMessage}'),
-            call().__exit__(None, None, None)
+            call().close()
         ]
         smtpMock.assert_has_calls(calls)
 

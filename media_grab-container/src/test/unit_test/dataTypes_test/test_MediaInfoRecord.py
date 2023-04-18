@@ -2,11 +2,10 @@
 
 # external dependencies
 import unittest
-import mock
 
 # internal dependencies
-from dataTypes.MediaInfoRecord import MediaInfoRecord
-from dataTypes.TorrentRecord import TorrentCategory, TorrentRecord
+from src.dataTypes.MediaInfoRecord import MediaInfoRecord
+from src.dataTypes.TorrentRecord import TorrentCategory, TorrentRecord
 
 class TestMediaInfoRecord(unittest.TestCase):
 

@@ -1,14 +1,14 @@
 # external dependencies
 import os
 import unittest
-import mock
-from mock import MagicMock
+from unittest import mock
+from unittest.mock import MagicMock
 from src.dataTypes.ProgramMode import PROGRAM_MODE
 from src.dataTypes.ProgramModeMap import PROGRAM_MODE_DIRECTORY_KEY_MAP
 
 # internal dependencies
 from src.strategies.AuditStrategy import AuditStrategy
-from test.unit_test.testUtilities import FakeFileSystemItem
+from src.test.unit_test.testUtilities import FakeFileSystemItem
 
 
 class TestAuditStrategy(unittest.TestCase):

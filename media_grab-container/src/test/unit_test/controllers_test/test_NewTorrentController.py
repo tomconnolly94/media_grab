@@ -1,7 +1,7 @@
 # external dependencies
 import unittest
-import mock
-from mock import MagicMock
+from unittest import mock
+from unittest.mock import MagicMock
 
 # internal dependencies
 from src.controllers import NewTorrentController

@@ -3,10 +3,12 @@
 # external dependencies
 import logging
 
+
 # internal dependencies
 from src.interfaces import TPBInterface, QBittorrentInterface, MediaIndexFileInterface
 from src.controllers import QueryGenerationController, NewTorrentController, CompletedDownloadsController
 from src.dataTypes.ProgramMode import PROGRAM_MODE
+from src.controllers import ErrorController
 
 
 def getMediaInfoRecordsWithTorrents(mediaInfoRecords):
@@ -59,8 +61,11 @@ def runProgramLogic(mode):
     :param mode: the mode of the program run, the type of media the program is focusing on
     :return: None
     """
-    #analyse folder to look for completed downloads
-    CompletedDownloadsController.auditDumpCompleteDir()
+    try:
+        #analyse folder to look for completed downloads
+        CompletedDownloadsController.auditDumpCompleteDir()
+    except Exception as exception:
+        ErrorController.reportError("Exception occurred - runProgramLogic, audit dump stage", exception=exception, sendEmail=True)
 
     mutatingFilter = []
 
@@ -91,5 +96,8 @@ def runProgramLogic(mode):
         qbittorrentInterfaceInstance = QBittorrentInterface.getInstance()
 
         for mediaInfoRecord in mediaInfoRecordsWithTorrents:
-            if qbittorrentInterfaceInstance.initTorrentDownload(mediaInfoRecord):
-                NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, mode)
+            try:
+                if qbittorrentInterfaceInstance.initTorrentDownload(mediaInfoRecord):
+                    NewTorrentController.onSuccessfulTorrentAdd(mediaInfoRecord, mode)
+            except Exception as exception:
+                ErrorController.reportError("Exception occurred - runProgramLogic, init download stage", exception=exception, sendEmail=True)

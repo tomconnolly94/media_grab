@@ -1,8 +1,8 @@
 # external dependencies
 import unittest
 import os
-import mock
-from mock import MagicMock
+from unittest import mock
+from unittest.mock import MagicMock
 
 # internal dependencies
 from src.interfaces.QBittorrentInterface import QBittorrentInterface

@@ -1,10 +1,9 @@
 # external dependencies
 import unittest
-import mock
+from unittest import mock
 import os
 from unittest.mock import call
-import shutil
-from mock import MagicMock
+from unittest.mock import MagicMock
 from datetime import datetime, timedelta
 
 # internal dependencies
@@ -94,7 +93,7 @@ class TestCompletedDownloadsController(unittest.TestCase):
             for directory in directories:
                 newDirPath = os.path.join(newDirPath, directory)
                 if not os.path.isdir(newDirPath):
-                    os.mkdir(newDirPath)
+                    os.makedirs(newDirPath)
 
             newFilePath = os.path.join(fakeDumpCompleteDir, path)
 

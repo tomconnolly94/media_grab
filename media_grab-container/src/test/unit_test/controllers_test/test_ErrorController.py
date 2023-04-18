@@ -2,9 +2,8 @@
 
 # external dependencies
 import unittest
-import mock
-from mock import MagicMock
-import os
+from unittest import mock
+from unittest.mock import MagicMock
 
 # internal dependencies
 from src.controllers import ErrorController

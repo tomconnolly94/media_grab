@@ -82,8 +82,8 @@ def main(argv):
 		LogicController.runProgramLogic(mode)
 		logging.info("Media grab app exiting.")
 	
-	except Exception as exception:
-		ErrorController.reportError("Exception occurred", exception=exception, sendEmail=True)
+	except Exception as exception: # general error handling to prevent crash
+		ErrorController.reportError("Exception occurred - main", exception=exception, sendEmail=True)
 	
 	finally:
 		# send mail items that have been collated

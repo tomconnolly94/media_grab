@@ -1,7 +1,7 @@
 import unittest
 
 # external dependencies
-from mock import mock
+from unittest import mock
 
 # internal dependencies
 from src.controllers import QueryGenerationController

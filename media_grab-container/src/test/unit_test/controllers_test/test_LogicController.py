@@ -1,8 +1,8 @@
 # external dependencies
 import unittest
-import mock
+from unittest import mock
 from unittest.mock import call
-from mock import MagicMock
+from unittest.mock import MagicMock
 import copy
 
 # internal dependencies 

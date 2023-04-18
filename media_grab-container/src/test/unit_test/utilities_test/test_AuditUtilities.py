@@ -3,8 +3,7 @@ import unittest
 import os
 from unittest.mock import call
 import shutil
-
-import mock
+from unittest import mock
 
 # internal dependencies
 from src.utilities import AuditUtilities

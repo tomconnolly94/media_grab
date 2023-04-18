@@ -3,9 +3,12 @@ import os
 import shutil
 
 # fake directories for use across multiple tests
-fakeTargetTvDir = "src/test/dummy_directories/tv"
-fakeDumpCompleteDir = "src/test/dummy_directories/dump_complete"
-fakeRecycleBinDir = "src/test/dummy_directories/recycle_bin"
+dummyDirectoriesDir = f"{os.path.dirname(os.path.dirname(os.path.realpath(__file__)))}/dummy_directories/"
+
+fakeTargetTvDir = dummyDirectoriesDir + "tv"
+fakeDumpCompleteDir = dummyDirectoriesDir + "dump_complete"
+fakeRecycleBinDir = dummyDirectoriesDir + "recycle_bin"
+fakeLogsDir = "logs"
 
 
 class FakeFileSystemItem:
@@ -23,6 +26,8 @@ def getEnvMockFunc(param):
         return fakeDumpCompleteDir
     elif param == "RECYCLE_BIN_DIR":
         return fakeRecycleBinDir
+    elif param == "LOGS_DIR":
+        return fakeLogsDir
     else:
         assert(None)
 

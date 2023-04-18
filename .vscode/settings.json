@@ -2,14 +2,13 @@
     "python.testing.unittestArgs": [
         "-v",
         "-s",
-        "media_grab-container/src",
+        "media_grab-container",
         "-p",
         "test_*.py"
     ],
     "python.testing.pytestEnabled": false,
-    "python.testing.nosetestsEnabled": false,
     "python.testing.unittestEnabled": true,
-    "python.pythonPath": "/home/tom/projects/media_grab/venv-dev/bin/python3.8",
     "editor.formatOnPaste": true,
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "python.defaultInterpreterPath": ""
 }

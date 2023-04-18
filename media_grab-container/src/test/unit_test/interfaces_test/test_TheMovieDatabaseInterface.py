@@ -1,48 +1,41 @@
 # external dependencies
 import unittest
-import os
-import mock
-from mock import MagicMock
+from unittest import mock
+from unittest.mock import MagicMock
 
 # internal dependencies
 from src.interfaces.TheMovieDatabaseInterface import TheMovieDatabaseInterface
 
-class TVMock():
+class TVShowMock():
 
-    def __init__(self):
-        pass
+    def __init__(self, id: int, title: str):
+        self.id = id
+        self.title = title
 
-    def search(self):
-        return [
-            {
-                "id": 1,
-                "title": "fakeTVShowTitle1"
-            },
-            {
-                "id": 2,
-                "title": "fakeTVShowTitle2"
-            }
-        ]
-
-    def similar(self):
-        return [
-            {
-                "id": 3,
-                "title": "fakeTVShowTitle3"
-            },
-            {
-                "id": 4,
-                "title": "fakeTVShowTitle4"
-            }
-        ]
 
 class TestTheMovieDatabaseInterface(unittest.TestCase):
 
-    @mock.patch("tmdbv3api.TV")
+    @mock.patch("src.interfaces.TheMovieDatabaseInterface.TV")
     def test_getShowReccomendation(self, tvMock):
 
         # config fake values
-        tvMock.return_value = TVMock()
+        tvMagicMock = MagicMock()
+        tvMagicMock.search.return_value = [
+            TVShowMock(1, "fakeTVShowTitle1"),
+            TVShowMock(2, "fakeTVShowTitle2")
+        ]
+        tvMagicMock.similar.return_value = [
+            {
+                "id": 3,
+                "original_name": "fakeTVShowTitle3"
+            },
+            {
+                "id": 4,
+                "original_name": "fakeTVShowTitle4"
+            }
+        ]
+        tvMock.return_value = tvMagicMock
+
         inputTVShow = "friends"
 
         theMovieDatabaseInterface = TheMovieDatabaseInterface()
@@ -52,8 +45,8 @@ class TestTheMovieDatabaseInterface(unittest.TestCase):
 
         # asserts
         self.assertEqual(["fakeTVShowTitle3", "fakeTVShowTitle4"], tvShowReccomendations)
-        tvMock.search.assert_called_with(inputTVShow)
-        tvMock.similar.assert_called_with(3)
+        tvMock.return_value.search.assert_called_with(inputTVShow)
+        tvMock.return_value.similar.assert_called_with(1)
 
 
 if __name__ == '__main__':
