@@ -6,6 +6,6 @@ WORKDIR $PROJDIR
 
 ADD . $PROJDIR
 
-RUN apt-get update
+RUN apk update
 
 CMD ./entrypoint.sh
