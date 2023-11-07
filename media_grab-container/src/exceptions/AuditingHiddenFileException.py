@@ -1,0 +1,4 @@
+
+
+class AuditingHiddenFileException(Exception):
+    pass

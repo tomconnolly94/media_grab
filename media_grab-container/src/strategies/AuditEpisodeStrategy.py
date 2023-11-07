@@ -3,9 +3,13 @@
 # external dependencies
 import logging
 
+from media_grab-container.src.controllers import ErrorController
+
+
 # internal dependencies
 from src.strategies.AuditStrategy import AuditStrategy
 from src.utilities import AuditUtilities
+from src.exceptions.AuditingHiddenFileException import AuditingHiddenFileException
 
 
 class AuditEpisodeStrategy(AuditStrategy):
@@ -18,9 +22,14 @@ class AuditEpisodeStrategy(AuditStrategy):
         :param fileSystemItem: the file system item, it shall be a directory sharing the same name as the downloadId
         :return: True if the fileSystemItem was handled correctly and completed, false if not
         """
-        # capture the parent directory as the item's downloadId
+        # capture the item's top-level root directory as the item's downloadId
         downloadId = fileSystemItem.name
         containerDir = fileSystemItem.path
+
+        if downloadId.startswith("."):
+            ErrorController.reportError(f"AuditEpisodeStrategy.audit({fileSystemItem.name}) called but item starts with a '.' indicating it is a hidden item. Hidden items cannot be processed.", sendEmail=True)
+            return False
+
         if AuditUtilities.downloadWasInitiatedByMediaGrab(downloadId):
             fileSystemItem = super().unWrapQBittorrentWrapperDir(fileSystemItem)
 

@@ -95,8 +95,12 @@ class AuditStrategy:
         :return: the path of the file after it has been moved to its prospective location
         """
         targetDir = os.getenv(PROGRAM_MODE_DIRECTORY_KEY_MAP[mode])
-        showName = AuditUtilities.extractShowName(
+        try:
+            showName = AuditUtilities.extractShowName(
             downloadId).capitalize()  # name of the tv show
+        except AttributeError as exception:
+            ErrorController.reportError(f"AuditUtilities.extractShowName({downloadId})) called but AttributeError was thrown indicating that show name could not be extracted.", exception=exception, sendEmail=True)
+            return None
         # target path of the tv show directory
         tvShowDir = os.path.join(targetDir, showName)
         seasonNumber = AuditUtilities.extractSeasonNumber(
