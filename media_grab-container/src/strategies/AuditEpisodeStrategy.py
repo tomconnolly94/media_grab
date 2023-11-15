@@ -3,7 +3,7 @@
 # external dependencies
 import logging
 
-from media_grab-container.src.controllers import ErrorController
+from src.controllers import ErrorController
 
 
 # internal dependencies
