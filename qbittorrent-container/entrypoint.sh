@@ -9,10 +9,13 @@ temp_dir_set=false
 
 # inject variables into qBittorrent.conf
 ./dotenv.sh -f $CONFIG_FILE set "Session\DefaultSavePath"=$DUMP_COMPLETE_DIR
+./dotenv.sh -f $CONFIG_FILE set "Downloads\SavePath"=$DUMP_COMPLETE_DIR
 
 if [ -n "$DUMP_TEMP_DIR" ] ; then
     ./dotenv.sh -f $CONFIG_FILE set "Session\TempPath"=$DUMP_TEMP_DIR
     ./dotenv.sh -f $CONFIG_FILE set "Session\TempPathEnabled"=true
+    ./dotenv.sh -f $CONFIG_FILE set "Downloads\TempPath"=$DUMP_TEMP_DIR
+    ./dotenv.sh -f $CONFIG_FILE set "Downloads\TempPathEnabled"=true
 fi
 
 if [ -n "$MAIL_NOTIFICATION_ADDRESS" ]; then
@@ -39,9 +42,9 @@ fi
 cp $CONFIG_FILE /config/qBittorrent/qBittorrent.conf
 
 # kill the already running qbittorrent which is using the unaltered config file
-kill -9 $(ps -ef|grep -i qbittorrent-nox | grep -v grep| awk '{print $2}')
+# kill -9 $(ps -ef|grep -i qbittorrent-nox | grep -v grep| awk '{print $2}')
 
 echo "Restarting qbittorrent with new qBittorrent.conf file."
 
 # restart qbittorrent with new config file
-/usr/bin/qbittorrent-nox
+# /usr/bin/qbittorrent-nox
