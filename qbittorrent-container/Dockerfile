@@ -1,4 +1,4 @@
-FROM lscr.io/linuxserver/qbittorrent
+FROM linuxserver/qbittorrent:arm32v7-4.5.3
 
 ARG PROJDIR=/proj-dir
 

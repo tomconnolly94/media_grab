@@ -7,6 +7,9 @@ WORKDIR /src
 # Copy the current directory contents into the container at /app 
 ADD . /src
 
+# hack to jump over PEP668
+ENV PIP_BREAK_SYSTEM_PACKAGES 1
+
 # add python bins
 RUN apt-get update -y
 RUN apt-get install -y python3

@@ -41,10 +41,8 @@ fi
 
 cp $CONFIG_FILE /config/qBittorrent/qBittorrent.conf
 
-# kill the already running qbittorrent which is using the unaltered config file
-kill -9 $(ps -ef|grep -i qbittorrent-nox | grep -v grep| awk '{print $2}')
-
-echo "Restarting qbittorrent with new qBittorrent.conf file."
+echo "Starting qbittorrent with new qBittorrent.conf file."
 
 # restart qbittorrent with new config file
-/usr/bin/qbittorrent-nox
+/usr/bin/qbittorrent-nox -d
+tail -f /config/qBittorrent/logs/qbittorrent.log
