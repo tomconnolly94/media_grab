@@ -28,6 +28,18 @@ RUN npm install --prefix $WEBAPPDIR/client
 # run frontend static file build
 RUN $WEBAPPDIR/client/node_modules/gulp/bin/gulp.js --gulpfile $WEBAPPDIR/client/build/gulpfile.js build
 
+# install test dependencies
+RUN pip install -r ./requirements-dev.txt
+
+# unit testing
+RUN python3 -m unittest discover -s src/test/unit_test/
+
+# uninstall test dependencies
+RUN pip uninstall -y -r ./requirements-dev.txt
+
+# install prod dependencies
+RUN pip install -r ./requirements.txt
+
 # make directories that the program requires
 RUN mkdir /var/log/media_grab
 RUN chmod 0666 /var/log/media_grab
