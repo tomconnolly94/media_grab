@@ -28,8 +28,22 @@ RUN $WEBAPPDIR/client/node_modules/gulp/bin/gulp.js --gulpfile $WEBAPPDIR/client
 # install test dependencies
 RUN pip install -r ./requirements-dev.txt
 
+# create required test directories
+RUN mkdir src/test/dummy_directories
+RUN mkdir src/test/dummy_directories/dump_complete
+RUN mkdir src/test/dummy_directories/logs
+RUN mkdir src/test/dummy_directories/recycle_bin
+RUN mkdir src/test/dummy_directories/tv
+
 # unit testing
 RUN python3 -m unittest discover -s src/test/unit_test/
+
+# clean up test dirs
+RUN rm -r src/test/dummy_directories
+RUN rm -r src/test/dummy_directories/dump_complete
+RUN rm -r src/test/dummy_directories/logs
+RUN rm -r src/test/dummy_directories/recycle_bin
+RUN rm -r src/test/dummy_directories/tv
 
 # uninstall test dependencies
 RUN pip uninstall -y -r ./requirements-dev.txt
