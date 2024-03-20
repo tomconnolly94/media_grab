@@ -19,9 +19,6 @@ RUN apt-get install -y python3
 RUN apt-get install -y cron
 RUN apt-get install -y python3-pip
 
-# Install pip dependencies
-RUN pip3 install -r requirements.txt
-
 # Install npm dependencies
 RUN npm install --prefix $WEBAPPDIR/client
 
