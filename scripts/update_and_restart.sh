@@ -21,4 +21,9 @@ cd $SCRIPTDIR/..
 # rebuild and restart containers in daemon mode
 docker-compose -f docker-compose.yml -f docker-compose.samba.yml up --build -d
 
+# exit if docker-compose fails
+if [[ $? -ne 0 ]] ; then
+    exit 1
+fi
+
 cd -
