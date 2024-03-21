@@ -39,11 +39,11 @@ RUN mkdir src/test/dummy_directories/tv
 RUN python3 -m unittest discover -s src/test/unit_test/
 
 # clean up test dirs
-RUN rm -r src/test/dummy_directories
-RUN rm -r src/test/dummy_directories/dump_complete
-RUN rm -r src/test/dummy_directories/logs
-RUN rm -r src/test/dummy_directories/recycle_bin
-RUN rm -r src/test/dummy_directories/tv
+RUN rm -rf src/test/dummy_directories
+RUN rm -rf src/test/dummy_directories/dump_complete
+RUN rm -rf src/test/dummy_directories/logs
+RUN rm -rf src/test/dummy_directories/recycle_bin
+RUN rm -rf src/test/dummy_directories/tv
 
 # uninstall test dependencies
 RUN pip uninstall -y -r ./requirements-dev.txt
