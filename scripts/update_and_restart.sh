@@ -9,7 +9,7 @@ git pull
 # stop the containers
 docker stop nginx-container qbittorrent-container media_grab-container
 
-# remove the previous image
+# remove the previous images
 docker rm nginx-container qbittorrent-container media_grab-container
 
 # remove the media volume

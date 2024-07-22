@@ -2,7 +2,7 @@
 # using https://github.com/bashup/dotenv
 
 # define conf file
-CONFIG_FILE=./config-template/qBittorrent.template.conf
+CONFIG_FILE=/config/qBittorrent/qBittorrent.conf
 
 # check if temp dir is provided
 temp_dir_set=false
@@ -10,6 +10,14 @@ temp_dir_set=false
 # inject variables into qBittorrent.conf
 ./dotenv.sh -f $CONFIG_FILE set "Session\DefaultSavePath"=$DUMP_COMPLETE_DIR
 ./dotenv.sh -f $CONFIG_FILE set "Downloads\SavePath"=$DUMP_COMPLETE_DIR
+./dotenv.sh -f $CONFIG_FILE set "Session\MaxActiveDownloads=3"
+./dotenv.sh -f $CONFIG_FILE set "Session\MaxActiveTorrents=5"
+./dotenv.sh -f $CONFIG_FILE set "Session\MaxActiveUploads=2"
+./dotenv.sh -f $CONFIG_FILE set "Session\QueueingSystemEnabled=true"
+
+# remove
+./dotenv.sh -f $CONFIG_FILE set "WebUI\AuthSubnetWhitelist=172.18.0.1/32"
+./dotenv.sh -f $CONFIG_FILE set "WebUI\AuthSubnetWhitelistEnabled=true"
 
 if [ -n "$DUMP_TEMP_DIR" ] ; then
     ./dotenv.sh -f $CONFIG_FILE set "Session\TempPath"=$DUMP_TEMP_DIR
@@ -39,7 +47,7 @@ then
 fi
 
 
-cp $CONFIG_FILE /config/qBittorrent/qBittorrent.conf
+# cp $CONFIG_FILE /config/qBittorrent/qBittorrent.conf
 
 echo "Starting qbittorrent with new qBittorrent.conf file."
 
