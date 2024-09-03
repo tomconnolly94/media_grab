@@ -73,3 +73,5 @@ media/TV/*
 
 # ignore persistent qbittorrent conf
 qbittorrent-container/qbittorrent-conf
+
+something-else
