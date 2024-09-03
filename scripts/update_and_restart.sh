@@ -4,7 +4,7 @@
 SCRIPTDIR=$(dirname "$0")
 
 # pull latest code
-git pull
+git pull origin master
 
 # stop the containers
 docker stop nginx-container qbittorrent-container media_grab-container
