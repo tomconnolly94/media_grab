@@ -71,5 +71,5 @@ media/download/dump_temp
 media/TV/*
 !media/TV/._
 
-# ignore local qbittorrent config directory
-config
+# ignore persistent qbittorrent conf
+qbittorrent-container/qbittorrent-conf
