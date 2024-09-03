@@ -10,6 +10,9 @@ WORKDIR $PROJDIR
 # Copy the current directory contents into the container
 ADD . $PROJDIR
 
+# hack to jump over PEP668
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+
 # install apt dependencies
 RUN apt-get update
 RUN apt-get install -y python3
@@ -29,8 +32,8 @@ RUN $WEBAPPDIR/client/node_modules/gulp/bin/gulp.js --gulpfile $WEBAPPDIR/client
 RUN mkdir /var/log/media_grab
 RUN chmod 0666 /var/log/media_grab
 
-#RUN rm /data-volume/MediaIndex.json
-COPY ./templates/MediaIndex-template.json /data/MediaIndex.json
+# RUN rm /data-volume/MediaIndex.json
+# COPY ./templates/MediaIndex-template.json /data/MediaIndex.json
 
 # install cron job and config access rights
 COPY ./scripts/media_grab.cronjob /etc/cron.d/media_grab

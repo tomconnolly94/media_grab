@@ -70,3 +70,6 @@ media/download/dump_complete
 media/download/dump_temp
 media/TV/*
 !media/TV/._
+
+# ignore persistent qbittorrent conf
+qbittorrent-container/qbittorrent-conf

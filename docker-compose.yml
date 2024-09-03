@@ -17,6 +17,7 @@ services:
       - QBITTORRENT_WEBUI_PORT=80
     volumes:
       - media-volume:/media:rw
+      - ./qbittorrent-container/qbittorrent-conf/:/config:rw
     ports:
       - 6881:6881
       - 6881:6881/udp
@@ -50,7 +51,8 @@ services:
       - MEDIA_GRAB_DIRECTORY=/proj-dir
     volumes:
       - media-volume:/media:rw
-      - data-volume:/data:rw
+      - ./media_grab-container/data/:/data:rw
+      - ./media_grab-container/logs/:/var/log/media_grab:rw
     expose:
       - 8080
     networks:
@@ -71,7 +73,3 @@ networks:
   media_grab_webapp_default:
     external:
       name: media_grab_webapp_default
-
-volumes:
-  data-volume:
-    name: data-volume

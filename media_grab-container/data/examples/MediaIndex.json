@@ -1,1 +1,404 @@
-{"media": [{"name": "a.p. bio", "typeSpecificData": {"latestSeason": 4, "latestEpisode": 1}, "blacklistTerms": []}, {"name": "below deck", "typeSpecificData": {"latestSeason": 9, "latestEpisode": 1}, "blacklistTerms": []}, {"name": "big mouth", "typeSpecificData": {"latestSeason": 5, "latestEpisode": 1}, "blacklistTerms": []}, {"name": "black mirror", "typeSpecificData": {"latestSeason": 6, "latestEpisode": 1}, "blacklistTerms": []}, {"name": "broad city", "typeSpecificData": {"latestSeason": 6, "latestEpisode": 1}, "blacklistTerms": []}, {"name": "derry girls", "typeSpecificData": {"latestSeason": 3, "latestEpisode": 1}, "blacklistTerms": []}, {"name": "its always sunny in philadelphia", "typeSpecificData": {"latestSeason": 15, "latestEpisode": 1}, "blacklistTerms": []}, {"name": "killing eve", "typeSpecificData": {"latestSeason": 4, "latestEpisode": 1}, "blacklistTerms": []}, {"name": "last week tonight", "typeSpecificData": {"latestSeason": 8, "latestEpisode": 7}, "blacklistTerms": []}, {"name": "ozark", "typeSpecificData": {"latestSeason": 4, "latestEpisode": 1}, "blacklistTerms": []}, {"name": "rick and morty", "typeSpecificData": {"latestSeason": 5, "latestEpisode": 1}, "blacklistTerms": []}, {"name": "taskmaster", "typeSpecificData": {"latestSeason": 11, "latestEpisode": 3}, "blacklistTerms": []}, {"name": "the boys", "typeSpecificData": {"latestSeason": 3, "latestEpisode": 1}, "blacklistTerms": []}, {"name": "the end of the fucking world", "typeSpecificData": {"latestSeason": 3, "latestEpisode": 1}, "blacklistTerms": []}, {"name": "the mandalorian", "typeSpecificData": {"latestSeason": 3, "latestEpisode": 1}, "blacklistTerms": []}, {"name": "the stand", "typeSpecificData": {"latestSeason": 2, "latestEpisode": 1}, "blacklistTerms": []}]}
+{
+    "media": [
+        {
+            "name": "a.p. bio",
+            "typeSpecificData": {
+                "latestSeason": 5,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "baby reindeer",
+            "typeSpecificData": {
+                "latestSeason": 2,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "below deck",
+            "typeSpecificData": {
+                "latestSeason": 12,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "big mouth",
+            "typeSpecificData": {
+                "latestSeason": 8,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": [
+                "celebrity"
+            ]
+        },
+        {
+            "name": "billions",
+            "typeSpecificData": {
+                "latestSeason": 8,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "black mirror",
+            "typeSpecificData": {
+                "latestSeason": 7,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "broad city",
+            "typeSpecificData": {
+                "latestSeason": 6,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "brooklyn nine nine",
+            "typeSpecificData": {
+                "latestSeason": 9,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "clarksons farm",
+            "typeSpecificData": {
+                "latestSeason": 4,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "community",
+            "typeSpecificData": {
+                "latestSeason": 7,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "derry girls",
+            "typeSpecificData": {
+                "latestSeason": 4,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "devs",
+            "typeSpecificData": {
+                "latestSeason": 2,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "Drive to survive",
+            "typeSpecificData": {
+                "latestSeason": 7,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "fleabag",
+            "typeSpecificData": {
+                "latestSeason": 3,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "frozen planet ii",
+            "typeSpecificData": {
+                "latestSeason": 2,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "game changer",
+            "typeSpecificData": {
+                "latestSeason": 1,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": [
+                "epub",
+                "pdf"
+            ]
+        },
+        {
+            "name": "house M.D.",
+            "typeSpecificData": {
+                "latestSeason": 13,
+                "latestEpisode": 27
+            },
+            "blacklistTerms": [
+                "old",
+                "hunters",
+                "prairie"
+            ]
+        },
+        {
+            "name": "house of cards",
+            "typeSpecificData": {
+                "latestSeason": 7,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "industry",
+            "typeSpecificData": {
+                "latestSeason": 3,
+                "latestEpisode": 5
+            },
+            "blacklistTerms": [
+                "enzyme"
+            ]
+        },
+        {
+            "name": "its always sunny in philadelphia",
+            "typeSpecificData": {
+                "latestSeason": 17,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "King of the road",
+            "typeSpecificData": {
+                "latestSeason": 4,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "last week tonight",
+            "typeSpecificData": {
+                "latestSeason": 11,
+                "latestEpisode": 22
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "modern family",
+            "typeSpecificData": {
+                "latestSeason": 12,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "only murders in the building",
+            "typeSpecificData": {
+                "latestSeason": 4,
+                "latestEpisode": 3
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "ozark",
+            "typeSpecificData": {
+                "latestSeason": 5,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "Peaky Blinders",
+            "typeSpecificData": {
+                "latestSeason": 7,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "peep show",
+            "typeSpecificData": {
+                "latestSeason": 10,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "qi",
+            "typeSpecificData": {
+                "latestSeason": 3,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": [
+                "fish"
+            ]
+        },
+        {
+            "name": "rick and morty",
+            "typeSpecificData": {
+                "latestSeason": 8,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "SAS Rogue Heroes",
+            "typeSpecificData": {
+                "latestSeason": 2,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "scrubs",
+            "typeSpecificData": {
+                "latestSeason": 10,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "severance",
+            "typeSpecificData": {
+                "latestSeason": 2,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "Sex actually with Alice Levine",
+            "typeSpecificData": {
+                "latestSeason": 3,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "Shogun",
+            "typeSpecificData": {
+                "latestSeason": 2,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "spent",
+            "typeSpecificData": {
+                "latestSeason": 2,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "starstruck",
+            "typeSpecificData": {
+                "latestSeason": 4,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "Succession",
+            "typeSpecificData": {
+                "latestSeason": 5,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "suits",
+            "typeSpecificData": {
+                "latestSeason": 10,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "taskmaster",
+            "typeSpecificData": {
+                "latestSeason": 18,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": [
+                "AU",
+                "US",
+                "NZ",
+                "champion",
+                "norway"
+            ]
+        },
+        {
+            "name": "the bear",
+            "typeSpecificData": {
+                "latestSeason": 4,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": [
+                "BJ",
+                "Masha"
+            ]
+        },
+        {
+            "name": "the end of the fucking world",
+            "typeSpecificData": {
+                "latestSeason": 3,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "the good place",
+            "typeSpecificData": {
+                "latestSeason": 5,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "the mandalorian",
+            "typeSpecificData": {
+                "latestSeason": 4,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "the office us",
+            "typeSpecificData": {
+                "latestSeason": 10,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": [
+                "uk"
+            ]
+        },
+        {
+            "name": "top boy",
+            "typeSpecificData": {
+                "latestSeason": 5,
+                "latestEpisode": 7
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "very important people",
+            "typeSpecificData": {
+                "latestSeason": 3,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        },
+        {
+            "name": "workaholics",
+            "typeSpecificData": {
+                "latestSeason": 8,
+                "latestEpisode": 1
+            },
+            "blacklistTerms": []
+        }
+    ]
+}
