@@ -18,7 +18,7 @@ services:
       - QBT_CONFIG_PATH=./config
     volumes:
       - media-volume:/qbit-media:rw
-      - ./qbittorrent-container/qbittorrent-conf/:/config:rw
+      - ${HOST_QBT_CONF_DIR}:/config:rw
     ports:
       - 6881:6881
       - 6881:6881/udp
@@ -52,8 +52,8 @@ services:
       - MEDIA_GRAB_DIRECTORY=/proj-dir
     volumes:
       - media-volume:/qbit-media:rw
-      - ./media_grab-container/data/:/data:rw
-      - ./media_grab-container/logs/:/var/log/media_grab:rw
+      - ${HOST_DATA_DIR}:/data:rw
+      - ${HOST_MEDIA_GRAB_LOGS_DIR}:/var/log/media_grab:rw
     expose:
       - 8080
     networks:
