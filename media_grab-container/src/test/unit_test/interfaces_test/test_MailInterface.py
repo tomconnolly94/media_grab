@@ -1,6 +1,7 @@
 # external dependencies
 import unittest
 from unittest import mock
+from unittest.mock import MagicMock
 from unittest.mock import call
 
 # internal dependencies
@@ -31,21 +32,22 @@ class TestMailInterface(unittest.TestCase):
         # mock asserts
         loggingInfoDevMock.assert_has_calls(loggingCalls)
 
+    @mock.patch('src.interfaces.MailInterface.EmailMessage')
     @mock.patch('smtplib.SMTP')
-    @mock.patch('os.getenv')
     @mock.patch('logging.info')
-    def test_sendMailSingleProduction(self, loggingInfoProdMock, osGetEnvMock, smtpMock):
+    def test_sendMailSingleProduction(self, loggingInfoProdMock, smtpMock, EmailMessageMock):
 
         # config inputs
         fakeToEmailAddress = "fakeToEmailAddress"
         envValue = "production"
         fakeMailUsername = "fakeMailUsername"
-        fakeMailPassword = "fakeMailPassword"
         fakeMessage = "fake message"
+        EmailMessageMagicMock = MagicMock()
+        EmailMessageMock.return_value = EmailMessageMagicMock
 
         # called testable method
         mailInterface = MailInterface(toEmailAddress=fakeToEmailAddress, environment=envValue,
-                                      mailUsername=fakeMailUsername, mailPassword=fakeMailPassword, collateMail=False)
+                                      mailUsername=fakeMailUsername, collateMail=False)
 
         mailInterface.pushMail(fakeMessage, MailItemType.NEW_TORRENT)
 
@@ -54,13 +56,9 @@ class TestMailInterface(unittest.TestCase):
         loggingInfoProdMock.assert_has_calls(calls)
 
         calls = [
-            call('smtp.gmail.com', 587),
-            call().ehlo(),
-            call().starttls(),
-            call().login(fakeMailUsername, fakeMailPassword),
-            call().sendmail(fakeMailUsername, fakeToEmailAddress,
-                                        f'Subject: [Media Grab] {singleNewTorrentMessage}\n\n{fakeMessage}'),
-            call().close()
+            call('192.168.0.106'),
+            call().send_message(EmailMessageMagicMock),
+            call().quit()
         ]
         smtpMock.assert_has_calls(calls)
 
@@ -96,9 +94,6 @@ class TestMailInterface(unittest.TestCase):
         fakeToEmailAddress = "fakeToEmailAddress"
         envValue = "dev"
         fakeMailUsername = "fakeMailUsername"
-        fakeMailPassword = "fakeMailPassword"
-
-        fakeHeading = "fake heading"
         fakeMessage = "fake message"
 
         # config mocks
@@ -106,7 +101,7 @@ class TestMailInterface(unittest.TestCase):
 
         # called testable method - run 1 sending mail is possible
         mailInterfaceSendingPossible = MailInterface(
-            toEmailAddress=fakeToEmailAddress, environment=envValue, mailUsername=fakeMailUsername, mailPassword=fakeMailPassword, collateMail=False)
+            toEmailAddress=fakeToEmailAddress, environment=envValue, mailUsername=fakeMailUsername, collateMail=False)
 
         # push messages
         mailSendSuccess = mailInterfaceSendingPossible.pushMail(
@@ -126,7 +121,7 @@ class TestMailInterface(unittest.TestCase):
         loggingInfoDevMock.reset_mock()
 
         # called testable method - run 2 sending mail is not possible
-        mailInterfaceSendingNotPossible = MailInterface(environment=envValue, mailUsername=fakeMailUsername, mailPassword=fakeMailPassword, collateMail=False)
+        mailInterfaceSendingNotPossible = MailInterface(environment=envValue, mailUsername=fakeMailUsername, collateMail=False)
 
         # push messages
         mailSendSuccess = mailInterfaceSendingNotPossible.pushMail(
@@ -135,7 +130,7 @@ class TestMailInterface(unittest.TestCase):
         # define calls
         loggingCalls = [
             call('MailInterface:__sendMail called.'),
-            call('Sending a notification mail is not possible because at least one of the following values was not provided - toEmailAddress: None, mailUsername: fakeMailUsername, mailPassword: fakeMailPassword')
+            call('Sending a notification mail is not possible because at least one of the following values was not provided - toEmailAddress: None, mailUsername: fakeMailUsername')
         ]
         
         # asserts

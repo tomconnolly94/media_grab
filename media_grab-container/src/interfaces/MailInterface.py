@@ -4,6 +4,10 @@
 import smtplib
 import os
 import logging
+from email.message import EmailMessage
+
+import sys
+sys.path.append("../../") # makes src accessible (during test run)
 
 # internal dependencies
 from src.dataTypes.MailItem import MailItem, MailItemType
@@ -32,7 +36,7 @@ multipleNewTorrentsMessage = "New torrents have just been added."
 class MailInterface():
 
     def __init__(self, enterLogMessage=None, toEmailAddress=None, environment=None,
-                 mailUsername=None, mailPassword=None, collateMail=True):
+                 mailUsername=None, collateMail=True):
         """
         __init__ initialises all private members of the object
         :testedWith: None - tested indirectly
@@ -40,7 +44,6 @@ class MailInterface():
         :param toEmailAddress: optional notification target email address, the param is to allow overwriting for amongst other purposes, testing, if not provided the value will be drawn from the .env file.
         :param environment: optional dev/production mode for the program run, the param is to allow overwriting for amongst other purposes, testing, if not provided the value will be drawn from the .env file.
         :param mailUsername: optional username for a mail account to send notifications from, the param is to allow overwriting for amongst other purposes, testing, if not provided the value will be drawn from the .env file.
-        :param mailPassword: optional password for the notification email account, the param is to allow overwriting for amongst other purposes, testing, if not provided the value will be drawn from the .env file.
         :param collateMail: optional mode that allows a collation of all messages to prevent many emails being fired off for one program run, the param is to allow overwriting for amongst other purposes, testing, if not provided the value will be drawn from the .env file.
         """
         # assign class properties if they are provided, use defaults if they are not
@@ -48,7 +51,6 @@ class MailInterface():
         self.__toEmailAddress = toEmailAddress if toEmailAddress else os.getenv("MAIL_NOTIFICATION_ADDRESS")
         self.__environment = environment if environment else os.getenv("ENVIRONMENT")
         self.__mailUsername = mailUsername if mailUsername else os.getenv("MAIL_USERNAME")
-        self.__mailPassword = mailPassword if mailPassword else os.getenv("MAIL_PASSWORD")
         self.__collateMail = collateMail
         self.__mailItems = []
 
@@ -69,14 +71,18 @@ class MailInterface():
 
         if self.__environment == "production":
             try:
-                mailContent = f'Subject: [Media Grab] {heading}\n\n{messageBody}'
-                smtpserver = smtplib.SMTP("smtp.gmail.com",587)
-                smtpserver.ehlo()
-                smtpserver.starttls()
-                smtpserver.ehlo
-                smtpserver.login(self.__mailUsername, self.__mailPassword)
-                smtpserver.sendmail(self.__mailUsername, self.__toEmailAddress, mailContent)
-                smtpserver.close()
+                msg = EmailMessage()
+                msg.set_content(messageBody)
+                msg['Subject'] = f'[Media Grab] {heading}'
+                msg['From'] = self.__mailUsername
+                msg['To'] = self.__toEmailAddress
+
+                # Send the message via our own SMTP server.
+                s = smtplib.SMTP('192.168.0.106')
+                s.send_message(msg)
+                s.quit()
+                logging.info(f"Email sent to {self.__toEmailAddress}")
+                return True
             except Exception as e:
                 logging.error(e)
 
@@ -94,11 +100,11 @@ class MailInterface():
         :testedWith: TestMailInterface:test_sendingMailIsNotPossible
         :return: whether it is possible to send an email with the current configuration of the MailInterface 
         """
-        if self.__toEmailAddress and self.__mailUsername and self.__mailPassword:
+        if self.__toEmailAddress and self.__mailUsername:
             return False
 
         logging.info(
-            f"Sending a notification mail is not possible because at least one of the following values was not provided - toEmailAddress: {self.__toEmailAddress}, mailUsername: {self.__mailUsername}, mailPassword: {self.__mailPassword}")
+            f"Sending a notification mail is not possible because at least one of the following values was not provided - toEmailAddress: {self.__toEmailAddress}, mailUsername: {self.__mailUsername}")
         return True
 
     ##### Private functions end #####
@@ -162,7 +168,7 @@ class MailInterface():
 
 if __name__== "__main__":
     mailInterface = MailInterface(enterLogMessage="test sendMail entered", toEmailAddress="tom.connolly@protonmail.com",
-                                  environment="production", mailUsername="app.dev.notifications.tc@gmail.com", mailPassword="", collateMail=True)
+                                  environment="production", mailUsername="app.dev.notifications.tc@gmail.com", collateMail=True)
 
     mailInterface.pushMail(
         "test message generated from running the interfaces/MailInterface.py as __main__", MailItemType.NEW_TORRENT)
