@@ -8,7 +8,8 @@ import logging
 import getopt
 
 # internal dependencies
-from src.controllers import LoggingController, LogicController, ErrorController
+from common import LoggingController 
+from src.controllers import LogicController, ErrorController
 from src.interfaces import MailInterface
 from src.dataTypes.ProgramModeMap import PROGRAM_MODE_MAP
 from src.dataTypes.ProgramMode import PROGRAM_MODE

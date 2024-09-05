@@ -17,7 +17,7 @@ function submitModifiedItem(item, itemIndex, successCallback){
 
 	var formattedItem = formatFrontendItemToBackendItem(item);
 	
-	axios.put(`/MediaInfoRecord/${itemIndex}`, formattedItem).then((response) => {
+	axios.put(`/media-info-record/${itemIndex}`, formattedItem).then((response) => {
 		successCallback();
 	})
     .catch(err => {
@@ -71,7 +71,7 @@ function refreshPage(){
 
 
 function loadMediaIndexJson() {
-	axios.get(`/MediaInfoRecords`).then((response) => {
+	axios.get(`/media-info-records`).then((response) => {
 
 		var mediaInfoList = response.data["media"];
 
@@ -112,7 +112,7 @@ function loadMediaIndexJson() {
 					submitModifiedItem(item, itemIndex, function(){});
 				},
 				deleteMediaInfoRecord: function (itemIndex) {
-					axios.delete(`/MediaInfoRecord/${itemIndex}`).then((response) => {
+					axios.delete(`/media-info-record/${itemIndex}`).then((response) => {
 						this.content.splice(itemIndex, 1);
 					}).catch(function(){
 						refreshPage()
@@ -162,7 +162,7 @@ function loadMediaIndexJson() {
 					makeNewMediaInfoRecordCall(newItem, vueInstance, function () {}, function () {});
 				},
 				makeSimilarShowsRequest: function(contentItem){
-					axios.get(`/SimilarShows/${contentItem.name.content}`).then((response) => {
+					axios.get(`/similar-shows/${contentItem.name.content}`).then((response) => {
 						contentItem.similarShows = addEditFieldToStringList(response.data["similarShows"]);
 					});
 				}
@@ -270,7 +270,7 @@ new Vue({
 			this.responseMessage = "";
 			vueComponent = this;
 
-			axios.get(`/runMediaGrab`).then((response) => {
+			axios.get(`/run-media-grab`).then((response) => {
 				vueComponent.cleanUpMediaGrabRun(true);
 			}).catch(function(){
 				vueComponent.cleanUpMediaGrabRun(false);
@@ -279,8 +279,42 @@ new Vue({
 	}
 });
 
+
+new Vue({
+	el: '#torrentTitlePanel',
+	data() {
+		return {
+			torrentTitles: [],
+			showPanel: false
+		}
+	},
+	beforeMount() {
+		let vueComponent = this;
+		Vue.prototype.$bus.$on('checkTorrentTitles', (searchTerm) => {
+			vueComponent.getTorrentTitles(searchTerm);
+		});
+	},
+	methods: {
+		getTorrentTitles(searchTerm) {
+			axios.get(`/torrent-titles/${searchTerm}`).then((response) => {
+				console.log(response.data);
+				this.torrentTitles = response.data.torrentTitles;
+				console.log(this.torrentTitles);
+				this.showPanel = true;
+			}).catch(function () {
+				this.torrentTitles = "woops";
+			});
+		},
+		clearTorrentTitles(){
+			this.torrentTitles = [];
+			this.showPanel = false;
+		}
+	}
+});
+
+
 function makeNewMediaInfoRecordCall(newItem, vueInstance, successCallback, errorCallback){
-	axios.post(`/MediaInfoRecord/0`, newItem).then((response) => {
+	axios.post(`/media-info-record/0`, newItem).then((response) => {
 
 		var newFrontendItem = formatBackendItemToFrontendItem([{
 			"name": newItem.mediaName,
@@ -332,7 +366,7 @@ new Vue({
 				refreshPage();
 			});
 		},
-		resetForm: function(){
+		resetForm: function () {
 			var newRecordForm = document.newMediaInfoRecord;
 
 			//clear fields
@@ -340,6 +374,9 @@ new Vue({
 			newRecordForm[1].value = "";
 			newRecordForm[2].value = "";
 			newRecordForm[3].value = "";
+		},
+		checkTorrentTitles: function () {
+			Vue.prototype.$bus.$emit("checkTorrentTitles", document.newMediaInfoRecord[0].value);
 		}
 	}
 });

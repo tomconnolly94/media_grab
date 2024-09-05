@@ -17,7 +17,7 @@ class Test_DataServer(unittest.TestCase):
     def test_serveMediaInfo(self, openMock, osGetEnvMock):
 
         #config fake data
-        fakeFileContent = "fakeFileContent"
+        fakeFileContent = '{"fakeFileContentKey": "fakeFileContentValue" }'
 
         # config mocks
         osGetEnvMock.return_value = "fake env return"
@@ -25,7 +25,7 @@ class Test_DataServer(unittest.TestCase):
 
         content = serveMediaInfo()
 
-        self.assertEqual(fakeFileContent, content)
+        self.assertEqual(json.loads(fakeFileContent), content)
         
 
     @mock.patch("server.controllers.DataServer.writeNewRecordToMediaInfoFile")
@@ -103,7 +103,7 @@ class Test_DataServer(unittest.TestCase):
         result = runMediaGrab()
 
 
-        checkCallMock.assert_called_with(['venv/bin/python', 'Main.py'], cwd=fakeOsGetEnvValue)
+        checkCallMock.assert_called_with(['python3', './Main.py'], cwd=fakeOsGetEnvValue)
 
 
 

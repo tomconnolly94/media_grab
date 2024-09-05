@@ -21,13 +21,13 @@ class TestMailInterface(unittest.TestCase):
         fakeMessage = "fake message"
 
         # called testable method
-        mailInterface = MailInterface(environment="dev", collateMail=False)
+        mailInterface = MailInterface(environment="development", collateMail=False)
         mailInterface.pushMail(fakeMessage, MailItemType.NEW_TORRENT)
 
         # mock
         loggingCalls = [
             call('MailInterface:__sendMail called.'),
-            call("Program is running in dev mode. No email has been sent.")
+            call("Program is running in development mode. No email has been sent.")
         ]
         # mock asserts
         loggingInfoDevMock.assert_has_calls(loggingCalls)
@@ -71,7 +71,7 @@ class TestMailInterface(unittest.TestCase):
         fakeMessage = "fake message"
 
         # called testable method
-        mailInterface = MailInterface(environment="dev")
+        mailInterface = MailInterface(environment="development")
         mailInterface.pushMail(fakeMessage, MailItemType.ERROR)
         mailInterface.pushMail(fakeMessage, MailItemType.ERROR)
 
@@ -79,7 +79,7 @@ class TestMailInterface(unittest.TestCase):
 
         loggingCalls = [
             call('MailInterface:__sendMail called.'),
-            call("Program is running in dev mode. No email has been sent.")
+            call("Program is running in development mode. No email has been sent.")
         ]
         # mock asserts
         loggingInfoDevMock.assert_has_calls(loggingCalls)
@@ -92,7 +92,7 @@ class TestMailInterface(unittest.TestCase):
 
         # config inputs
         fakeToEmailAddress = "fakeToEmailAddress"
-        envValue = "dev"
+        envValue = "development"
         fakeMailUsername = "fakeMailUsername"
         fakeMessage = "fake message"
 
@@ -110,7 +110,7 @@ class TestMailInterface(unittest.TestCase):
         # define calls
         loggingCalls = [
             call('MailInterface:__sendMail called.'),
-            call("Program is running in dev mode. No email has been sent.")
+            call("Program is running in development mode. No email has been sent.")
         ]
 
         # asserts

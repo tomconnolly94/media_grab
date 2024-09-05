@@ -87,7 +87,7 @@ class MailInterface():
                 logging.error(e)
 
 
-        elif self.__environment == "dev":
+        elif self.__environment == "development":
             logging.info(f"Program is running in {self.__environment} mode. No email has been sent.")
             return True
         else:

@@ -177,30 +177,34 @@
 					<form name="newMediaInfoRecord" class="inputForm">
 
 						<div class="row">
-							<div class="col-sm-4">
+							<div class="col-sm-3">
 								<label for="mediaName">Media Name</label>
 							</div>
-							<div class="col-sm-8">
+							<div class="col-sm-7">
 								<input type="text" id="mediaName" name="mediaName"
 									placeholder="Enter the name of the tv show you want to watch..">
+							</div>
+
+							<div class="col-sm-2">
+								<button class="btn main-button" id="checkTorrentTitlesButton" type="button" @click="checkTorrentTitles">Check</button>
 							</div>
 						</div>
 
 
 						<div class="row">
-							<div class="col-sm-4">
+							<div class="col-sm-3">
 								<label for="latestSeason">Latest Season:</label>
 							</div>
-							<div class="col-sm-8">
+							<div class="col-sm-9">
 								<input type="number" id="latestSeason" name="latestSeason" min="1">
 							</div>
 						</div>
 
 						<div class="row">
-							<div class="col-sm-4">
+							<div class="col-sm-3">
 								<label for="latestEpisode">Latest Episode:</label>
 							</div>
-							<div class="col-sm-8">
+							<div class="col-sm-9">
 								<input type="number" id="latestEpisode" name="latestEpisode" min="1">
 							</div>
 						</div>
@@ -222,11 +226,31 @@
 					</form>
 				</div>
 
+				<div id="torrentTitlePanel" class="container panel panel-default" v-if="showPanel">
+					<div class="row">
+						<div class="col-sm-10">
+							<h4 id="torrentTitlePanelHeading">Available torrents:</h4>
+						</div>
+						<div class="col-sm-2">
+							<button class="btn main-button" type="button" @click="clearTorrentTitles">Hide</button>
+						</div>
+					</div>
+					<div class="row panel-body">
+						<ul class="col-sm">
+							<li v-for="torrentTitle in torrentTitles">
+								{{ torrentTitle }}
+							</li>
+						</ul>
+					</div>
+				</div>
+
 				<div id="triggerPanel" class="container panel panel-default">
 					<div class="row panel-body">
 						<div :class="spinnerParentClass">
-							<button class="btn main-button" id="runMediaGrabButton" type="button" @click="runMediaGrab">Run MediaGrab</button>
-							
+							<button class="btn main-button" id="runMediaGrabButton" type="button" @click="runMediaGrab">
+								Run MediaGrab
+							</button>
+				
 							<span class="loader" v-if="running"></span>
 						</div>
 						<div class="col-sm">
@@ -235,7 +259,6 @@
 					</div>
 				</div>
 			</div>
-
 		</div>
 
 		<div id="templatePanel">

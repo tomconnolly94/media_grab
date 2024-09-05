@@ -4,12 +4,18 @@
 from flask import Flask, request, Response, send_from_directory
 from dotenv import load_dotenv
 from os.path import join, dirname
-import os
+import os, sys
 import json
+import logging
+rootDir = dirname(dirname(os.path.realpath(__file__)))
+sys.path.append(rootDir) # make root directory accessible
 
 # internal dependencies
 from server.controllers.PageServer import serveIndex
-from server.controllers.DataServer import serveMediaInfo, submitMediaInfoRecord, deleteMediaInfoRecord, updateMediaInfoRecord, runMediaGrab, getSimilarShows
+from server.controllers.DataServer import serveMediaInfo, submitMediaInfoRecord, \
+    deleteMediaInfoRecord, updateMediaInfoRecord, runMediaGrab, getSimilarShows, \
+    getTorrentTitleList
+from common.LoggingController import initLogging 
 
 #create app
 app = Flask(__name__, template_folder="client")
@@ -17,6 +23,8 @@ app = Flask(__name__, template_folder="client")
 # load env file
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
+
+initLogging() # init logging module
 
 def getResponse(errorCode, errorMessage):
     return Response(errorMessage, status=errorCode, mimetype="text/html") 
@@ -33,17 +41,17 @@ def favicon():
                           'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
-@app.route("/MediaInfoRecords", methods=["GET"])
+@app.route("/media-info-records", methods=["GET"])
 def MediaInfoRecords():
         return serveMediaInfo()
 
 
-@app.route("/SimilarShows/<showTitle>", methods=["GET"])
+@app.route("/similar-shows/<showTitle>", methods=["GET"])
 def SimilarShows(showTitle):
         return getSimilarShows(showTitle)
 
 
-@app.route("/MediaInfoRecord/<recordIndex>", methods=["POST", "PUT", "DELETE"])
+@app.route("/media-info-record/<recordIndex>", methods=["POST", "PUT", "DELETE"])
 def MediaIndexRecord(recordIndex):
     if request.method == "POST":
         submitMediaInfoRecord(json.loads(request.data))
@@ -62,30 +70,20 @@ def MediaIndexRecord(recordIndex):
         getResponse(500, "request method unrecognised for this route") 
 
 
-@app.route('/runMediaGrab', methods=["GET"])
+@app.route('/run-media-grab', methods=["GET"])
 def mediaGrab():
     if runMediaGrab():
         return getResponse(200, "run media grab accepted") 
     else:
-        return getResponse(500, "run media grab failed") 
+        return getResponse(500, "run media grab failed")
 
-
-# @app.route("/node_modules/<module>", methods=["GET"])
-# def nodeModule(module):
-#     if ".map" in module:
-#         return serveNodeModuleMapModule(module)
-#     else:
-#         return serveNodeModule(module)
-
-
-# @app.route("/js/<module>", methods=["GET"])
-# def customJsModule(module):
-#     return serveCustomJsModule(module)
-
-
-# @app.route("/css/<module>", methods=["GET"])
-# def customCssModule(module):
-#     return serveCustomCssModule(module)
+@app.route('/torrent-titles/<searchTerm>', methods=["GET"])
+def TorrentTitles(searchTerm: str):
+    torrentTitles = getTorrentTitleList(searchTerm)[:30]
+    if torrentTitles:
+        return getResponse(200, json.dumps({"torrentTitles": torrentTitles })) 
+    else:
+        return getResponse(500, "run media grab failed")
 
 
 if __name__ == "__main__":

@@ -2,13 +2,18 @@
 
 # external dependencies
 import json
-import os
+import os, sys
+from os.path import dirname
 import subprocess
+import logging
+
+rootDir = dirname(dirname(dirname(dirname(os.path.realpath(__file__)))))
+sys.path.append(rootDir) # make root directory accessible
 
 # internal dependencies
 from server.interfaces.MediaIndexFileInterface import removeRecordFromMediaInfoFile, updateRecordInMediaInfoFile, writeNewRecordToMediaInfoFile
 from server.interfaces import TheMovieDatabaseInterface
-
+from src.interfaces.TPBInterface import queryAPI
 
 def serveMediaInfo():
     file = open(os.getenv("MEDIA_INDEX_FILE_LOCATION"), "r")
@@ -52,3 +57,9 @@ def runMediaGrab():
 
 def getSimilarShows(showTitle):
     return TheMovieDatabaseInterface.getInstance().getSimilarShowTitles(showTitle)
+
+
+def getTorrentTitleList(searchTerm: str):
+    # make req to torrent client
+    torrentTitles = [ title.getName() for title in queryAPI(searchTerm) ]
+    return torrentTitles
