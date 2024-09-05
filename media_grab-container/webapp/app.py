@@ -54,8 +54,10 @@ def SimilarShows(showTitle):
 @app.route("/media-info-record/<recordIndex>", methods=["POST", "PUT", "DELETE"])
 def MediaIndexRecord(recordIndex):
     if request.method == "POST":
-        submitMediaInfoRecord(json.loads(request.data))
-        return getResponse(200, "got post request, all good") 
+        if submitMediaInfoRecord(json.loads(request.data)):
+            return getResponse(200, "got post request, all good")
+        else:
+            return getResponse(400, "post request failed, bad request") 
     elif request.method == "DELETE":
         if deleteMediaInfoRecord(int(recordIndex)):
             return getResponse(200, "got delete request, all good")

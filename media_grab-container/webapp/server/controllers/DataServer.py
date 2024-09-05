@@ -18,17 +18,26 @@ from src.interfaces.TPBInterface import queryAPI
 def serveMediaInfo():
     file = open(os.getenv("MEDIA_INDEX_FILE_LOCATION"), "r")
     mediaIndexFile = json.loads(file.read())
-    # return TheMovieDatabaseInterface.getInstance().addShowReccomendationsToMediaIndexContent(mediaIndexFile)
     return mediaIndexFile
 
 
 def submitMediaInfoRecord(data):
+
+    logging.info(f"submitMediaInfoRecord input received: {data}")
 
     # extract data
     mediaName = data['mediaName']
     latestSeason = int(data['latestSeason'])
     latestEpisode = int(data['latestEpisode'])
     blacklistTerms = data['blacklistTerms']
+    
+    # very basic validation
+    if not mediaName or not latestSeason or not latestEpisode:
+
+        logging.error(f"submitMediaInfoRecord input is malformed. mediaName='{mediaName}' "
+                     f"latestSeason={latestSeason} latestEpisode={latestEpisode} "
+                     f"blacklistTerms='{blacklistTerms}'")
+        return False
 
     blacklistTerms = [ term.replace(" ", "") for term in blacklistTerms.split(",") if len(term) > 0]
 

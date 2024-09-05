@@ -339,24 +339,29 @@ new Vue({
 	el: '#inputPanel',
 	data() {
 		return {
+			mediaName: "",
+			latestSeason: 1,
+			latestEpisode: 1,
+			blacklistTerms: ""
 		}
 	},
 	methods: {
 		submitNewMediaInfoRecord: function (){
 			var newRecordForm = document.newMediaInfoRecord;
 
+			console.log(newRecordForm);
 			// extract data
-			var mediaName = newRecordForm[0].value;
-			var latestSeason = newRecordForm[1].value;
-			var latestEpisode = newRecordForm[2].value;
-			var blacklistTerms = newRecordForm[3].value.length > 0 ? newRecordForm[3].value.split(/[\n,]+/) : [];
+			var blacklistTerms = this.blacklistTerms.length > 0 ? this.blacklistTerms.split(/[\n,]+/) : [];
 		
 			var newItem = {
-				mediaName: mediaName,
-				latestSeason: latestSeason,
-				latestEpisode: latestEpisode,
+				mediaName: this.mediaName,
+				latestSeason: this.latestSeason,
+				latestEpisode: this.latestEpisode,
 				blacklistTerms: blacklistTerms.join()
 			};
+
+			console.log("newItem:");
+			console.log(newItem);
 
 			var vueInstance = this;
 
