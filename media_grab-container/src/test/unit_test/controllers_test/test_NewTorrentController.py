@@ -10,15 +10,22 @@ from src.dataTypes.MediaInfoRecord import MediaInfoRecord
 from src.dataTypes.TorrentRecord import TorrentRecord
 from src.dataTypes.MailItem import MailItemType
 
+
 class TestNewTorrentController(unittest.TestCase):
 
-    @mock.patch('src.interfaces.MailInterface.getInstance')
-    @mock.patch('src.interfaces.MediaIndexFileInterface.writeMediaFile')
-    def test_onSuccessfulTorrentAdd(self, writeMediaFileMock, mailInterfaceGetInstanceMock):
+    @mock.patch("src.interfaces.MailInterface.getInstance")
+    @mock.patch("src.interfaces.MediaIndexFileInterface.writeMediaFile")
+    def test_onSuccessfulTorrentAdd(
+        self, writeMediaFileMock, mailInterfaceGetInstanceMock
+    ):
 
         # config fake values
-        fakeTorrent = TorrentRecord("fakeTorrentName", "fakeId", "fakeInfoHash", "5")
-        fakeMediaInfoRecord = MediaInfoRecord("fakeRecordName", 1, 1, [], fakeTorrent)
+        fakeTorrent = TorrentRecord(
+            "fakeTorrentName", "fakeId", "fakeInfoHash", 5, "5"
+        )
+        fakeMediaInfoRecord = MediaInfoRecord(
+            "fakeRecordName", 1, 1, [], fakeTorrent
+        )
         expectedMediaGrabId = "fakeRecordName--s1e1"
         activeMode = PROGRAM_MODE.TV
 
@@ -28,15 +35,19 @@ class TestNewTorrentController(unittest.TestCase):
         # assign mocked MailInterface instance to return_vlue for mocked getInstance()
         mailInterfaceGetInstanceMock.return_value = mailInterfaceInstanceMock
 
-        NewTorrentController.onSuccessfulTorrentAdd(fakeMediaInfoRecord, activeMode)
-        
+        NewTorrentController.onSuccessfulTorrentAdd(
+            fakeMediaInfoRecord, activeMode
+        )
+
         # mock function asserts
         writeMediaFileMock.assert_called_once_with(fakeMediaInfoRecord)
         mailInterfaceInstanceMock.pushMail.assert_called_once_with(
-            "ADDED TORRENT: fakeTorrentName Latest episode: 1 \n\n Magnet:magnet:?xt=urn:btih:fakeInfoHash&dn=fakeTorrentName", MailItemType.NEW_TORRENT)
+            "ADDED TORRENT: fakeTorrentName Latest episode: 1 \n\n Magnet:magnet:?xt=urn:btih:fakeInfoHash&dn=fakeTorrentName",
+            MailItemType.NEW_TORRENT,
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
 
 

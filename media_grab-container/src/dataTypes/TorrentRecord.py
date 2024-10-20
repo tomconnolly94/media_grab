@@ -3,14 +3,24 @@
 # external dependencies
 import enum
 
+
 class TorrentCategory(enum.Enum):
-   TV_EPISODE = 1
-   TV_SEASON = 2
+    TV_EPISODE = 1
+    TV_SEASON = 2
 
 
-class TorrentRecord():
+class TorrentRecord:
 
-    def __init__(self, name, torrentId, infoHash, size, seeders, leechers=None, category=None):
+    def __init__(
+        self,
+        name: str,
+        torrentId: str,
+        infoHash: str,
+        size: int,
+        seeders: str,  # TODO: why is this a string?
+        leechers=None,
+        category=None,
+    ):
         self._name = name
         self._torrentId = torrentId
         self._infoHash = infoHash

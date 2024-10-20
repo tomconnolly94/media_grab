@@ -14,17 +14,18 @@ from src.dataTypes.TorrentRecord import TorrentRecord
 
 def sortTorrents(torrents):
     """
-    sortTorrents sorts a list of torrentRecord object based on whom has the most seeders
+    sortTorrents sorts a list of torrentRecord object based on the size
+    smallest to largest
     :param torrents: list of torrents
     :testedWith: TestTPBInterface:test_getTorrentRecords
     :return: sorted list of torrents
     """
-    return sorted(torrents, key=lambda torrent: -1 * torrent.getSeeders())
+    return sorted(torrents, key=lambda torrent: torrent.getSize())
 
 
 def getTorrentRecords(mediaInfoRecord):
     """
-    getTorrentRecords attempts to find a torrentRecord for the mediaInfoRecord passed in 
+    getTorrentRecords attempts to find a torrentRecord for the mediaInfoRecord passed in
     :param mediaInfoRecord: mediaInfoRecord for which torrent records should be found
     :testedWith: TestTPBInterface:test_getTorrentRecords
     :return: sorted and filtered list of torrents
@@ -32,17 +33,23 @@ def getTorrentRecords(mediaInfoRecord):
     # make query for the mediaInfoRecord, if none are found, try the next query format
     for queryStr in mediaInfoRecord.getMediaSearchQueries():
         torrentRecords = queryAPI(queryStr)
-        
-        #logging
-        logging.info(f"Torrent search performed for: '{queryStr}' - {len(torrentRecords)} results.")
+
+        # logging
+        logging.info(
+            f"Torrent search performed for: '{queryStr}' - {len(torrentRecords)} results."
+        )
 
         if not torrentRecords:
             continue
 
-        filteredTorrents = TorrentFilterController.filterTorrents(torrentRecords, mediaInfoRecord)
+        filteredTorrents = TorrentFilterController.filterTorrents(
+            torrentRecords, mediaInfoRecord
+        )
 
         if not filteredTorrents:
-            logging.info("No torrents survived the filter, trying the next query")
+            logging.info(
+                "No torrents survived the filter, trying the next query"
+            )
             continue
 
         # order torrents by number of seeders
@@ -95,14 +102,22 @@ def queryAPI(queryTerm):
         torrentRecords = []
 
         for torrentData in torrents:
-            torrentRecords.append(TorrentRecord(torrentData["name"], torrentData["id"], torrentData["info_hash"], torrentData["size"], torrentData["seeders"], torrentData["leechers"]))
+            torrentRecords.append(
+                TorrentRecord(
+                    torrentData["name"],
+                    torrentData["id"],
+                    torrentData["info_hash"],
+                    torrentData["size"],
+                    torrentData["seeders"],
+                    torrentData["leechers"],
+                )
+            )
 
         return torrentRecords
 
     except (ChunkedEncodingError, JSONDecodeError) as exception:
         return reportAPIError(response, exception, True)
 
-    except (ConnectionError) as exception:
+    except ConnectionError as exception:
         extraErrorString = "Torrent API seems down at the moment."
         return reportAPIError(response, exception, False, extraErrorString)
-

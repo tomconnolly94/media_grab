@@ -7,6 +7,7 @@ import unittest
 from src.dataTypes.MediaInfoRecord import MediaInfoRecord
 from src.dataTypes.TorrentRecord import TorrentCategory, TorrentRecord
 
+
 class TestMediaInfoRecord(unittest.TestCase):
 
     def test_MediaInfoRecordInit(self):
@@ -15,57 +16,83 @@ class TestMediaInfoRecord(unittest.TestCase):
         fakeShowName = "fakeShowName"
         fakeLatestSeasonNumber = "1"
         fakeLatestEpisodeNumber = "2"
-        fakeBlacklistTerms = ["blacklistTerm1", "blacklistTerm2" ]
+        fakeBlacklistTerms = ["blacklistTerm1", "blacklistTerm2"]
         fakeMediaSearchQueries = [
             "mediaSearchQuery1",
-            "mediaSearchQuery2", 
-            "mediaSearchQuery3"
+            "mediaSearchQuery2",
+            "mediaSearchQuery3",
         ]
         fakeEpisodeTorrentRecord = TorrentRecord(
-            "fakeEpisodeTorrentRecord", "fakeTorrentId", "fakeInfoHash", "fakeSeeders", "fakeLeechers", TorrentCategory.TV_EPISODE)
+            "fakeEpisodeTorrentRecord",
+            "fakeTorrentId",
+            "fakeInfoHash",
+            "fakeSize",
+            "fakeSeeders",
+            "fakeLeechers",
+            TorrentCategory.TV_EPISODE,
+        )
         fakeSeasonTorrentRecord = TorrentRecord(
-            "fakeSeasonTorrentRecord", "fakeTorrentId", "fakeInfoHash", "fakeSeeders", "fakeLeechers", TorrentCategory.TV_SEASON)
+            "fakeSeasonTorrentRecord",
+            "fakeTorrentId",
+            "fakeInfoHash",
+            "fakeSize",
+            "fakeSeeders",
+            "fakeLeechers",
+            TorrentCategory.TV_SEASON,
+        )
 
         # create testable object
         mediaInfoRecord = MediaInfoRecord(
-            fakeShowName, fakeLatestSeasonNumber, fakeLatestEpisodeNumber, fakeBlacklistTerms)
+            fakeShowName,
+            fakeLatestSeasonNumber,
+            fakeLatestEpisodeNumber,
+            fakeBlacklistTerms,
+        )
 
-        # basic asserts 
+        # basic asserts
         self.assertEqual(fakeShowName, mediaInfoRecord.getShowName())
-        self.assertEqual(int(fakeLatestSeasonNumber),
-                         mediaInfoRecord.getLatestSeasonNumber())
-        self.assertEqual(int(fakeLatestEpisodeNumber),
-                         mediaInfoRecord.getLatestEpisodeNumber())
-        self.assertEqual(fakeBlacklistTerms,
-                         mediaInfoRecord.getBlacklistTerms())
-        self.assertEqual(None,
-                         mediaInfoRecord.getMediaGrabId())
-        self.assertEqual(None,
-                         mediaInfoRecord.getMediaSearchQueries())
-        self.assertEqual(None,
-                         mediaInfoRecord.getTorrentRecord())
+        self.assertEqual(
+            int(fakeLatestSeasonNumber), mediaInfoRecord.getLatestSeasonNumber()
+        )
+        self.assertEqual(
+            int(fakeLatestEpisodeNumber),
+            mediaInfoRecord.getLatestEpisodeNumber(),
+        )
+        self.assertEqual(
+            fakeBlacklistTerms, mediaInfoRecord.getBlacklistTerms()
+        )
+        self.assertEqual(None, mediaInfoRecord.getMediaGrabId())
+        self.assertEqual(None, mediaInfoRecord.getMediaSearchQueries())
+        self.assertEqual(None, mediaInfoRecord.getTorrentRecord())
 
         # add mediaSearchQueries
         mediaInfoRecord.setMediaSearchQueries(fakeMediaSearchQueries)
 
         # mediaSearchQuery asserts
-        self.assertEqual(fakeMediaSearchQueries,
-                         mediaInfoRecord.getMediaSearchQueries())
+        self.assertEqual(
+            fakeMediaSearchQueries, mediaInfoRecord.getMediaSearchQueries()
+        )
 
         # add episode torrentRecord
         mediaInfoRecord.setTorrentRecord(fakeEpisodeTorrentRecord)
 
         # torrentRecord asserts
-        self.assertEqual(fakeEpisodeTorrentRecord,
-                         mediaInfoRecord.getTorrentRecord())
         self.assertEqual(
-            f"{fakeShowName}--s{fakeLatestSeasonNumber}e{fakeLatestEpisodeNumber}", mediaInfoRecord.getMediaGrabId())
+            fakeEpisodeTorrentRecord, mediaInfoRecord.getTorrentRecord()
+        )
+        self.assertEqual(
+            f"{fakeShowName}--s{fakeLatestSeasonNumber}e{fakeLatestEpisodeNumber}",
+            mediaInfoRecord.getMediaGrabId(),
+        )
 
         # add season torrentRecord
         mediaInfoRecord.setTorrentRecord(fakeSeasonTorrentRecord)
 
         # torrentRecord asserts
-        self.assertEqual(fakeSeasonTorrentRecord,
-                         mediaInfoRecord.getTorrentRecord())
         self.assertEqual(
-            f"{fakeShowName}--s{fakeLatestSeasonNumber}", mediaInfoRecord.getMediaGrabId())
+            fakeSeasonTorrentRecord, mediaInfoRecord.getTorrentRecord()
+        )
+        self.assertEqual(
+            f"{fakeShowName}--s{fakeLatestSeasonNumber}",
+            mediaInfoRecord.getMediaGrabId(),
+        )
