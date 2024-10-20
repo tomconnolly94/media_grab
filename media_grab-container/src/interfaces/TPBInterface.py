@@ -48,7 +48,7 @@ def getTorrentRecords(mediaInfoRecord):
         # order torrents by number of seeders
         filteredSortedTorrents = sortTorrents(filteredTorrents)
 
-        #if we have some results then break the loop and return the torrentRecords
+        # if we have some results then break the loop and return the torrentRecords
         return filteredSortedTorrents
 
     return None
@@ -95,7 +95,7 @@ def queryAPI(queryTerm):
         torrentRecords = []
 
         for torrentData in torrents:
-            torrentRecords.append(TorrentRecord(torrentData["name"], torrentData["id"], torrentData["info_hash"], torrentData["seeders"], torrentData["leechers"]))
+            torrentRecords.append(TorrentRecord(torrentData["name"], torrentData["id"], torrentData["info_hash"], torrentData["size"], torrentData["seeders"], torrentData["leechers"]))
 
         return torrentRecords
 

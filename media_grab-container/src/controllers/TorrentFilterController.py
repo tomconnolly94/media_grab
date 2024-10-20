@@ -4,7 +4,7 @@
 import re
 import logging
 
-#internal dependencies
+# internal dependencies
 from src.dataTypes.TorrentRecord import TorrentCategory
 
 
@@ -91,47 +91,54 @@ def filterByBlacklist(mediaInfoRecord, torrentTitles):
 
 def filterTorrentsByTitleList(torrents, titles, category):
 
-	filteredTorrents = [torrent for torrent in torrents if torrent.getName(
-	) in titles ]
+	filteredTorrents = [torrent for torrent in torrents if torrent.getName() in titles ]
 
 	for torrent in filteredTorrents:
 		torrent.setCategory(category)
 
 	return filteredTorrents
-	
+
 
 def filterTorrents(torrents, mediaInfoRecord):
-	"""
+    """
 	filterEpisodeTorrents applies a set of filters that involve regex matching with the download name and ensuring the number of sources exceeds one
 	:testedWith: TestTorrentFilterController:filterEpisodeTorrents
 	:param torrents: a list of potential download items for the mediaInfoRecord to be filtered
 	:param mediaInfoRecord: the mediaInfoRecord for which the torrents were found
 	:return: a list of filtered downloads
-	"""
-	if not torrents:
-		return []
-		
-	name = mediaInfoRecord.getShowName()
-	name = name.replace(" ", "\\D*")
-	relevantSeason = str(mediaInfoRecord.getLatestSeasonNumber()).zfill(2)
-	relevantEpisode = str(mediaInfoRecord.getLatestEpisodeNumber()).zfill(2)
+	"""	
+    if not torrents:
+        return []
 
-	torrentTitles = [ torrent.getName() for torrent in torrents ]
-	
-	# apply blacklist filters to torrent names to avoid any unwanted terms
-	blacklistFilteredTorrentTitles = filterByBlacklist(
+    name = mediaInfoRecord.getShowName()
+    name = name.replace(" ", "\\D*")
+    relevantSeason = str(mediaInfoRecord.getLatestSeasonNumber()).zfill(2)
+    relevantEpisode = str(mediaInfoRecord.getLatestEpisodeNumber()).zfill(2)
+
+    torrentTitles = [ torrent.getName() for torrent in torrents ]
+
+    # apply blacklist filters to torrent names to avoid any unwanted terms
+    blacklistFilteredTorrentTitles = filterByBlacklist(
 		mediaInfoRecord, torrentTitles)
 
-	filteredEpisodeTorrentTitles = filterByEpisode(
+    # filter seasons and episodes with regexes
+    filteredEpisodeTorrentTitles = filterByEpisode(
 		blacklistFilteredTorrentTitles, name, relevantSeason, relevantEpisode)
-	filteredSeasonTorrentTitles = filterBySeason(
+    filteredSeasonTorrentTitles = filterBySeason(
 		blacklistFilteredTorrentTitles, name, relevantSeason)
 
-	filteredEpisodeTorrents = filterTorrentsByTitleList(torrents, filteredEpisodeTorrentTitles, TorrentCategory.TV_EPISODE)
-	filteredSeasonTorrents = filterTorrentsByTitleList(torrents, filteredSeasonTorrentTitles, TorrentCategory.TV_SEASON)
+    filteredEpisodeTorrents = filterTorrentsByTitleList(torrents, filteredEpisodeTorrentTitles, TorrentCategory.TV_EPISODE)
+    filteredSeasonTorrents = filterTorrentsByTitleList(torrents, filteredSeasonTorrentTitles, TorrentCategory.TV_SEASON)
 
-	filteredTorrents = filteredSeasonTorrents + filteredEpisodeTorrents
-	logging.info(f"{len(torrents)} torrents filtered down to {len(filteredTorrents)} ({len(filteredSeasonTorrents)} season, {len(filteredEpisodeTorrents)} episode)")
+    # filter by seeder numbers
+    filteredEpisodeTorrents = [ 
+		torrent for torrent in filteredEpisodeTorrents if torrent.getSeeders() > 0 
+	]
+    filteredSeasonTorrents = [
+        torrent for torrent in filteredSeasonTorrents if torrent.getSeeders() > 0
+    ]
 
+    filteredTorrents = filteredSeasonTorrents + filteredEpisodeTorrents
+    logging.info(f"{len(torrents)} torrents filtered down to {len(filteredTorrents)} ({len(filteredSeasonTorrents)} season, {len(filteredEpisodeTorrents)} episode)")
 
-	return filteredTorrents
+    return filteredTorrents

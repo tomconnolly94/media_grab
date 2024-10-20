@@ -10,32 +10,35 @@ class TorrentCategory(enum.Enum):
 
 class TorrentRecord():
 
-    def __init__(self, name, torrentId, infoHash, seeders, leechers=None, category=None):
-        self.__name = name
-        self.__torrentId = torrentId
-        self.__infoHash = infoHash
-        self.__seeders = seeders
-        self.__leechers = leechers
-        self.__category = category
-
+    def __init__(self, name, torrentId, infoHash, size, seeders, leechers=None, category=None):
+        self._name = name
+        self._torrentId = torrentId
+        self._infoHash = infoHash
+        self._size = size
+        self._seeders = seeders
+        self._leechers = leechers
+        self._category = category
 
     def getMagnet(self):
-        return f"magnet:?xt=urn:btih:{self.__infoHash}&dn={self.__name}"
+        return f"magnet:?xt=urn:btih:{self._infoHash}&dn={self._name}"
 
     def getName(self):
-        return self.__name
+        return self._name
 
     def getId(self):
-        return self.__name
+        return self._name
+
+    def getSize(self):
+        return self._size
 
     def getSeeders(self):
-        return self.__seeders
+        return self._seeders
 
     def getInfoHash(self):
-        return self.__infoHash
+        return self._infoHash
 
     def getCategory(self):
-        return self.__category
+        return self._category
 
     def setCategory(self, category):
-        self.__category = category
+        self._category = category
