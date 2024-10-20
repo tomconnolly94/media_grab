@@ -22,8 +22,7 @@ function submitModifiedItem(item, itemIndex, successCallback){
 	})
     .catch(err => {
     	console.log(err);
-		//redirect to make sure any local changes that failed are removed.
-		refreshPage();
+		console.log("Updating media info record failed.")
     });
 }
 
@@ -62,11 +61,6 @@ function addNewBlacklistTermToItemModel(item){
 	}
 
 	item.blacklistTerms.push(newBlacklistTerm);
-}
-
-
-function refreshPage(){
-	window.location.href = homeUrl;
 }
 
 
@@ -115,7 +109,7 @@ function loadMediaIndexJson() {
 					axios.delete(`/media-info-record/${itemIndex}`).then((response) => {
 						this.content.splice(itemIndex, 1);
 					}).catch(function(){
-						refreshPage()
+						console.log("Deleting media info record failed.")
 					});
 				},
 				removeBlacklistTerm: function (item, itemIndex, blacklistTermForRemoval){
@@ -240,78 +234,6 @@ Vue.component("modal", {
 	}
 });
 
-new Vue({
-	el: '#triggerPanel',
-	data() {
-		return {
-			responseMessage: "",
-			running: false,
-			startTime: null,
-			originalSpinnerParentClass: "col-sm-6 col-xl-4",
-			spinnerParentClass: this.originalSpinnerParentClass
-		}
-	},
-	methods: {
-		cleanUpMediaGrabRun: function(success){
-			var successStr = success ? "successfully" : "unsuccessfully";
-			console.log(`runMediaGrab finished ${successStr}.`);
-			this.responseMessage = `MediaGrab run ${successStr} at ${vueComponent.startTime}`
-			this.running = false;
-			this.spinnerParentClass = this.originalSpinnerParentClass
-		},
-		runMediaGrab: function (){
-			if (this.running){
-				return;
-			}
-
-			this.running = true;
-			this.startTime = new Date().toLocaleString();
-			this.spinnerParentClass = "col-sm-8"
-			this.responseMessage = "";
-			vueComponent = this;
-
-			axios.get(`/run-media-grab`).then((response) => {
-				vueComponent.cleanUpMediaGrabRun(true);
-			}).catch(function(){
-				vueComponent.cleanUpMediaGrabRun(false);
-			});
-		}
-	}
-});
-
-
-new Vue({
-	el: '#torrentTitlePanel',
-	data() {
-		return {
-			torrentTitles: [],
-			showPanel: false
-		}
-	},
-	beforeMount() {
-		let vueComponent = this;
-		Vue.prototype.$bus.$on('checkTorrentTitles', (searchTerm) => {
-			vueComponent.getTorrentTitles(searchTerm);
-		});
-	},
-	methods: {
-		getTorrentTitles(searchTerm) {
-			axios.get(`/torrent-titles/${searchTerm}`).then((response) => {
-				console.log(response.data);
-				this.torrentTitles = response.data.torrentTitles;
-				console.log(this.torrentTitles);
-				this.showPanel = true;
-			}).catch(function () {
-				this.torrentTitles = "woops";
-			});
-		},
-		clearTorrentTitles(){
-			this.torrentTitles = [];
-			this.showPanel = false;
-		}
-	}
-});
-
 
 function makeNewMediaInfoRecordCall(newItem, vueInstance, successCallback, errorCallback){
 	axios.post(`/media-info-record/0`, newItem).then((response) => {
@@ -326,65 +248,14 @@ function makeNewMediaInfoRecordCall(newItem, vueInstance, successCallback, error
 		}])[0];
 
 		vueInstance.$bus.$emit("new-item-added", newFrontendItem, function () {
-			successCallback();
+			successCallback(response);
 		});
 
-	}).catch(function () {
-		errorCallback();
+	}).catch(function (response) {
+		errorCallback(response);
 	});
 }
 
-
-new Vue({
-	el: '#inputPanel',
-	data() {
-		return {
-			mediaName: "",
-			latestSeason: 1,
-			latestEpisode: 1,
-			blacklistTerms: ""
-		}
-	},
-	methods: {
-		submitNewMediaInfoRecord: function (){
-			var newRecordForm = document.newMediaInfoRecord;
-
-			console.log(newRecordForm);
-			// extract data
-			var blacklistTerms = this.blacklistTerms.length > 0 ? this.blacklistTerms.split(/[\n,]+/) : [];
-		
-			var newItem = {
-				mediaName: this.mediaName,
-				latestSeason: this.latestSeason,
-				latestEpisode: this.latestEpisode,
-				blacklistTerms: blacklistTerms.join()
-			};
-
-			console.log("newItem:");
-			console.log(newItem);
-
-			var vueInstance = this;
-
-			makeNewMediaInfoRecordCall(newItem, vueInstance, function(){
-				vueInstance.resetForm();
-			}, function(){
-				refreshPage();
-			});
-		},
-		resetForm: function () {
-			var newRecordForm = document.newMediaInfoRecord;
-
-			//clear fields
-			newRecordForm[0].value = "";
-			newRecordForm[1].value = "";
-			newRecordForm[2].value = "";
-			newRecordForm[3].value = "";
-		},
-		checkTorrentTitles: function () {
-			Vue.prototype.$bus.$emit("checkTorrentTitles", document.newMediaInfoRecord[0].value);
-		}
-	}
-});
 
 
 // js execute section
