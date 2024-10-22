@@ -17,7 +17,7 @@ class TorrentRecord:
         torrentId: str,
         infoHash: str,
         size: int,
-        seeders: str,  # TODO: why is this a string?
+        seeders: int,
         leechers=None,
         category=None,
     ):
@@ -25,7 +25,7 @@ class TorrentRecord:
         self._torrentId = torrentId
         self._infoHash = infoHash
         self._size = size
-        self._seeders = seeders
+        self._seeders = int(seeders)  # should be int, cast just in case
         self._leechers = leechers
         self._category = category
 
@@ -36,7 +36,7 @@ class TorrentRecord:
         return self._name
 
     def getId(self):
-        return self._name
+        return self._torrentId
 
     def getSize(self):
         return self._size

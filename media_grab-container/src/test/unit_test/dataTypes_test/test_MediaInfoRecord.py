@@ -27,7 +27,7 @@ class TestMediaInfoRecord(unittest.TestCase):
             "fakeTorrentId",
             "fakeInfoHash",
             "fakeSize",
-            "fakeSeeders",
+            "1",
             "fakeLeechers",
             TorrentCategory.TV_EPISODE,
         )
@@ -36,7 +36,7 @@ class TestMediaInfoRecord(unittest.TestCase):
             "fakeTorrentId",
             "fakeInfoHash",
             "fakeSize",
-            "fakeSeeders",
+            "2",
             "fakeLeechers",
             TorrentCategory.TV_SEASON,
         )
