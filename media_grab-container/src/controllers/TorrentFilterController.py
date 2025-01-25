@@ -130,12 +130,12 @@ def filterTorrents(torrents, mediaInfoRecord):
     filteredEpisodeTorrents = filterTorrentsByTitleList(torrents, filteredEpisodeTorrentTitles, TorrentCategory.TV_EPISODE)
     filteredSeasonTorrents = filterTorrentsByTitleList(torrents, filteredSeasonTorrentTitles, TorrentCategory.TV_SEASON)
 
-    # filter by seeder numbers
+    # filter by seeder numbers and ensure that size is larger than 0
     filteredEpisodeTorrents = [ 
-		torrent for torrent in filteredEpisodeTorrents if torrent.getSeeders() > 0 
+		torrent for torrent in filteredEpisodeTorrents if torrent.getSeeders() > 0 and torrent.getSize() > 0
 	]
     filteredSeasonTorrents = [
-        torrent for torrent in filteredSeasonTorrents if torrent.getSeeders() > 0
+        torrent for torrent in filteredSeasonTorrents if torrent.getSeeders() > 0 and torrent.getSize() > 0
     ]
 
     filteredTorrents = filteredSeasonTorrents + filteredEpisodeTorrents

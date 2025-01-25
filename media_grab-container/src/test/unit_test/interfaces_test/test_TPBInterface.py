@@ -13,6 +13,23 @@ from src.dataTypes.TorrentRecord import TorrentRecord
 
 class TestTPBInterface(unittest.TestCase):
 
+    def test_sortTorrents(self):
+
+        # fake torrent list
+        fakeTorrentList = [
+            TorrentRecord("fakeTorrent1", "fakeTorrent1Id", "fakeTorrent1InfoHash", 2, 5),
+            TorrentRecord("fakeTorrent2", "fakeTorrent2Id", "fakeTorrent2InfoHash", 10, 5),
+            TorrentRecord("fakeTorrent3", "fakeTorrent3Id", "fakeTorrent3InfoHash", 1, 5)
+        ]
+
+        # run testable function
+        sortedTorrentRecords = TPBInterface.sortTorrents(fakeTorrentList)
+
+        # assert order
+        self.assertEqual("fakeTorrent3", sortedTorrentRecords[0].getName())
+        self.assertEqual("fakeTorrent1", sortedTorrentRecords[1].getName())
+        self.assertEqual("fakeTorrent2", sortedTorrentRecords[2].getName())
+
     @mock.patch("src.controllers.TorrentFilterController.filterTorrents")
     @mock.patch("logging.info")
     @mock.patch("src.interfaces.TPBInterface.queryAPI")
