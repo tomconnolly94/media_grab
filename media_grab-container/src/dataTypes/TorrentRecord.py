@@ -24,8 +24,8 @@ class TorrentRecord:
         self._name = name
         self._torrentId = torrentId
         self._infoHash = infoHash
-        self._size = size
-        self._seeders = int(seeders)  # should be int, cast just in case
+        self._size = int(size)
+        self._seeders = int(seeders)
         self._leechers = leechers
         self._category = category
 
