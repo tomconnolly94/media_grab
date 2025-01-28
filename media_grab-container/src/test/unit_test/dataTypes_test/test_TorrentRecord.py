@@ -17,7 +17,7 @@ class TestTorrentRecord(unittest.TestCase):
             "fakeEpisodeTorrentRecord",
             "fakeTorrentId",
             "fakeInfoHash",
-            "fakeSize",
+            "2",
             "1",
             "fakeLeechers",
             TorrentCategory.TV_EPISODE,
@@ -26,7 +26,7 @@ class TestTorrentRecord(unittest.TestCase):
             "fakeSeasonTorrentRecord",
             "fakeTorrentId",
             "fakeInfoHash",
-            "fakeSize",
+            "3",
             2,
             "fakeLeechers",
             TorrentCategory.TV_SEASON,
@@ -38,7 +38,7 @@ class TestTorrentRecord(unittest.TestCase):
         )
         self.assertEqual("fakeTorrentId", fakeEpisodeTorrentRecord.getId())
         self.assertEqual("fakeInfoHash", fakeEpisodeTorrentRecord.getInfoHash())
-        self.assertEqual("fakeSize", fakeEpisodeTorrentRecord.getSize())
+        self.assertEqual(2, fakeEpisodeTorrentRecord.getSize())
         self.assertEqual(1, fakeEpisodeTorrentRecord.getSeeders())
         self.assertEqual(
             TorrentCategory.TV_EPISODE, fakeEpisodeTorrentRecord.getCategory()
@@ -49,7 +49,7 @@ class TestTorrentRecord(unittest.TestCase):
         )
         self.assertEqual("fakeTorrentId", fakeSeasonTorrentRecord.getId())
         self.assertEqual("fakeInfoHash", fakeSeasonTorrentRecord.getInfoHash())
-        self.assertEqual("fakeSize", fakeSeasonTorrentRecord.getSize())
+        self.assertEqual(3, fakeSeasonTorrentRecord.getSize())
         self.assertEqual(2, fakeSeasonTorrentRecord.getSeeders())
         self.assertEqual(
             TorrentCategory.TV_SEASON, fakeSeasonTorrentRecord.getCategory()
