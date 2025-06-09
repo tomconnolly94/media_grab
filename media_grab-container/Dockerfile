@@ -1,5 +1,5 @@
 # Use the node base image
-FROM node:slim
+FROM node:22
 
 ARG PROJDIR=/proj-dir
 ARG WEBAPPDIR=$PROJDIR/webapp
