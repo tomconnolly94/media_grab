@@ -20,6 +20,8 @@ RUN apt-get install -y cron
 RUN apt-get install -y python3-pip
 
 # Install npm dependencies
+RUN npm update -g npm
+RUN npm config delete proxy
 RUN npm install --prefix $WEBAPPDIR/client
 
 # run frontend static file build
