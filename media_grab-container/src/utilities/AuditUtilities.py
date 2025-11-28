@@ -9,6 +9,7 @@ import re
 from src.controllers import ErrorController
 from src.interfaces import FolderInterface
 
+
 def downloadWasInitiatedByMediaGrab(downloadId):
     """
     downloadWasInitiatedByMediaGrab checks if a download was initiated by mediaGrab using a regex
@@ -21,14 +22,16 @@ def downloadWasInitiatedByMediaGrab(downloadId):
         relevantRegexes = [r"[ \w]+--s\d+e\d+", r"[ \w]+--s\d+(?![es])"]
 
         for regexRaw in relevantRegexes:
-            match = re.search(regexRaw, downloadId,
-                              re.IGNORECASE | re.MULTILINE)
+            match = re.search(regexRaw, downloadId, re.IGNORECASE | re.MULTILINE)
             if match:
                 return True
         return False
     except Exception as exception:
         ErrorController.reportError(
-            "Exception occurred when checking if a download was initiated by mediaGrab using a regex", exception=exception, sendEmail=True)
+            "Exception occurred when checking if a download was initiated by mediaGrab using a regex",
+            exception=exception,
+            sendEmail=True,
+        )
         return False
 
 
@@ -49,7 +52,10 @@ def extractShowName(downloadId):
         try:
             # extract show name using regex capturing group
             showNameMatch = re.match(
-                r"(.+?)(?:[^a-zA-Z]*(?:season|s|episode|e)+.\d+.*)*?\s*$", downloadId, re.IGNORECASE)
+                r"(.+?)(?:[^a-zA-Z]*(?:season|s|episode|e)+.\d+.*)*?\s*$",
+                downloadId,
+                re.IGNORECASE,
+            )
             showName = showNameMatch.groups()[0]
             # replace all punctuation
             showName = re.sub(r"[^\w\s]", " ", showName)
@@ -62,7 +68,10 @@ def extractShowName(downloadId):
                 return None
         except Exception as exception:
             ErrorController.reportError(
-                "Exception occurred when extracting season number with regex", exception=exception, sendEmail=True)
+                "Exception occurred when extracting season number with regex",
+                exception=exception,
+                sendEmail=True,
+            )
             return None
 
 
@@ -90,7 +99,10 @@ def extractSeasonNumber(downloadId):
         return None
     except Exception as exception:
         ErrorController.reportError(
-            "Exception occurred when extracting season number with regex", exception=exception, sendEmail=True)
+            "Exception occurred when extracting season number with regex",
+            exception=exception,
+            sendEmail=True,
+        )
         return None
 
 
@@ -118,7 +130,10 @@ def extractEpisodeNumber(downloadId):
         return None
     except Exception as exception:
         ErrorController.reportError(
-            "Exception occurred when extracting episode number with regex", exception=exception, sendEmail=True)
+            "Exception occurred when extracting episode number with regex",
+            exception=exception,
+            sendEmail=True,
+        )
         return None
 
 
@@ -152,12 +167,15 @@ def getLargestItemInDir(directory):
     """
     filesInDir = list(os.scandir(directory))
     if filesInDir:
-        filesInDir = sorted(filesInDir, key=lambda file: -
-                            1 * int(os.path.getsize(f"{directory}/{file.name}")))
+        filesInDir = sorted(
+            filesInDir,
+            key=lambda file: -1 * int(os.path.getsize(f"{directory}/{file.name}")),
+        )
         return filesInDir[0]
 
     logging.info(
-        f"Tried to getLargestItemInDir from {directory} but a file cold not be located")
+        f"Tried to getLargestItemInDir from {directory} but a file cold not be located"
+    )
     return None
 
 
@@ -181,5 +199,10 @@ def ensureDirStructureExists(tvShowDirPath, seasonDirPath):
         return True
     except Exception as exception:
         ErrorController.reportError(
-            "Directory structure could not be completed", exception=exception, sendEmail=True)
+            f"Directory structure check could not be completed. "
+            f"Function: ensureDirStructureExists({tvShowDirPath},"
+            f" {seasonDirPath}) exception={exception}",
+            exception=exception,
+            sendEmail=True,
+        )
         return None
